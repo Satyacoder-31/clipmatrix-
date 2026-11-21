@@ -90,6 +90,7 @@ body {
   -webkit-mask-image: radial-gradient(ellipse 85% 70% at 50% 35%, #000 60%, transparent 100%);
   animation: matrixGridScroll 22s linear infinite;
   will-change: background-position;
+  transform: translateZ(0);
 }
 
 @keyframes matrixGridScroll {

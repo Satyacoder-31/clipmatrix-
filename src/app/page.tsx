@@ -457,7 +457,7 @@ export default function HomePage() {
       {/* =========================================================================
           SECTION 2: STATISTICS COUNTERS
           ========================================================================= */}
-      <section className="relative py-12 bg-[#0c0517]/80 backdrop-blur-md border-y border-purple-900/30">
+      <section className="relative py-12 bg-[#0c0517]/90 border-y border-purple-900/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 text-center">
             {[
@@ -820,7 +820,7 @@ export default function HomePage() {
       {/* =========================================================================
           SECTION 5: CAMPAIGN MARKETPLACE (#campaigns)
           ========================================================================= */}
-      <section id="campaigns" className="py-24 bg-[#0a0415]/80 backdrop-blur-md border-y border-purple-900/30 px-4 sm:px-6 lg:px-8 scroll-mt-24">
+      <section id="campaigns" className="py-24 bg-[#0a0415]/90 border-y border-purple-900/40 px-4 sm:px-6 lg:px-8 scroll-mt-24">
         <div className="max-w-7xl mx-auto space-y-12">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
@@ -1008,7 +1008,7 @@ export default function HomePage() {
       {/* =========================================================================
           SECTION 7: CASE STUDIES (#case-studies)
           ========================================================================= */}
-      <section id="case-studies" className="py-24 bg-[#0a0415]/80 backdrop-blur-md border-y border-purple-900/30 px-4 sm:px-6 lg:px-8 scroll-mt-24">
+      <section id="case-studies" className="py-24 bg-[#0a0415]/90 border-y border-purple-900/40 px-4 sm:px-6 lg:px-8 scroll-mt-24">
         <div className="max-w-7xl mx-auto space-y-16">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -1228,7 +1228,7 @@ export default function HomePage() {
       {/* =========================================================================
           SECTION 9: PRICING & ROI SIMULATOR (#pricing)
           ========================================================================= */}
-      <section id="pricing" className="py-24 bg-[#0a0415]/80 backdrop-blur-md border-y border-purple-900/30 px-4 sm:px-6 lg:px-8 scroll-mt-24">
+      <section id="pricing" className="py-24 bg-[#0a0415]/90 border-y border-purple-900/40 px-4 sm:px-6 lg:px-8 scroll-mt-24">
         <div className="max-w-7xl mx-auto space-y-16">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -1530,7 +1530,7 @@ export default function HomePage() {
       {/* =========================================================================
           SECTION 11: REVIEWS / TESTIMONIALS (#reviews)
           ========================================================================= */}
-      <section id="reviews" className="py-24 bg-[#0a0415]/80 backdrop-blur-md border-y border-purple-900/30 px-4 sm:px-6 lg:px-8 scroll-mt-24">
+      <section id="reviews" className="py-24 bg-[#0a0415]/90 border-y border-purple-900/40 px-4 sm:px-6 lg:px-8 scroll-mt-24">
         <div className="max-w-7xl mx-auto space-y-16">
           <motion.div
             initial={{ opacity: 0, y: 30 }}

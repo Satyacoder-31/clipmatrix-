@@ -59,29 +59,21 @@ export default function CybertronPlanet() {
         {/* 4b. Intense Upper Atmosphere Rim Flare */}
         <div className="absolute -top-10 -left-10 w-[120%] h-48 bg-gradient-to-b from-cyan-400/35 via-fuchsia-500/20 to-transparent blur-xl z-20 pointer-events-none" />
 
-        {/* 4c. Continuous Looping Cybernetic Circuit Texture (Cybertron Grid) */}
+        {/* 4c. Continuous Looping Cybernetic Circuit Texture (Cybertron Grid) - GPU Accelerated */}
         <motion.div
           animate={{
             x: [0, -380],
           }}
           transition={{
-            duration: 35,
+            duration: 40,
             repeat: Infinity,
             ease: 'linear',
           }}
-          className="absolute inset-0 w-[200%] h-full opacity-70 z-15 mix-blend-screen"
+          style={{ willChange: 'transform' }}
+          className="absolute inset-0 w-[200%] h-full opacity-80 z-15 mix-blend-screen"
         >
           <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
             <defs>
-              {/* Neon Glow Filter */}
-              <filter id="cyber-glow" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="3" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-
               {/* Seamless Cybertron Circuit Pattern */}
               <pattern
                 id="cybertron-circuits"
@@ -93,35 +85,32 @@ export default function CybertronPlanet() {
                 <path
                   d="M 0 30 L 70 30 L 95 55 L 150 55 M 30 0 L 30 80 L 60 110 L 60 190 M 110 30 L 110 120 L 140 150 L 190 150 M 95 190 L 95 140 L 120 115 L 190 115 M 10 140 L 50 140 L 80 170 L 80 190"
                   fill="none"
-                  stroke="#a855f7"
+                  stroke="#c084fc"
                   strokeWidth="1.8"
-                  opacity="0.85"
-                  filter="url(#cyber-glow)"
+                  opacity="0.9"
                 />
                 {/* Glowing Hexagonal Power Hubs */}
                 <polygon
                   points="70,30 75,22 85,22 90,30 85,38 75,38"
                   fill="#06b6d4"
-                  opacity="0.9"
-                  filter="url(#cyber-glow)"
+                  opacity="0.95"
                 />
                 <polygon
                   points="140,150 145,142 155,142 160,150 155,158 145,158"
                   fill="#d946ef"
-                  opacity="0.9"
-                  filter="url(#cyber-glow)"
+                  opacity="0.95"
                 />
-                <circle cx="60" cy="110" r="4.5" fill="#38bdf8" filter="url(#cyber-glow)" />
-                <circle cx="120" cy="115" r="3.5" fill="#e879f9" filter="url(#cyber-glow)" />
+                <circle cx="60" cy="110" r="4.5" fill="#38bdf8" />
+                <circle cx="120" cy="115" r="3.5" fill="#f472b6" />
                 <circle cx="30" cy="80" r="3" fill="#a855f7" />
-                <circle cx="110" cy="120" r="4" fill="#06b6d4" filter="url(#cyber-glow)" />
+                <circle cx="110" cy="120" r="4" fill="#06b6d4" />
 
                 {/* Sub-circuits */}
                 <path
                   d="M 5 5 L 25 25 M 170 170 L 185 185 M 180 10 L 165 25"
-                  stroke="#c084fc"
+                  stroke="#e879f9"
                   strokeWidth="1.2"
-                  opacity="0.6"
+                  opacity="0.75"
                 />
               </pattern>
             </defs>
@@ -130,27 +119,25 @@ export default function CybertronPlanet() {
         </motion.div>
 
         {/* 4d. Glowing Molten Energon Fissures / Continental Chasms */}
-        <div className="absolute inset-0 z-18 pointer-events-none mix-blend-screen opacity-75">
+        <div className="absolute inset-0 z-18 pointer-events-none mix-blend-screen opacity-85">
           <svg className="w-full h-full" viewBox="0 0 600 600" fill="none">
             {/* Primary Glowing Energon Trench */}
             <motion.path
-              animate={{ opacity: [0.6, 1, 0.7, 0.6] }}
+              animate={{ opacity: [0.7, 1, 0.75, 0.7] }}
               transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
               d="M 80 220 Q 220 180 340 260 T 520 280 M 140 320 Q 260 380 400 340 T 540 400 M 240 100 Q 280 240 290 380 T 320 520"
               stroke="#06b6d4"
               strokeWidth="3.5"
               strokeLinecap="round"
-              filter="url(#cyber-glow)"
             />
             {/* Secondary Pink Fissure */}
             <motion.path
-              animate={{ opacity: [0.5, 0.9, 0.6, 0.5] }}
+              animate={{ opacity: [0.6, 0.95, 0.65, 0.6] }}
               transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
               d="M 180 140 Q 320 190 390 120 T 480 200 M 120 420 Q 240 440 360 480"
               stroke="#d946ef"
               strokeWidth="2.8"
               strokeLinecap="round"
-              filter="url(#cyber-glow)"
             />
           </svg>
         </div>

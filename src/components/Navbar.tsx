@@ -38,40 +38,57 @@ export default function Navbar() {
   const pathname = usePathname();
 
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 15);
-
-      // ScrollSpy logic to detect which section is currently centered/active
-      const sectionIds = [
-        'hero',
-        'clippers',
-        'brands',
-        'campaigns',
-        'how-it-works',
-        'case-studies',
-        'dashboard-demo',
-        'pricing',
-        'about',
-        'reviews',
-        'contact',
-      ];
-
-      const scrollPosition = window.scrollY + 200;
-
-      for (let i = sectionIds.length - 1; i >= 0; i--) {
-        const el = document.getElementById(sectionIds[i]);
-        if (el) {
-          const top = el.offsetTop;
-          if (scrollPosition >= top) {
-            setActiveSection(sectionIds[i]);
-            break;
-          }
-        }
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setIsScrolled(window.scrollY > 20);
+          ticking = false;
+        });
+        ticking = true;
       }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    // Use IntersectionObserver for 60fps ScrollSpy with ZERO layout thrashing
+    const sectionIds = [
+      'hero',
+      'clippers',
+      'brands',
+      'campaigns',
+      'how-it-works',
+      'case-studies',
+      'dashboard-demo',
+      'pricing',
+      'about',
+      'reviews',
+      'contact',
+    ];
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        });
+      },
+      {
+        rootMargin: '-20% 0px -60% 0px',
+        threshold: 0,
+      }
+    );
+
+    sectionIds.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      observer.disconnect();
+    };
   }, []);
 
   useEffect(() => {
