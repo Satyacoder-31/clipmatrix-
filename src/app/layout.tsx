@@ -3,6 +3,7 @@ import './globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import DynamicBackground from '@/components/DynamicBackground';
+import ScrollProgressBar from '@/components/ScrollProgressBar';
 
 export const metadata: Metadata = {
   title: 'Clip Matrix | Viral Clipping Platform & Creator Economy Ecosystem',
@@ -29,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark scroll-smooth">
+    <html lang="en" className="dark">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -39,6 +40,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen bg-[#07020f] text-white antialiased selection:bg-purple-600 selection:text-white relative">
+        <ScrollProgressBar />
         <DynamicBackground />
         <Navbar />
         <main className="min-h-[calc(100vh-280px)]">{children}</main>

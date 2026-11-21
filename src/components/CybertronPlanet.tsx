@@ -1,34 +1,32 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
 
 export default function CybertronPlanet() {
   return (
-    <div className="absolute top-[80px] sm:top-[60px] left-1/2 -translate-x-1/2 w-[700px] sm:w-[950px] lg:w-[1100px] h-[700px] sm:h-[950px] lg:h-[1100px] pointer-events-none z-0 flex items-center justify-center select-none overflow-visible">
-      {/* 1. Deep Atmospheric Nebula Glow Behind Cybertron */}
-      <div className="absolute w-[650px] sm:w-[850px] h-[650px] sm:h-[850px] rounded-full bg-gradient-to-tr from-purple-700/35 via-fuchsia-600/25 to-cyan-500/20 blur-[100px] -z-10 animate-pulse duration-1000" />
+    <div
+      style={{ contain: 'layout paint' }}
+      className="absolute top-[70px] sm:top-[50px] left-1/2 -translate-x-1/2 w-[700px] sm:w-[950px] lg:w-[1100px] h-[700px] sm:h-[950px] lg:h-[1100px] pointer-events-none z-0 flex items-center justify-center select-none overflow-visible"
+    >
+      {/* 1. Deep Atmospheric Planetary Nebula Glow Behind Cybertron (Pure Radial Gradient - Zero CPU Filter cost) */}
+      <div className="absolute w-[650px] sm:w-[850px] h-[650px] sm:h-[850px] rounded-full bg-[radial-gradient(circle_at_center,rgba(168,85,247,0.45)_0%,rgba(217,70,239,0.22)_35%,rgba(6,182,212,0.12)_55%,transparent_75%)] -z-10" />
 
-      {/* 2. Outer Giant Energy Ring (Tilted 3D Orbit) */}
+      {/* 2. Outer Giant Energy Ring (Tilted 3D Orbit - GPU compositor rotation) */}
       <div
-        className="absolute w-[800px] sm:w-[1050px] lg:w-[1250px] h-[800px] sm:h-[1050px] lg:h-[1250px] rounded-full border border-purple-500/30 -z-5"
+        className="absolute w-[800px] sm:w-[1050px] lg:w-[1250px] h-[800px] sm:h-[1050px] lg:h-[1250px] rounded-full border border-purple-500/40 -z-5"
         style={{
           transform: 'rotateX(72deg) rotateY(-18deg)',
-          boxShadow: '0 0 50px rgba(168, 85, 247, 0.3), inset 0 0 50px rgba(168, 85, 247, 0.2)',
+          transformStyle: 'preserve-3d',
         }}
       >
         {/* Orbiting Satellite Node 1 */}
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
-          className="w-full h-full relative"
-        >
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-cyan-400 shadow-[0_0_20px_#22d3ee] border-2 border-white flex items-center justify-center">
-            <div className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+        <div className="w-full h-full relative animate-cybertron-orbit">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-cyan-400 shadow-[0_0_16px_#22d3ee] border-2 border-white flex items-center justify-center">
+            <div className="w-1.5 h-1.5 rounded-full bg-white" />
           </div>
           {/* Glowing particle trail */}
-          <div className="absolute top-2 left-[52%] w-12 h-1 bg-gradient-to-r from-cyan-400 to-transparent blur-[1px]" />
-        </motion.div>
+          <div className="absolute top-2 left-[52%] w-12 h-1 bg-gradient-to-r from-cyan-400 to-transparent" />
+        </div>
       </div>
 
       {/* 3. Middle Segmented Cyber-Ring with Mechanical Notches */}
@@ -36,47 +34,33 @@ export default function CybertronPlanet() {
         className="absolute w-[700px] sm:w-[920px] lg:w-[1080px] h-[700px] sm:h-[920px] lg:h-[1080px] rounded-full -z-5"
         style={{
           transform: 'rotateX(72deg) rotateY(-18deg)',
+          transformStyle: 'preserve-3d',
         }}
       >
-        <motion.div
-          animate={{ rotate: -360 }}
-          transition={{ duration: 40, repeat: Infinity, ease: 'linear' }}
-          className="w-full h-full rounded-full border-2 border-dashed border-fuchsia-500/50 relative"
-          style={{
-            boxShadow: '0 0 35px rgba(217, 70, 239, 0.4)',
-          }}
-        >
+        <div className="w-full h-full rounded-full border-2 border-dashed border-fuchsia-500/50 relative animate-cybertron-orbit-reverse">
           {/* Secondary Orbiting Satellite Node */}
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-fuchsia-400 shadow-[0_0_18px_#e879f9] border border-white" />
-        </motion.div>
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-fuchsia-400 shadow-[0_0_16px_#e879f9] border border-white" />
+        </div>
       </div>
 
       {/* 4. THE CYBERTRON PLANET CORE SPHERE */}
-      <div className="relative w-[380px] sm:w-[540px] lg:w-[620px] h-[380px] sm:h-[540px] lg:h-[620px] rounded-full overflow-hidden shadow-[0_0_100px_rgba(168,85,247,0.7),inset_0_0_80px_rgba(147,51,234,0.9)] border border-purple-400/60 bg-[#0e061c]">
+      <div className="relative w-[380px] sm:w-[540px] lg:w-[620px] h-[380px] sm:h-[540px] lg:h-[620px] rounded-full overflow-hidden shadow-[0_0_80px_rgba(168,85,247,0.6),inset_0_0_70px_rgba(147,51,234,0.85)] border border-purple-400/60 bg-[#0e061c]">
         {/* 4a. Base 3D Sphere Shading (Atmospheric Shadow & Rim Light) */}
-        <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_35%_25%,_rgba(192,132,252,0.45)_0%,_rgba(59,7,100,0.85)_45%,_rgba(10,3,24,0.98)_85%)] z-10" />
+        <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_35%_25%,_rgba(192,132,252,0.5)_0%,_rgba(59,7,100,0.85)_45%,_rgba(10,3,24,0.98)_85%)] z-10" />
 
         {/* 4b. Intense Upper Atmosphere Rim Flare */}
-        <div className="absolute -top-10 -left-10 w-[120%] h-48 bg-gradient-to-b from-cyan-400/35 via-fuchsia-500/20 to-transparent blur-xl z-20 pointer-events-none" />
+        <div className="absolute -top-10 -left-10 w-[120%] h-48 bg-gradient-to-b from-cyan-400/35 via-fuchsia-500/20 to-transparent z-20 pointer-events-none" />
 
-        {/* 4c. Continuous Looping Cybernetic Circuit Texture (Cybertron Grid) - GPU Accelerated */}
-        <motion.div
-          animate={{
-            x: [0, -380],
-          }}
-          transition={{
-            duration: 40,
-            repeat: Infinity,
-            ease: 'linear',
-          }}
+        {/* 4c. Continuous Looping Cybernetic Circuit Texture (Cybertron Grid) - 100% GPU Accelerated */}
+        <div
           style={{ willChange: 'transform' }}
-          className="absolute inset-0 w-[200%] h-full opacity-80 z-15 mix-blend-screen"
+          className="absolute inset-0 w-[200%] h-full opacity-80 z-15 mix-blend-screen animate-cybertron-circuits"
         >
           <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
             <defs>
               {/* Seamless Cybertron Circuit Pattern */}
               <pattern
-                id="cybertron-circuits"
+                id="cybertron-circuits-pattern"
                 width="190"
                 height="190"
                 patternUnits="userSpaceOnUse"
@@ -114,26 +98,22 @@ export default function CybertronPlanet() {
                 />
               </pattern>
             </defs>
-            <rect width="100%" height="100%" fill="url(#cybertron-circuits)" />
+            <rect width="100%" height="100%" fill="url(#cybertron-circuits-pattern)" />
           </svg>
-        </motion.div>
+        </div>
 
         {/* 4d. Glowing Molten Energon Fissures / Continental Chasms */}
-        <div className="absolute inset-0 z-18 pointer-events-none mix-blend-screen opacity-85">
+        <div className="absolute inset-0 z-18 pointer-events-none mix-blend-screen opacity-85 animate-cybertron-fissure">
           <svg className="w-full h-full" viewBox="0 0 600 600" fill="none">
             {/* Primary Glowing Energon Trench */}
-            <motion.path
-              animate={{ opacity: [0.7, 1, 0.75, 0.7] }}
-              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+            <path
               d="M 80 220 Q 220 180 340 260 T 520 280 M 140 320 Q 260 380 400 340 T 540 400 M 240 100 Q 280 240 290 380 T 320 520"
               stroke="#06b6d4"
               strokeWidth="3.5"
               strokeLinecap="round"
             />
             {/* Secondary Pink Fissure */}
-            <motion.path
-              animate={{ opacity: [0.6, 0.95, 0.65, 0.6] }}
-              transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+            <path
               d="M 180 140 Q 320 190 390 120 T 480 200 M 120 420 Q 240 440 360 480"
               stroke="#d946ef"
               strokeWidth="2.8"
@@ -145,45 +125,22 @@ export default function CybertronPlanet() {
         {/* 4e. Internal Spherical Shadowing to create true 3D curvature */}
         <div className="absolute inset-0 rounded-full shadow-[inset_-40px_-50px_120px_rgba(0,0,0,0.95),inset_25px_25px_70px_rgba(192,132,252,0.45)] z-25 pointer-events-none" />
 
-        {/* 4f. Subtle Pulsing Energon Core Pulse */}
-        <motion.div
-          animate={{
-            opacity: [0.3, 0.6, 0.35, 0.3],
-            scale: [0.95, 1.05, 0.98, 0.95],
-          }}
-          transition={{
-            duration: 6,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-          className="absolute top-1/4 left-1/4 w-1/2 h-1/2 rounded-full bg-gradient-to-br from-cyan-400/30 via-fuchsia-500/25 to-purple-600/30 blur-2xl z-12 pointer-events-none"
-        />
+        {/* 4f. Pulsing Energon Core Glow (Pure Radial Gradient) */}
+        <div className="absolute top-1/4 left-1/4 w-1/2 h-1/2 rounded-full bg-[radial-gradient(circle,rgba(6,182,212,0.35)_0%,rgba(217,70,239,0.2)_40%,transparent_70%)] z-12 pointer-events-none" />
       </div>
 
-      {/* 5. Front Half of Outer Orbital Rings (Creates depth passing in front of Cybertron) */}
+      {/* 5. Front Half of Outer Orbital Rings (Passes in front of Cybertron) */}
       <div
         className="absolute w-[800px] sm:w-[1050px] lg:w-[1250px] h-[800px] sm:h-[1050px] lg:h-[1250px] rounded-full border-t-2 border-r-2 border-cyan-400/70 z-30 pointer-events-none"
         style={{
           transform: 'rotateX(72deg) rotateY(-18deg)',
           clipPath: 'polygon(0% 45%, 100% 45%, 100% 100%, 0% 100%)',
-          boxShadow: '0 0 35px rgba(6, 182, 212, 0.6)',
+          boxShadow: '0 0 25px rgba(6, 182, 212, 0.5)',
         }}
       />
 
       {/* 6. Orbiting Cyber-Moon (Moonbase 1) */}
-      <motion.div
-        animate={{
-          x: [180, 260, 210, 180],
-          y: [-120, -70, -140, -120],
-          scale: [1, 1.15, 0.95, 1],
-        }}
-        transition={{
-          duration: 18,
-          repeat: Infinity,
-          ease: 'easeInOut',
-        }}
-        className="absolute top-12 right-4 sm:right-16 w-20 sm:w-28 h-20 sm:h-28 rounded-full z-20 shadow-[0_0_35px_rgba(6,182,212,0.6),inset_0_0_25px_rgba(59,7,100,0.8)] border border-cyan-400/50 overflow-hidden bg-[#0c0418]"
-      >
+      <div className="absolute top-12 right-4 sm:right-16 w-20 sm:w-28 h-20 sm:h-28 rounded-full z-20 shadow-[0_0_25px_rgba(6,182,212,0.5),inset_0_0_20px_rgba(59,7,100,0.8)] border border-cyan-400/50 overflow-hidden bg-[#0c0418] animate-cybertron-moon">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_35%_25%,_rgba(6,182,212,0.6)_0%,_rgba(15,6,30,0.95)_75%)]" />
         <div className="absolute inset-0 opacity-60">
           <svg className="w-full h-full" viewBox="0 0 100 100">
@@ -202,7 +159,7 @@ export default function CybertronPlanet() {
           className="absolute -inset-4 rounded-full border border-cyan-400/40"
           style={{ transform: 'rotateX(75deg)' }}
         />
-      </motion.div>
+      </div>
     </div>
   );
 }

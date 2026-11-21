@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion, useScroll, useSpring, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Scissors,
   Sparkles,
@@ -43,14 +43,6 @@ export default function HomePage() {
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [filteredPlatform, setFilteredPlatform] = useState('ALL');
   const [activeTab, setActiveTab] = useState<'brand' | 'clipper'>('brand');
-
-  // Scroll animations hooks
-  const { scrollYProgress } = useScroll();
-  const scaleX = useSpring(scrollYProgress, {
-    stiffness: 100,
-    damping: 30,
-    restDelta: 0.001,
-  });
 
   // ROI Calculator state
   const [calcBudget, setCalcBudget] = useState(100000);
@@ -147,87 +139,62 @@ export default function HomePage() {
   };
 
   return (
-    <div className="relative overflow-hidden bg-transparent scroll-smooth">
-      {/* Top Radiant Neon Scroll Progress Bar */}
-      <motion.div
-        className="fixed top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#9333ea] via-[#e879f9] to-[#38bdf8] origin-left z-[60] shadow-[0_0_12px_#c026d3]"
-        style={{ scaleX }}
-      />
-
+    <div className="relative overflow-hidden bg-transparent">
       {/* =========================================================================
           SECTION 1: HERO SECTION
           ========================================================================= */}
       <section
         id="hero"
-        className="relative pt-8 pb-20 lg:pt-14 lg:pb-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col items-center text-center scroll-mt-24"
+        className="relative pt-10 pb-20 lg:pt-16 lg:pb-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col items-center text-center scroll-mt-24"
       >
-
-        {/* Top Floating Ecosystem Status Pill */}
-        <motion.div
-          initial={{ opacity: 0, y: -15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="inline-flex items-center gap-2.5 px-4 sm:px-5 py-2 rounded-full bg-[#150a2b]/90 backdrop-blur-2xl border border-purple-500/40 text-xs font-medium text-purple-200 shadow-[0_0_25px_rgba(168,85,247,0.25)] mb-8"
+        {/* Central High-Impact Headline matching User Reference & Typography */}
+        <h1
+          className="text-4xl sm:text-6xl md:text-7xl lg:text-[76px] font-black text-white tracking-[-0.03em] text-center leading-[1.04] max-w-5xl uppercase"
+          style={{ fontFamily: "'Plus Jakarta Sans', 'Syne', sans-serif" }}
         >
-          <span className="flex h-2 w-2 relative">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          <span className="block text-white">VIRAL CLIPPING AGENCY</span>
+          <span className="block bg-gradient-to-r from-[#fed7aa] via-[#fbcfe8] to-[#f472b6] bg-clip-text text-transparent">
+            INFLUENCER CREATOR
           </span>
-          <span className="text-white font-semibold">Decentralized Short-Form Distribution</span>
-          <span className="text-purple-400/50">•</span>
-          <span className="text-emerald-400 font-mono font-bold">100% Escrow Protected</span>
-          <span className="text-purple-400/50 hidden sm:inline">•</span>
-          <span className="text-purple-300 hidden sm:inline">Instant UPI Cashouts</span>
-        </motion.div>
-
-        {/* Central High-Impact Headline - Original, Bold & Distinct */}
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-4xl sm:text-6xl md:text-7xl lg:text-[76px] font-black text-white tracking-[-0.035em] text-center leading-[1.06] max-w-5xl font-display"
-        >
-          Turn Long-Form Videos Into <br />
-          <span className="bg-gradient-to-r from-[#f472b6] via-[#c084fc] to-[#38bdf8] bg-clip-text text-transparent">
-            Millions of Viral Short Views
+          <span className="block bg-gradient-to-r from-[#f472b6] via-[#c084fc] to-[#38bdf8] bg-clip-text text-transparent">
+            MARKETING PLATFORM
           </span>
-        </motion.h1>
+          <span className="flex items-center justify-center flex-wrap gap-x-3.5 tracking-[-0.02em]">
+            <span className="text-white">SCALE VIEWS WITH</span>
+            <span
+              className="bg-gradient-to-r from-[#c084fc] via-[#e879f9] to-[#38bdf8] bg-clip-text text-transparent inline-block tracking-normal"
+              style={{ fontFamily: "'Bagel Fat One', cursive" }}
+            >
+              CLIP MATRIX.
+            </span>
+          </span>
+        </h1>
 
         {/* Supporting Narrative */}
-        <motion.p
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.15 }}
-          className="mt-6 text-sm sm:text-lg text-purple-200/80 max-w-3xl mx-auto leading-relaxed font-normal"
-        >
-          Connect your podcasts, product demos, and keynotes with over{' '}
-          <strong className="text-white font-semibold">3,400+ vetted video editors</strong>. Clippers craft 3-second
-          retention hooks, publish across <strong className="text-white font-semibold">Reels, Shorts & TikTok</strong>, and
-          receive guaranteed CPM payouts locked safely in escrow.
-        </motion.p>
+        <p className="mt-6 text-sm sm:text-base md:text-lg text-purple-200/85 max-w-3xl mx-auto leading-relaxed font-normal">
+          Clip Matrix is India's top <strong className="text-white font-semibold">viral clipping agency</strong> and{' '}
+          <strong className="text-white font-semibold">influencer marketing platform</strong> for{' '}
+          <strong className="text-white font-semibold">creators</strong>. We turn long videos into viral Reels and YouTube
+          Shorts. Vetted clippers share your clips to drive real views. You get clear CPM rates and safe escrow payouts.
+        </p>
 
-        {/* Action Buttons */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.25 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-3.5 mt-8 w-full sm:w-auto"
-        >
+        {/* Action Buttons matching User Reference */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 mt-8 w-full sm:w-auto">
           <button
-            onClick={() => smoothScroll('#brands')}
-            className="w-full sm:w-auto px-8 py-3.5 rounded-full text-sm font-bold text-white bg-gradient-to-r from-[#d946ef] via-[#a855f7] to-[#7c3aed] hover:opacity-95 transition-all shadow-lg shadow-fuchsia-600/30 flex items-center justify-center gap-2 group cursor-pointer border border-fuchsia-300/30"
+            onClick={() => smoothScroll('#clippers')}
+            className="w-full sm:w-auto px-7 py-3.5 rounded-full text-sm font-bold text-white bg-gradient-to-r from-[#9333ea] via-[#c026d3] to-[#7c3aed] hover:opacity-95 transition-all shadow-lg shadow-purple-600/30 flex items-center justify-center gap-2 group cursor-pointer border border-fuchsia-300/30"
           >
-            <Sparkles className="w-4 h-4 text-fuchsia-200" />
-            <span>Launch a Campaign</span>
+            <Scissors className="w-4 h-4 -rotate-45 text-white" />
+            <span>Join as a Clipper</span>
             <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
           </button>
 
           <button
-            onClick={() => smoothScroll('#clippers')}
-            className="w-full sm:w-auto px-8 py-3.5 rounded-full text-sm font-bold text-purple-100 hover:text-white bg-[#150a29] hover:bg-[#1f0e3d] transition-all border border-purple-500/40 shadow-md flex items-center justify-center gap-2 group cursor-pointer"
+            onClick={() => smoothScroll('#brands')}
+            className="w-full sm:w-auto px-7 py-3.5 rounded-full text-sm font-bold text-white bg-[#150a29] hover:bg-[#1f0e3d] transition-all border border-purple-500/40 shadow-md flex items-center justify-center gap-2 group cursor-pointer"
           >
-            <Scissors className="w-4 h-4 -rotate-45 text-purple-400" />
-            <span>Join as a Clipper</span>
+            <Sparkles className="w-4 h-4 text-cyan-400" />
+            <span>Launch Campaign</span>
             <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
           </button>
 
@@ -236,9 +203,10 @@ export default function HomePage() {
             className="w-full sm:w-auto px-6 py-3.5 rounded-full text-xs font-bold text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 flex items-center justify-center gap-2 transition-all cursor-pointer"
           >
             <Flame className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-            <span>Active Bounties (₹32.5L Escrow)</span>
+            <span>Discover Campaigns</span>
+            <ArrowUpRight className="w-3.5 h-3.5" />
           </button>
-        </motion.div>
+        </div>
 
         {/* Live Social Proof Stack */}
         <motion.div
@@ -258,6 +226,8 @@ export default function HomePage() {
                 key={i}
                 src={src}
                 alt="Creator avatar"
+                loading="lazy"
+                decoding="async"
                 className="w-7 h-7 rounded-full border-2 border-[#07020f] object-cover"
               />
             ))}
@@ -287,6 +257,8 @@ export default function HomePage() {
               <img
                 src="https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=600&auto=format&fit=crop&q=80"
                 alt="Podcast viral clip"
+                loading="eager"
+                decoding="async"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/60" />
@@ -409,6 +381,8 @@ export default function HomePage() {
               <img
                 src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=80"
                 alt="Tech AI viral clip"
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/60" />
@@ -872,6 +846,8 @@ export default function HomePage() {
                       <img
                         src={camp.thumbnailUrl || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=80'}
                         alt={camp.title}
+                        loading="lazy"
+                        decoding="async"
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                       <div className="absolute top-3 left-3 px-2 py-0.5 rounded text-[10px] font-bold bg-black/70 backdrop-blur-md text-white border border-white/10 uppercase">
@@ -1070,7 +1046,7 @@ export default function HomePage() {
                 className="rounded-3xl bg-[#130a24] border border-purple-900/50 overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-8 p-6 sm:p-10 items-center hover:border-purple-500/40 transition-all shadow-xl"
               >
                 <div className="lg:col-span-5 relative aspect-video sm:aspect-square lg:aspect-auto h-full min-h-[240px] rounded-2xl overflow-hidden bg-black">
-                  <img src={cs.thumbnail} alt={cs.title} className="w-full h-full object-cover" />
+                  <img src={cs.thumbnail} alt={cs.title} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
                   <div className="absolute bottom-4 left-4 right-4 text-xs text-white/90 font-medium italic">
                     "{cs.quote}" — <span className="font-bold text-white">{cs.author}</span>
@@ -1584,7 +1560,7 @@ export default function HomePage() {
                 <p className="text-sm text-purple-200/80 leading-relaxed italic">"{t.quote}"</p>
                 <div className="flex items-center gap-3 pt-2 border-t border-purple-900/40">
                   <div className="w-10 h-10 rounded-full bg-purple-700 overflow-hidden">
-                    <img src={t.avatar} alt={t.name} className="w-full h-full object-cover" />
+                    <img src={t.avatar} alt={t.name} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                   </div>
                   <div>
                     <div className="text-xs font-bold text-white">{t.name}</div>

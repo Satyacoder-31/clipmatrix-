@@ -80,25 +80,104 @@ body {
   box-shadow: 0 0 15px -2px rgba(139, 92, 246, 0.4);
 }
 
-/* Continuously looping Cyber-Matrix background grid */
+/* Continuously looping Cyber-Matrix background grid - 100% GPU Hardware Accelerated */
 .matrix-moving-grid {
+  position: absolute;
+  inset: -120px;
   background-image: 
     linear-gradient(to right, rgba(168, 85, 247, 0.14) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(168, 85, 247, 0.14) 1px, transparent 1px);
   background-size: 60px 60px;
   mask-image: radial-gradient(ellipse 85% 70% at 50% 35%, #000 60%, transparent 100%);
   -webkit-mask-image: radial-gradient(ellipse 85% 70% at 50% 35%, #000 60%, transparent 100%);
-  animation: matrixGridScroll 22s linear infinite;
-  will-change: background-position;
-  transform: translateZ(0);
+  animation: matrixGpuScroll 20s linear infinite;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  pointer-events: none;
 }
 
-@keyframes matrixGridScroll {
+@keyframes matrixGpuScroll {
   0% {
-    background-position: 0px 0px;
+    transform: translate3d(0, 0, 0);
   }
   100% {
-    background-position: 60px 60px;
+    transform: translate3d(60px, 60px, 0);
   }
 }
+
+/* Cybertron Planet 60-120 FPS GPU Keyframes (Zero Main Thread JavaScript overhead) */
+@keyframes cybertronOrbit {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes cybertronOrbitReverse {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes cybertronCircuits {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-190px, 0, 0);
+  }
+}
+
+@keyframes cybertronMoonFloat {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(24px, -14px, 0) scale(1.05);
+  }
+}
+
+@keyframes cybertronPulseGlow {
+  0%, 100% {
+    opacity: 0.65;
+  }
+  50% {
+    opacity: 0.95;
+  }
+}
+
+.animate-cybertron-orbit {
+  animation: cybertronOrbit 28s linear infinite;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+}
+
+.animate-cybertron-orbit-reverse {
+  animation: cybertronOrbitReverse 42s linear infinite;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+}
+
+.animate-cybertron-circuits {
+  animation: cybertronCircuits 30s linear infinite;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+}
+
+.animate-cybertron-moon {
+  animation: cybertronMoonFloat 16s ease-in-out infinite;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+}
+
+.animate-cybertron-fissure {
+  animation: cybertronPulseGlow 4s ease-in-out infinite;
+  will-change: opacity;
+}
+
 
