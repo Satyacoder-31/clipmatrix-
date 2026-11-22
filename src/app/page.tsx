@@ -211,14 +211,14 @@ export default function HomePage() {
 
         {/* Action Buttons matching User Reference */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 mt-8 w-full sm:w-auto">
-          <button
-            onClick={() => smoothScroll('#clippers')}
+          <a
+            href="/auth/register-clipper"
             className="w-full sm:w-auto px-7 py-3.5 rounded-full text-sm font-bold text-white bg-gradient-to-r from-[#9333ea] via-[#c026d3] to-[#7c3aed] hover:opacity-95 transition-all shadow-lg shadow-purple-600/30 flex items-center justify-center gap-2 group cursor-pointer border border-fuchsia-300/30"
           >
             <Scissors className="w-4 h-4 -rotate-45 text-white" />
             <span>Join as a Clipper</span>
             <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-          </button>
+          </a>
 
           <button
             onClick={() => smoothScroll('#brands')}
