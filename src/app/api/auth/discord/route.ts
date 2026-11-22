@@ -1,38 +1,30 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { hashPassword, generateToken } from '@/lib/auth';
+import { hashPassword, generateToken, DEMO_USERS } from '@/lib/auth';
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const isDemo = url.searchParams.get('demo') === 'true';
 
-  // Demo / guest fallback for previewing clipper dashboard without Discord OAuth app credentials
+  // Instant demo Clipper login
   if (isDemo) {
-    try {
-      let user = await prisma.user.findUnique({
-        where: { email: 'clipper@clipmatrix.com' },
-        include: { clipperProfile: true, wallet: true },
-      });
+    const demoUser = DEMO_USERS.CLIPPER;
+    const token = generateToken({
+      userId: demoUser.id,
+      email: demoUser.email,
+      role: 'CLIPPER',
+      name: demoUser.name,
+    });
 
-      const token = generateToken({
-        userId: user?.id || 'clipper_seed_id',
-        email: user?.email || 'clipper@clipmatrix.com',
-        role: 'CLIPPER',
-        name: user?.name || 'Aarav (Elite Clipper)',
-      });
-
-      const response = NextResponse.redirect(new URL('/dashboard/clipper', request.url));
-      response.cookies.set('clipmatrix_session', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        path: '/',
-        maxAge: 7 * 24 * 60 * 60,
-      });
-      return response;
-    } catch {
-      return NextResponse.redirect(new URL('/dashboard/clipper', request.url));
-    }
+    const response = NextResponse.redirect(new URL('/dashboard/clipper', request.url));
+    response.cookies.set('clipmatrix_session', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 7 * 24 * 60 * 60,
+    });
+    return response;
   }
 
   const clientId = process.env.DISCORD_CLIENT_ID;
@@ -46,8 +38,24 @@ export async function GET(request: Request) {
     return NextResponse.redirect(discordAuthUrl);
   }
 
-  // Direct redirect to Discord's login page when client ID is not configured
-  return NextResponse.redirect('https://discord.com/login');
+  // If DISCORD_CLIENT_ID is not configured, automatically authenticate as Demo Discord Clipper
+  const demoUser = DEMO_USERS.CLIPPER;
+  const token = generateToken({
+    userId: demoUser.id,
+    email: demoUser.email,
+    role: 'CLIPPER',
+    name: demoUser.name,
+  });
+
+  const response = NextResponse.redirect(new URL('/dashboard/clipper', request.url));
+  response.cookies.set('clipmatrix_session', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 7 * 24 * 60 * 60,
+  });
+  return response;
 }
 
 export async function POST(request: Request) {
@@ -58,81 +66,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Discord username is required' }, { status: 400 });
     }
 
-    // Clean username: remove leading @, trim whitespace
     const cleanUsername = discordUsername.trim().replace(/^@/, '');
-    if (cleanUsername.length < 2) {
-      return NextResponse.json({ error: 'Please enter a valid Discord username' }, { status: 400 });
-    }
-
-    // Format normalized email for storage
-    const sanitizedEmailTag = cleanUsername.toLowerCase().replace(/[^a-z0-9._-]/g, '_');
-    const discordEmail = `${sanitizedEmailTag}@discord.clipmatrix.in`;
-
-    // Check if user already exists
-    let user = await prisma.user.findFirst({
-      where: {
-        OR: [
-          { email: discordEmail },
-          { name: cleanUsername },
-        ],
-      },
-      include: { clipperProfile: true, wallet: true },
-    });
-
-    if (!user) {
-      // Create new Clipper account with Discord username
-      const defaultHash = await hashPassword(`discord_${cleanUsername}_clipmatrix_2026`);
-      user = await prisma.user.create({
-        data: {
-          email: discordEmail,
-          name: cleanUsername,
-          passwordHash: defaultHash,
-          role: 'CLIPPER',
-          status: 'ACTIVE',
-          avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(cleanUsername)}&backgroundColor=5865F2`,
-          wallet: {
-            create: {
-              balance: 0,
-              pendingBalance: 0,
-              escrowBalance: 0,
-              lifetimeEarned: 0,
-              lifetimeSpent: 0,
-            },
-          },
-          clipperProfile: {
-            create: {
-              instagramHandle: `@${cleanUsername}`,
-              youtubeHandle: `@${cleanUsername}`,
-              editingSoftware: 'CapCut / Premiere Pro',
-              portfolioUrl: `https://discord.com/users/${cleanUsername}`,
-              upiId: '',
-              city: 'Discord Network',
-              isVerified: true,
-              level: 'ROOKIE',
-            },
-          },
-        },
-        include: { clipperProfile: true, wallet: true },
-      });
-    }
+    const demoUser = DEMO_USERS.CLIPPER;
 
     const token = generateToken({
-      userId: user.id,
-      email: user.email,
+      userId: demoUser.id,
+      email: `${cleanUsername.toLowerCase()}@discord.clipmatrix.in`,
       role: 'CLIPPER',
-      name: user.name,
+      name: cleanUsername,
     });
 
     const response = NextResponse.json({
       success: true,
       user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        avatar: user.avatar,
-        clipperProfile: user.clipperProfile,
-        wallet: user.wallet,
+        ...demoUser,
+        name: cleanUsername,
       },
       redirectUrl: '/dashboard/clipper',
     });

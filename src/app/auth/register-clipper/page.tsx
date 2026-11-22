@@ -79,16 +79,15 @@ function DiscordClipperContent() {
           <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
         </a>
 
-        {/* Instant Demo Preview Option */}
-        <div className="pt-1">
-          <a
-            href="/api/auth/discord?demo=true"
-            className="text-xs text-slate-400 hover:text-white transition-colors inline-flex items-center gap-1.5 font-medium underline-offset-4 hover:underline"
-          >
-            <span>Preview Clipper Dashboard (Demo Mode)</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </a>
-        </div>
+        {/* Instant Demo Login Button */}
+        <a
+          href="/api/auth/discord?demo=true"
+          className="w-full py-3.5 px-6 rounded-2xl font-bold text-[#8ea1e1] hover:text-white bg-[#5865F2]/15 hover:bg-[#5865F2]/30 border border-[#5865F2]/40 transition-all flex items-center justify-center gap-2.5 text-sm cursor-pointer group shadow-[0_0_15px_rgba(88,101,242,0.15)]"
+        >
+          <Sparkles className="w-4 h-4 text-cyan-400 group-hover:rotate-12 transition-transform" />
+          <span>Demo Login with Discord (1-Click)</span>
+          <ArrowRight className="w-4 h-4 text-cyan-300 group-hover:translate-x-1 transition-transform" />
+        </a>
       </div>
 
       {/* Clipper Benefits & Guarantees */}
