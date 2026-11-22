@@ -119,7 +119,7 @@ export default function ClipperOverviewPage() {
           <div className="text-center py-12 space-y-3">
             <p className="text-sm text-purple-300">You haven't submitted any clips yet.</p>
             <a
-              href="/campaigns"
+              href="/dashboard/clipper/campaigns"
               className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-purple-600 inline-block shadow-glow-purple"
             >
               Browse Active Campaigns to Clip

@@ -58,7 +58,7 @@ export default function DashboardSidebar({
   // Distinct Clip Matrix Workspace Items
   const clipperWorkspace = [
     { label: 'Command Dashboard', href: '/dashboard/clipper', icon: LayoutDashboard },
-    { label: 'Campaign Marketplace', href: '/campaigns', icon: Compass, badge: 'LIVE' },
+    { label: 'Campaign Marketplace', href: '/dashboard/clipper/campaigns', icon: Compass, badge: 'LIVE' },
     { label: 'My Video Clips', href: '/dashboard/clipper/submissions', icon: Film },
     { label: 'Escrow Earnings', href: '/dashboard/clipper/earnings', icon: Wallet },
     { label: 'Notifications', href: '/dashboard/clipper/notifications', icon: Bell },
@@ -72,7 +72,7 @@ export default function DashboardSidebar({
     { label: 'Campaign Manager', href: '/dashboard/brand/campaigns', icon: FolderKanban },
     { label: 'Review Submissions', href: '/dashboard/brand/submissions', icon: CheckSquare },
     { label: 'Escrow & Billing', href: '/dashboard/brand/billing', icon: CreditCard },
-    { label: 'Marketplace View', href: '/campaigns', icon: Compass },
+    { label: 'Marketplace View', href: '/dashboard/clipper/campaigns', icon: Compass },
     { label: 'Notifications', href: '/dashboard/clipper/notifications', icon: Bell },
   ];
 
@@ -91,8 +91,16 @@ export default function DashboardSidebar({
   const networkItems = [
     { label: 'Viral Leaderboard', href: '/dashboard/clipper/leaderboard', icon: Trophy },
     { label: 'Creator Lounge & Chat', href: '/dashboard/clipper/chat', icon: MessageSquare },
-    { label: 'Escrow Rules & Policy', href: role === 'BRAND' ? '/brand-agreement' : '/clipper-agreement', icon: ShieldCheck },
-    { label: 'Clipping Academy', href: '/blog', icon: BookOpen },
+    {
+      label: 'Escrow Rules & Policy',
+      href: role === 'BRAND' ? '/dashboard/brand/rules' : '/dashboard/clipper/rules',
+      icon: ShieldCheck,
+    },
+    {
+      label: 'Clipping Academy',
+      href: role === 'BRAND' ? '/dashboard/brand/academy' : '/dashboard/clipper/academy',
+      icon: BookOpen,
+    },
   ];
 
   const displayName = user?.name || (role === 'CLIPPER' ? 'Aarav Sharma' : role === 'BRAND' ? 'Aether AI Labs' : 'Super Admin');
