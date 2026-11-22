@@ -78,6 +78,7 @@ export default function DashboardSidebar({
 
   const adminWorkspace = [
     { label: 'Command Hub', href: '/dashboard/admin', icon: LayoutDashboard },
+    { label: 'Review Video Clips', href: '/dashboard/admin/submissions', icon: Film, badge: 'REVIEW' },
     { label: 'Verify Views Engine', href: '/dashboard/admin/verification', icon: CheckSquare, badge: 'LIVE' },
     { label: 'Campaign Controls', href: '/dashboard/admin/campaigns', icon: FolderKanban },
     { label: 'Payout Requests', href: '/dashboard/admin/withdrawals', icon: CreditCard },
