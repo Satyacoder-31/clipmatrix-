@@ -10,11 +10,13 @@ export default function Footer() {
           {/* Brand Info */}
           <div className="space-y-2 max-w-md">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#9333ea] via-[#c026d3] to-[#e879f9] flex items-center justify-center text-white font-black text-lg font-display shadow-md shadow-fuchsia-500/25">
-                C
-              </div>
+              <img
+                src="/clipmatrix-logo.png"
+                alt="Clip Matrix Logo"
+                className="w-10 h-10 object-contain drop-shadow-[0_0_15px_rgba(124,58,237,0.55)]"
+              />
               <span className="text-xl font-extrabold text-white font-display tracking-tight">
-                CLIP MATRIX
+                CLIP <span className="text-[#00D4FF]">MATRIX</span>
               </span>
             </div>
             <p className="text-xs text-purple-200/60 leading-relaxed">

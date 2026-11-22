@@ -4,6 +4,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import DynamicBackground from '@/components/DynamicBackground';
 import ScrollProgressBar from '@/components/ScrollProgressBar';
+import SmoothScroll from '@/components/SmoothScroll';
 
 export const metadata: Metadata = {
   title: 'Clip Matrix | Viral Clipping Platform & Creator Economy Ecosystem',
@@ -39,12 +40,14 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-screen bg-[#07020f] text-white antialiased selection:bg-purple-600 selection:text-white relative">
-        <ScrollProgressBar />
-        <DynamicBackground />
-        <Navbar />
-        <main className="min-h-[calc(100vh-280px)]">{children}</main>
-        <Footer />
+      <body className="min-h-screen bg-[#0a0e23] text-white antialiased selection:bg-purple-600 selection:text-white relative">
+        <SmoothScroll>
+          <ScrollProgressBar />
+          <DynamicBackground />
+          <Navbar />
+          <main className="min-h-[calc(100vh-280px)]">{children}</main>
+          <Footer />
+        </SmoothScroll>
       </body>
     </html>
   );

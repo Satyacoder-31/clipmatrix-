@@ -102,47 +102,21 @@ export default function Navbar() {
   }, [pathname]);
 
   const navLinks: NavItem[] = [
-    { label: 'Clippers', href: '#clippers', id: 'clippers' },
+    { label: 'For Creators', href: '#clippers', id: 'clippers' },
     { label: 'For Brands', href: '#brands', id: 'brands' },
-    { label: 'About', href: '#about', id: 'about' },
+    { label: 'Commission', href: '#pricing', id: 'pricing' },
+    { label: 'How It Works', href: '#how-it-works', id: 'how-it-works' },
     {
-      label: 'Work With Us',
-      href: '#campaigns',
-      id: 'campaigns',
-      dropdown: [
-        { label: 'Live Brand Campaigns', href: '#campaigns', desc: 'Browse high-budget active briefs', icon: Flame },
-        { label: 'How It Works', href: '#how-it-works', desc: 'Decentralized clipping workflow', icon: Layers },
-        { label: 'Clipper Hub & Earning', href: '#clippers', desc: 'Creator payout calculator', icon: Sparkles },
-      ],
-    },
-    {
-      label: 'Case Studies',
+      label: 'Resources',
       href: '#case-studies',
       id: 'case-studies',
       dropdown: [
         { label: 'Client Proof & Metrics', href: '#case-studies', desc: 'Aether AI & KicksDrop case files', icon: BarChart3 },
         { label: 'Interactive Dashboard Demo', href: '#dashboard-demo', desc: 'Live Brand & Clipper preview', icon: LayoutDashboard },
-      ],
-    },
-    {
-      label: 'Compare',
-      href: '#pricing',
-      id: 'pricing',
-      dropdown: [
-        { label: 'ROI & CPM Simulator', href: '#pricing', desc: 'Calculate views & return on ad spend', icon: BarChart3 },
-        { label: 'Agency vs Clip Matrix', href: '#brands', desc: 'Escrow vs fixed upfront retainers', icon: Layers },
-      ],
-    },
-    {
-      label: 'Resources',
-      href: '#reviews',
-      id: 'reviews',
-      dropdown: [
         { label: 'Client Reviews (890+)', href: '#reviews', desc: '5-star founder & editor testimonials', icon: Star },
         { label: 'Ecosystem Vision', href: '#about', desc: 'Our decentralized mission & ethos', icon: Sparkles },
       ],
     },
-    { label: 'Contact', href: '#contact', id: 'contact' },
   ];
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -152,6 +126,14 @@ export default function Navbar() {
         window.location.href = `/${href}`;
         return;
       }
+      if (typeof window !== 'undefined' && (window as any).__lenis) {
+        (window as any).__lenis.scrollTo(href, { offset: -85, duration: 1.4 });
+        setMobileMenuOpen(false);
+        setOpenDropdown(null);
+        window.history.pushState(null, '', href);
+        return;
+      }
+
       const target = document.querySelector(href);
       if (target) {
         const navHeight = 85;
@@ -194,17 +176,19 @@ export default function Navbar() {
             : 'bg-[#110922]/80 backdrop-blur-xl border-purple-500/20 shadow-xl shadow-purple-950/40'
         }`}
       >
-        {/* Brand Logo: Magenta-Purple Rounded Badge */}
+        {/* Brand Logo: Clean transparent Clip Matrix logo */}
         <a
           href="#hero"
           onClick={(e) => handleNavClick(e, '#hero')}
           className="flex items-center gap-2.5 group shrink-0"
         >
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#9333ea] via-[#c026d3] to-[#e879f9] flex items-center justify-center text-white font-black text-base font-display shadow-md shadow-fuchsia-500/30 group-hover:scale-105 transition-transform">
-            C
-          </div>
-          <span className="font-extrabold text-white text-sm font-display tracking-tight hidden sm:inline">
-            CLIP <span className="text-purple-400">MATRIX</span>
+          <img
+            src="/clipmatrix-logo.png"
+            alt="Clip Matrix Logo"
+            className="w-9 h-9 object-contain group-hover:scale-105 transition-transform drop-shadow-[0_0_12px_rgba(124,58,237,0.55)]"
+          />
+          <span className="font-extrabold text-white text-base font-display tracking-tight hidden sm:inline">
+            CLIP<span className="text-[#00D4FF]">MATRIX</span>
           </span>
         </a>
 
@@ -279,8 +263,8 @@ export default function Navbar() {
           })}
         </nav>
 
-        {/* Right CTA Button: Radiant Pink-Purple Gradient Pill */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        {/* Right CTA Buttons matching reference design: Log In + Start Creating */}
+        <div className="flex items-center gap-3 sm:gap-4">
           {user ? (
             <a
               href={getDashboardUrl()}
@@ -291,14 +275,21 @@ export default function Navbar() {
               <ArrowUpRight className="w-3 h-3" />
             </a>
           ) : (
-            <a
-              href="#contact"
-              onClick={(e) => handleNavClick(e, '#contact')}
-              className="px-5 py-2 rounded-full text-xs font-bold text-white bg-gradient-to-r from-[#d946ef] via-[#a855f7] to-[#8b5cf6] hover:opacity-95 transition-all shadow-lg shadow-fuchsia-600/30 flex items-center gap-1.5 border border-fuchsia-300/30 group"
-            >
-              <span>Book a call</span>
-              <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-            </a>
+            <>
+              <a
+                href="/auth/login"
+                className="text-xs font-semibold text-white/80 hover:text-white transition-colors hidden sm:inline"
+              >
+                Log In
+              </a>
+              <a
+                href="#clippers"
+                onClick={(e) => handleNavClick(e, '#clippers')}
+                className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#7C3AED] to-[#6366F1] hover:opacity-95 transition-all shadow-[0_0_15px_rgba(124,58,237,0.45)] border border-purple-400/40 flex items-center gap-1.5 cursor-pointer"
+              >
+                <span>Start Creating</span>
+              </a>
+            </>
           )}
 
           {/* Mobile hamburger */}
