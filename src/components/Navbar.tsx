@@ -102,21 +102,47 @@ export default function Navbar() {
   }, [pathname]);
 
   const navLinks: NavItem[] = [
-    { label: 'For Creators', href: '#clippers', id: 'clippers' },
+    { label: 'Clippers', href: '#clippers', id: 'clippers' },
     { label: 'For Brands', href: '#brands', id: 'brands' },
-    { label: 'Commission', href: '#pricing', id: 'pricing' },
-    { label: 'How It Works', href: '#how-it-works', id: 'how-it-works' },
+    { label: 'About', href: '#about', id: 'about' },
     {
-      label: 'Resources',
+      label: 'Work With Us',
+      href: '#campaigns',
+      id: 'campaigns',
+      dropdown: [
+        { label: 'Live Brand Campaigns', href: '#campaigns', desc: 'Browse high-budget active briefs', icon: Flame },
+        { label: 'How It Works', href: '#how-it-works', desc: 'Decentralized clipping workflow', icon: Layers },
+        { label: 'Clipper Hub & Earning', href: '#clippers', desc: 'Creator payout calculator', icon: Sparkles },
+      ],
+    },
+    {
+      label: 'Case Studies',
       href: '#case-studies',
       id: 'case-studies',
       dropdown: [
         { label: 'Client Proof & Metrics', href: '#case-studies', desc: 'Aether AI & KicksDrop case files', icon: BarChart3 },
         { label: 'Interactive Dashboard Demo', href: '#dashboard-demo', desc: 'Live Brand & Clipper preview', icon: LayoutDashboard },
+      ],
+    },
+    {
+      label: 'Compare',
+      href: '#pricing',
+      id: 'pricing',
+      dropdown: [
+        { label: 'ROI & CPM Simulator', href: '#pricing', desc: 'Calculate views & return on ad spend', icon: BarChart3 },
+        { label: 'Agency vs Clip Matrix', href: '#brands', desc: 'Escrow vs fixed upfront retainers', icon: Layers },
+      ],
+    },
+    {
+      label: 'Resources',
+      href: '#reviews',
+      id: 'reviews',
+      dropdown: [
         { label: 'Client Reviews (890+)', href: '#reviews', desc: '5-star founder & editor testimonials', icon: Star },
         { label: 'Ecosystem Vision', href: '#about', desc: 'Our decentralized mission & ethos', icon: Sparkles },
       ],
     },
+    { label: 'Contact', href: '#contact', id: 'contact' },
   ];
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -170,11 +196,10 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full px-4 sm:px-6 pt-3 pb-2 transition-all duration-300">
       <div
-        className={`max-w-6xl mx-auto rounded-full transition-all duration-300 px-4 sm:px-6 py-2 flex items-center justify-between border ${
-          isScrolled
-            ? 'bg-[#0d071a]/92 backdrop-blur-2xl border-purple-500/35 shadow-2xl shadow-purple-950/70'
-            : 'bg-[#110922]/80 backdrop-blur-xl border-purple-500/20 shadow-xl shadow-purple-950/40'
-        }`}
+        className={`max-w-6xl mx-auto rounded-full transition-all duration-300 px-4 sm:px-6 py-2 flex items-center justify-between border ${isScrolled
+          ? 'bg-[#0d071a]/92 backdrop-blur-2xl border-purple-500/35 shadow-2xl shadow-purple-950/70'
+          : 'bg-[#110922]/80 backdrop-blur-xl border-purple-500/20 shadow-xl shadow-purple-950/40'
+          }`}
       >
         {/* Brand Logo: Clean transparent Clip Matrix logo */}
         <a
@@ -208,18 +233,16 @@ export default function Navbar() {
                 <a
                   href={item.href}
                   onClick={(e) => handleNavClick(e, item.href)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1 ${
-                    active
-                      ? 'text-white bg-purple-600/30 font-semibold shadow-[0_0_12px_rgba(168,85,247,0.35)] border border-purple-400/30'
-                      : 'text-purple-200/80 hover:text-white hover:bg-white/[0.06]'
-                  }`}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1 ${active
+                    ? 'text-white bg-purple-600/30 font-semibold shadow-[0_0_12px_rgba(168,85,247,0.35)] border border-purple-400/30'
+                    : 'text-purple-200/80 hover:text-white hover:bg-white/[0.06]'
+                    }`}
                 >
                   <span>{item.label}</span>
                   {hasDropdown && (
                     <ChevronDown
-                      className={`w-3 h-3 text-purple-300/60 transition-transform duration-200 ${
-                        openDropdown === item.label ? 'rotate-180 text-white' : ''
-                      }`}
+                      className={`w-3 h-3 text-purple-300/60 transition-transform duration-200 ${openDropdown === item.label ? 'rotate-180 text-white' : ''
+                        }`}
                     />
                   )}
                 </a>
@@ -263,8 +286,8 @@ export default function Navbar() {
           })}
         </nav>
 
-        {/* Right CTA Buttons matching reference design: Log In + Start Creating */}
-        <div className="flex items-center gap-3 sm:gap-4">
+        {/* Right CTA Button: Book a call matching user screenshot */}
+        <div className="flex items-center gap-2 sm:gap-3">
           {user ? (
             <a
               href={getDashboardUrl()}
@@ -275,21 +298,14 @@ export default function Navbar() {
               <ArrowUpRight className="w-3 h-3" />
             </a>
           ) : (
-            <>
-              <a
-                href="/auth/login"
-                className="text-xs font-semibold text-white/80 hover:text-white transition-colors hidden sm:inline"
-              >
-                Log In
-              </a>
-              <a
-                href="#clippers"
-                onClick={(e) => handleNavClick(e, '#clippers')}
-                className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#7C3AED] to-[#6366F1] hover:opacity-95 transition-all shadow-[0_0_15px_rgba(124,58,237,0.45)] border border-purple-400/40 flex items-center gap-1.5 cursor-pointer"
-              >
-                <span>Start Creating</span>
-              </a>
-            </>
+            <a
+              href="#contact"
+              onClick={(e) => handleNavClick(e, '#contact')}
+              className="px-5 py-2 rounded-full text-xs font-bold text-white bg-gradient-to-r from-[#d946ef] via-[#a855f7] to-[#8b5cf6] hover:opacity-95 transition-all shadow-lg shadow-fuchsia-600/30 flex items-center gap-1.5 border border-fuchsia-300/30 group cursor-pointer"
+            >
+              <span>Book a call</span>
+              <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            </a>
           )}
 
           {/* Mobile hamburger */}
@@ -312,11 +328,10 @@ export default function Navbar() {
                 key={link.label}
                 href={link.href}
                 onClick={(e) => handleNavClick(e, link.href)}
-                className={`px-3 py-2.5 rounded-xl transition-colors ${
-                  isLinkActive(link)
-                    ? 'bg-purple-600/30 text-white font-bold border border-purple-500/40'
-                    : 'text-purple-200 hover:text-white hover:bg-white/5'
-                }`}
+                className={`px-3 py-2.5 rounded-xl transition-colors ${isLinkActive(link)
+                  ? 'bg-purple-600/30 text-white font-bold border border-purple-500/40'
+                  : 'text-purple-200 hover:text-white hover:bg-white/5'
+                  }`}
               >
                 {link.label}
               </a>

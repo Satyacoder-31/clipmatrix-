@@ -151,247 +151,295 @@ export default function HomePage() {
   return (
     <div className="relative overflow-hidden bg-transparent">
       {/* =========================================================================
-          SECTION 1: HERO SECTION - MATCHING REFERENCE DESIGN SYSTEM
+          SECTION 1: HERO SECTION - 3 ATTRACTIVE LINES & VIRAL SHOWCASE
           ========================================================================= */}
       <section
         id="hero"
-        className="relative pt-12 pb-20 lg:pt-20 lg:pb-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto scroll-mt-24"
+        className="relative pt-10 pb-20 lg:pt-16 lg:pb-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col items-center text-center scroll-mt-24"
       >
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-          {/* Left Column: Headline, Narrative & Primary Actions */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7 }}
-            className="lg:col-span-7 text-left space-y-6"
-          >
-            {/* Top Badge: The Performance Creator Network */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#7C3AED]/40 bg-[#11152B]/80 text-[#C084FC] text-xs font-semibold tracking-wider uppercase shadow-[0_0_20px_rgba(124,58,237,0.25)]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#00D4FF] animate-pulse" />
-              <span>THE PERFORMANCE CREATOR NETWORK</span>
-            </div>
+        {/* Central High-Impact Headline - Exactly 3 Attractive Lines */}
+        <h1
+          className="text-4xl sm:text-6xl md:text-7xl lg:text-[76px] font-black text-white tracking-[-0.03em] text-center leading-[1.08] max-w-5xl uppercase"
+          style={{ fontFamily: "'Plus Jakarta Sans', 'Syne', sans-serif" }}
+        >
+          {/* Line 1: Pure White Statement */}
+          <span className="block text-white drop-shadow-[0_0_25px_rgba(255,255,255,0.18)]">
+            VIRAL CLIPPING AGENCY
+          </span>
 
-            {/* Main Headline */}
-            <h1
-              className="text-4xl sm:text-6xl md:text-7xl font-extrabold text-white tracking-tight leading-[1.06]"
-              style={{ fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif" }}
+          {/* Line 2: Glowing Sunset Rose to Electric Cyan Gradient */}
+          <span className="block bg-gradient-to-r from-[#fed7aa] via-[#f472b6] to-[#38bdf8] bg-clip-text text-transparent drop-shadow-[0_0_35px_rgba(244,114,182,0.35)] py-1">
+            INFLUENCER MARKETING PLATFORM
+          </span>
+
+          {/* Line 3: Signature Brand Finish with Cyber Cyan & Purple Accent */}
+          <span className="flex items-center justify-center flex-wrap gap-x-3.5 tracking-[-0.02em] pt-1">
+            <span className="text-white">SCALE VIEWS WITH</span>
+            <span
+              className="bg-gradient-to-r from-[#c084fc] via-[#e879f9] to-[#00d4ff] bg-clip-text text-transparent inline-block tracking-normal drop-shadow-[0_0_35px_rgba(192,132,252,0.5)]"
+              style={{ fontFamily: "'Bagel Fat One', cursive" }}
             >
-              Turn Content Into <br />
-              <span className="bg-gradient-to-r from-[#7C3AED] via-[#9061F9] to-[#00D4FF] bg-clip-text text-transparent">
-                Distribution.
-              </span>
-            </h1>
+              CLIP MATRIX.
+            </span>
+          </span>
+        </h1>
 
-            {/* Narrative Description */}
-            <p className="text-base sm:text-lg text-[#A1A8C7] max-w-xl leading-relaxed font-normal">
-              Clipmatrix helps creators and brands grow fast through data-backed distribution, performance tracking and a network built for scale.
-            </p>
+        {/* Supporting Narrative */}
+        <p className="mt-6 text-sm sm:text-base md:text-lg text-purple-200/85 max-w-3xl mx-auto leading-relaxed font-normal">
+          Clip Matrix is India's top <strong className="text-white font-semibold">viral clipping agency</strong> and{' '}
+          <strong className="text-white font-semibold">influencer marketing platform</strong> for{' '}
+          <strong className="text-white font-semibold">creators</strong>. We turn long videos into viral Reels and YouTube
+          Shorts. Vetted clippers share your clips to drive real views. You get clear CPM rates and safe escrow payouts.
+        </p>
 
-            {/* Dual CTAs matching reference */}
-            <div className="flex flex-wrap items-center gap-4 pt-2">
-              <button
-                onClick={() => smoothScroll('#brands')}
-                className="px-8 py-4 rounded-xl text-sm font-bold text-white bg-[#2563EB] hover:bg-blue-600 transition-all shadow-[0_0_25px_rgba(37,99,235,0.45)] hover:shadow-[0_0_35px_rgba(37,99,235,0.6)] flex items-center gap-2 group cursor-pointer"
-              >
-                <span>Launch a Campaign</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </button>
+        {/* Action Buttons matching User Reference */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 mt-8 w-full sm:w-auto">
+          <button
+            onClick={() => smoothScroll('#clippers')}
+            className="w-full sm:w-auto px-7 py-3.5 rounded-full text-sm font-bold text-white bg-gradient-to-r from-[#9333ea] via-[#c026d3] to-[#7c3aed] hover:opacity-95 transition-all shadow-lg shadow-purple-600/30 flex items-center justify-center gap-2 group cursor-pointer border border-fuchsia-300/30"
+          >
+            <Scissors className="w-4 h-4 -rotate-45 text-white" />
+            <span>Join as a Clipper</span>
+            <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+          </button>
 
-              <button
-                onClick={() => smoothScroll('#clippers')}
-                className="px-8 py-4 rounded-xl text-sm font-bold text-[#0A0E23] bg-white hover:bg-slate-100 transition-all shadow-lg flex items-center gap-2 group cursor-pointer"
-              >
-                <span>Start Earning</span>
-                <ArrowRight className="w-4 h-4 text-[#0A0E23] group-hover:translate-x-1 transition-transform" />
-              </button>
+          <button
+            onClick={() => smoothScroll('#brands')}
+            className="w-full sm:w-auto px-7 py-3.5 rounded-full text-sm font-bold text-white bg-[#150a29] hover:bg-[#1f0e3d] transition-all border border-purple-500/40 shadow-md flex items-center justify-center gap-2 group cursor-pointer"
+          >
+            <Sparkles className="w-4 h-4 text-cyan-400" />
+            <span>Launch Campaign</span>
+            <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+          </button>
+
+          <button
+            onClick={() => smoothScroll('#campaigns')}
+            className="w-full sm:w-auto px-6 py-3.5 rounded-full text-xs font-bold text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 flex items-center justify-center gap-2 transition-all cursor-pointer"
+          >
+            <Flame className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+            <span>Discover Campaigns</span>
+            <ArrowUpRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* Live Social Proof Stack */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.35 }}
+          className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-purple-300/80"
+        >
+          <div className="flex -space-x-2">
+            {[
+              'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80',
+              'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&auto=format&fit=crop&q=80',
+              'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&auto=format&fit=crop&q=80',
+              'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&auto=format&fit=crop&q=80',
+            ].map((src, i) => (
+              <img
+                key={i}
+                src={src}
+                alt="Creator avatar"
+                loading="lazy"
+                decoding="async"
+                className="w-7 h-7 rounded-full border-2 border-[#07020f] object-cover"
+              />
+            ))}
+          </div>
+          <span>
+            Joined by <strong className="text-white">3,420+ clippers</strong> across India
+          </span>
+          <span className="text-purple-500">•</span>
+          <div className="flex items-center gap-1 text-amber-400 font-semibold">
+            <span>★ 4.9/5 Rating</span>
+            <span className="text-purple-300/70 font-normal">(890+ Brand Reviews)</span>
+          </div>
+        </motion.div>
+
+        {/* =====================================================================
+            HERO VISUAL SHOWCASE: 3D DYNAMIC VIRAL CLIP CARDS & PIPELINE
+            ===================================================================== */}
+        <div className="mt-14 w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+          {/* Left Vertical Clip Card (Podcast / Founder Hook) */}
+          <motion.div
+            initial={{ opacity: 0, x: -30, rotateY: 10 }}
+            animate={{ opacity: 1, x: 0, rotateY: 0 }}
+            transition={{ duration: 0.7, delay: 0.3 }}
+            className="lg:col-span-4 rounded-3xl bg-gradient-to-b from-[#1c0e35] to-[#100720] border border-purple-500/30 p-4 shadow-2xl shadow-purple-950/70 text-left relative overflow-hidden group hover:border-purple-400/60 transition-all"
+          >
+            <div className="relative aspect-[9/14] sm:aspect-[9/13] rounded-2xl overflow-hidden bg-black/80">
+              <img
+                src="https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=600&auto=format&fit=crop&q=80"
+                alt="Podcast viral clip"
+                loading="eager"
+                decoding="async"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/60" />
+
+              {/* Platform & Status Badge */}
+              <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
+                <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-pink-600 text-white shadow-md flex items-center gap-1">
+                  <Instagram className="w-3 h-3" /> Instagram Reels
+                </span>
+                <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+                  VERIFIED
+                </span>
+              </div>
+
+              {/* Play icon overlay */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center text-white shadow-glow-purple group-hover:scale-110 transition-transform">
+                  <Play className="w-5 h-5 fill-white ml-0.5" />
+                </div>
+              </div>
+
+              {/* Hook Caption */}
+              <div className="absolute bottom-16 left-3 right-3">
+                <div className="p-2.5 rounded-xl bg-black/60 backdrop-blur-md border border-white/10 text-xs font-semibold text-white">
+                  "The #1 reason 90% of SaaS startups fail within 12 months..."
+                </div>
+              </div>
+
+              {/* Bottom Metrics Bar */}
+              <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-[11px] font-semibold text-white/90">
+                <span className="flex items-center gap-1 text-purple-300">
+                  <Eye className="w-3.5 h-3.5 text-purple-400" /> 1.48M Views
+                </span>
+                <span className="text-emerald-400 font-mono font-bold">+₹20,720 Earned</span>
+              </div>
             </div>
 
-            {/* 4 Value Pillars */}
-            <div className="grid grid-cols-2 sm:grid-cols-2 gap-y-3 gap-x-6 pt-4 text-xs sm:text-sm text-[#A1A8C7]">
-              <div className="flex items-center gap-2.5">
-                <CheckCircle2 className="w-4 h-4 text-[#7C3AED] shrink-0" />
-                <span className="text-[#A1A8C7] font-medium">Creative ownership</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <CheckCircle2 className="w-4 h-4 text-[#7C3AED] shrink-0" />
-                <span className="text-[#A1A8C7] font-medium">Performance tracking</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <CheckCircle2 className="w-4 h-4 text-[#7C3AED] shrink-0" />
-                <span className="text-[#A1A8C7] font-medium">Real-time analytics</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <CheckCircle2 className="w-4 h-4 text-[#7C3AED] shrink-0" />
-                <span className="text-[#A1A8C7] font-medium">Millions of views</span>
-              </div>
+            <div className="mt-3 flex items-center justify-between text-xs px-1">
+              <span className="text-purple-300/80">Clipper: <strong className="text-white">@nikhil.cuts</strong></span>
+              <span className="text-xs font-mono text-cyan-400 font-semibold">CPM: ₹140</span>
             </div>
           </motion.div>
 
-          {/* Right Column: Campaign Live Card */}
+          {/* Center Pipeline Visualizer (1 Long Video ➔ 48 Viral Clips ➔ Mass Reach) */}
           <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            className="lg:col-span-5"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.4 }}
+            className="lg:col-span-4 rounded-3xl bg-[#120724]/90 backdrop-blur-xl border border-purple-500/30 p-6 shadow-2xl space-y-6 text-left"
           >
-            <div className="w-full rounded-2xl bg-[#11152B]/90 backdrop-blur-2xl border border-[#2334AD]/70 p-6 sm:p-7 shadow-[0_20px_50px_rgba(0,0,0,0.7)] text-left relative overflow-hidden group hover:border-[#2334AD] transition-all">
-              {/* Subtle background glow */}
-              <div className="absolute top-0 right-0 w-48 h-48 bg-[#7C3AED]/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="flex items-center justify-between border-b border-purple-900/40 pb-4">
+              <span className="text-xs font-mono uppercase tracking-widest text-purple-400">The Virality Engine</span>
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-600/30 text-purple-300 border border-purple-500/40">
+                LIVE PIPELINE
+              </span>
+            </div>
 
-              {/* Card Header: Campaign Live & Status */}
-              <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
-                <span className="text-xs font-mono font-bold tracking-widest text-[#A1A8C7] uppercase">
-                  CAMPAIGN LIVE
-                </span>
-                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Active
-                </span>
-              </div>
-
-              {/* Campaign Profile */}
-              <div className="flex items-center gap-3.5 mt-5">
-                <div className="w-11 h-11 rounded-xl bg-purple-600/30 border border-purple-500/40 flex items-center justify-center text-lg font-bold text-white shadow-inner">
-                  N
+            <div className="space-y-4">
+              {/* Pipeline Step 1 */}
+              <div className="p-3.5 rounded-2xl bg-[#1a0e33] border border-purple-800/40 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center shrink-0">
+                  <Video className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-white text-base">Nova Podcast</h3>
-                  <p className="text-xs text-[#A1A8C7]">315 / 500K views</p>
+                  <div className="text-xs font-bold text-white">1. Ingest Raw Long Video</div>
+                  <div className="text-[11px] text-purple-300/70">YouTube Link, Podcast URL, or Raw MP4</div>
                 </div>
               </div>
 
-              {/* Revenue & Completion Metrics */}
-              <div className="mt-5 p-4 rounded-xl bg-[#0A0E23]/80 border border-white/[0.06]">
-                <div className="flex items-center justify-between text-[11px] text-[#A1A8C7] font-semibold tracking-wider">
-                  <span>TOTAL REVENUE</span>
-                  <span>COMPLETION</span>
+              {/* Connecting Pulse Line */}
+              <div className="flex justify-center -my-2">
+                <div className="w-0.5 h-6 bg-gradient-to-b from-purple-500 to-cyan-400" />
+              </div>
+
+              {/* Pipeline Step 2 */}
+              <div className="p-3.5 rounded-2xl bg-[#1a0e33] border border-purple-800/40 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-cyan-600/20 text-cyan-400 flex items-center justify-center shrink-0">
+                  <Scissors className="w-5 h-5 -rotate-45" />
                 </div>
-                <div className="flex items-center justify-between mt-1.5">
-                  <span className="text-2xl font-black text-white tracking-tight">$10,000</span>
-                  <span className="text-lg font-bold text-[#00D4FF]">21%</span>
-                </div>
-                {/* Dual Gradient Progress Bar */}
-                <div className="w-full h-2 rounded-full bg-slate-800/80 mt-3 overflow-hidden">
-                  <div className="h-full w-[21%] rounded-full bg-gradient-to-r from-[#7C3AED] via-[#2563EB] to-[#00D4FF]" />
+                <div>
+                  <div className="text-xs font-bold text-white">2. 1,200+ Clippers Cut Hooks</div>
+                  <div className="text-[11px] text-purple-300/70">30 to 100+ high-retention variations</div>
                 </div>
               </div>
 
-              {/* Top Clipper Leaderboard */}
-              <div className="mt-5 space-y-2.5">
-                {/* Contributor 1 */}
-                <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.05] transition-all">
-                  <div className="flex items-center gap-3">
-                    <span className="w-6 h-6 rounded-md bg-[#7C3AED]/25 text-[#00D4FF] text-xs font-mono font-bold flex items-center justify-center border border-[#7C3AED]/30">
-                      1
-                    </span>
-                    <div className="w-8 h-8 rounded-lg bg-slate-800/90 border border-white/10 flex items-center justify-center text-xs font-bold text-white">
-                      M
-                    </div>
-                    <span className="text-sm font-semibold text-white">Maya K.</span>
-                  </div>
-                  <div className="flex items-center gap-4 text-right">
-                    <div>
-                      <div className="text-xs font-mono font-bold text-white">1.23M</div>
-                      <div className="text-[10px] text-[#A1A8C7]">VIEWS</div>
-                    </div>
-                    <div>
-                      <div className="text-xs font-mono font-bold text-emerald-400">$1.2K</div>
-                      <div className="text-[10px] text-[#A1A8C7]">EARNED</div>
-                    </div>
-                  </div>
-                </div>
+              {/* Connecting Pulse Line */}
+              <div className="flex justify-center -my-2">
+                <div className="w-0.5 h-6 bg-gradient-to-b from-cyan-400 to-emerald-400" />
+              </div>
 
-                {/* Contributor 2 */}
-                <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.05] transition-all">
-                  <div className="flex items-center gap-3">
-                    <span className="w-6 h-6 rounded-md bg-[#7C3AED]/25 text-[#00D4FF] text-xs font-mono font-bold flex items-center justify-center border border-[#7C3AED]/30">
-                      2
-                    </span>
-                    <div className="w-8 h-8 rounded-lg bg-slate-800/90 border border-white/10 flex items-center justify-center text-xs font-bold text-white">
-                      D
-                    </div>
-                    <span className="text-sm font-semibold text-white">Dew P.</span>
-                  </div>
-                  <div className="flex items-center gap-4 text-right">
-                    <div>
-                      <div className="text-xs font-mono font-bold text-white">943K</div>
-                      <div className="text-[10px] text-[#A1A8C7]">VIEWS</div>
-                    </div>
-                    <div>
-                      <div className="text-xs font-mono font-bold text-emerald-400">$1.1K</div>
-                      <div className="text-[10px] text-[#A1A8C7]">EARNED</div>
-                    </div>
-                  </div>
+              {/* Pipeline Step 3 */}
+              <div className="p-3.5 rounded-2xl bg-[#1a0e33] border border-purple-800/40 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-600/20 text-emerald-400 flex items-center justify-center shrink-0">
+                  <ShieldCheck className="w-5 h-5" />
                 </div>
-
-                {/* Contributor 3 */}
-                <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.05] transition-all">
-                  <div className="flex items-center gap-3">
-                    <span className="w-6 h-6 rounded-md bg-[#7C3AED]/25 text-[#00D4FF] text-xs font-mono font-bold flex items-center justify-center border border-[#7C3AED]/30">
-                      3
-                    </span>
-                    <div className="w-8 h-8 rounded-lg bg-slate-800/90 border border-white/10 flex items-center justify-center text-xs font-bold text-white">
-                      L
-                    </div>
-                    <span className="text-sm font-semibold text-white">Lena R.</span>
-                  </div>
-                  <div className="flex items-center gap-4 text-right">
-                    <div>
-                      <div className="text-xs font-mono font-bold text-white">2.34M</div>
-                      <div className="text-[10px] text-[#A1A8C7]">VIEWS</div>
-                    </div>
-                    <div>
-                      <div className="text-xs font-mono font-bold text-emerald-400">$1.6K</div>
-                      <div className="text-[10px] text-[#A1A8C7]">EARNED</div>
-                    </div>
-                  </div>
+                <div>
+                  <div className="text-xs font-bold text-white">3. Verified Views & Escrow Release</div>
+                  <div className="text-[11px] text-purple-300/70">Audited API sync • Zero ad fatigue</div>
                 </div>
               </div>
+            </div>
+
+            <button
+              onClick={() => smoothScroll('#how-it-works')}
+              className="w-full py-3 rounded-xl text-xs font-bold text-center text-purple-200 hover:text-white bg-purple-950/60 hover:bg-purple-900/60 border border-purple-700/50 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <span>Explore Complete Engine Architecture</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </motion.div>
+
+          {/* Right Vertical Clip Card (Tech / D2C Launch Hook) */}
+          <motion.div
+            initial={{ opacity: 0, x: 30, rotateY: -10 }}
+            animate={{ opacity: 1, x: 0, rotateY: 0 }}
+            transition={{ duration: 0.7, delay: 0.3 }}
+            className="lg:col-span-4 rounded-3xl bg-gradient-to-b from-[#1c0e35] to-[#100720] border border-purple-500/30 p-4 shadow-2xl shadow-purple-950/70 text-left relative overflow-hidden group hover:border-purple-400/60 transition-all"
+          >
+            <div className="relative aspect-[9/14] sm:aspect-[9/13] rounded-2xl overflow-hidden bg-black/80">
+              <img
+                src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=80"
+                alt="Tech AI viral clip"
+                loading="lazy"
+                decoding="async"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/60" />
+
+              {/* Platform & Status Badge */}
+              <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
+                <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-600 text-white shadow-md flex items-center gap-1">
+                  <Youtube className="w-3 h-3" /> YouTube Shorts
+                </span>
+                <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-400 border border-cyan-500/40">
+                  TOP VIRAL
+                </span>
+              </div>
+
+              {/* Play icon overlay */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center text-white shadow-glow-purple group-hover:scale-110 transition-transform">
+                  <Play className="w-5 h-5 fill-white ml-0.5" />
+                </div>
+              </div>
+
+              {/* Hook Caption */}
+              <div className="absolute bottom-16 left-3 right-3">
+                <div className="p-2.5 rounded-xl bg-black/60 backdrop-blur-md border border-white/10 text-xs font-semibold text-white">
+                  "This 3D generative model renders full scenes in 4 seconds flat..."
+                </div>
+              </div>
+
+              {/* Bottom Metrics Bar */}
+              <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-[11px] font-semibold text-white/90">
+                <span className="flex items-center gap-1 text-cyan-300">
+                  <Eye className="w-3.5 h-3.5 text-cyan-400" /> 920K Views
+                </span>
+                <span className="text-amber-400 font-mono font-bold">3.8x ROAS</span>
+              </div>
+            </div>
+
+            <div className="mt-3 flex items-center justify-between text-xs px-1">
+              <span className="text-purple-300/80">Brand: <strong className="text-white">Aether AI 2.0</strong></span>
+              <span className="text-xs font-mono text-emerald-400 font-semibold">CPV: ₹0.11</span>
             </div>
           </motion.div>
         </div>
-
-        {/* Color Palette Design Bar matching reference mockup */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="mt-14 w-full rounded-2xl bg-[#0A0E23]/90 border border-[#2334AD]/50 p-4 sm:p-5 backdrop-blur-xl shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
-        >
-          <div className="text-xs font-mono font-bold uppercase tracking-wider text-white shrink-0">
-            COLOR PALETTE
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 w-full">
-            <div className="flex flex-col gap-1.5">
-              <span className="text-[10px] font-mono text-[#A1A8C7] uppercase">PRIMARY BG</span>
-              <div className="h-8 rounded-lg bg-[#0A0E23] border border-white/20 flex items-center justify-center text-[10px] font-mono text-white/80 font-bold">#0A0E23</div>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <span className="text-[10px] font-mono text-[#A1A8C7] uppercase">SECONDARY BG</span>
-              <div className="h-8 rounded-lg bg-[#11152B] border border-white/20 flex items-center justify-center text-[10px] font-mono text-white/80 font-bold">#11152B</div>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <span className="text-[10px] font-mono text-[#A1A8C7] uppercase">PRIMARY PURPLE</span>
-              <div className="h-8 rounded-lg bg-[#7C3AED] flex items-center justify-center text-[10px] font-mono text-white font-bold">#7C3AED</div>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <span className="text-[10px] font-mono text-[#A1A8C7] uppercase">PRIMARY BLUE</span>
-              <div className="h-8 rounded-lg bg-[#2563EB] flex items-center justify-center text-[10px] font-mono text-white font-bold">#2563EB</div>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <span className="text-[10px] font-mono text-[#A1A8C7] uppercase">ACCENT CYAN</span>
-              <div className="h-8 rounded-lg bg-[#00D4FF] flex items-center justify-center text-[10px] font-mono text-[#0A0E23] font-black">#00D4FF</div>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <span className="text-[10px] font-mono text-[#A1A8C7] uppercase">TEXT SECONDARY</span>
-              <div className="h-8 rounded-lg bg-[#A1A8C7] flex items-center justify-center text-[10px] font-mono text-[#0A0E23] font-bold">#A1A8C7</div>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <span className="text-[10px] font-mono text-[#A1A8C7] uppercase">BORDER / DIVIDER</span>
-              <div className="h-8 rounded-lg bg-[#2334AD] flex items-center justify-center text-[10px] font-mono text-white font-bold">#2334AD</div>
-            </div>
-          </div>
-        </motion.div>
       </section>
 
       {/* =========================================================================
