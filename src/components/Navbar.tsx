@@ -183,7 +183,7 @@ export default function Navbar() {
   };
 
   const getDashboardUrl = () => {
-    if (!user) return '/auth/login';
+    if (!user) return '/dashboard/admin';
     if (user.role === 'ADMIN') return '/dashboard/admin';
     if (user.role === 'BRAND') return '/dashboard/brand';
     return '/dashboard/clipper';
@@ -294,27 +294,22 @@ export default function Navbar() {
           })}
         </nav>
 
-        {/* Right CTA Button: Book a call matching user screenshot */}
+        {/* Right CTA Button: Admin Panel matching Vercel UI */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {user ? (
-            <a
-              href={getDashboardUrl()}
-              className="px-4 py-1.5 rounded-full text-xs font-semibold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 transition-all shadow-glow-purple flex items-center gap-1.5 border border-purple-400/40"
-            >
-              <LayoutDashboard className="w-3.5 h-3.5" />
-              <span>{user.role === 'ADMIN' ? 'Admin Panel' : 'Dashboard'}</span>
-              <ArrowUpRight className="w-3 h-3" />
-            </a>
-          ) : (
-            <a
-              href="#contact"
-              onClick={(e) => handleNavClick(e, '#contact')}
-              className="px-5 py-2 rounded-full text-xs font-bold text-white bg-gradient-to-r from-[#d946ef] via-[#a855f7] to-[#8b5cf6] hover:opacity-95 transition-all shadow-lg shadow-fuchsia-600/30 flex items-center gap-1.5 border border-fuchsia-300/30 group cursor-pointer"
-            >
-              <span>Book a call</span>
-              <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-            </a>
-          )}
+          <a
+            href={getDashboardUrl()}
+            className="px-4 py-1.5 rounded-full text-xs font-semibold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 transition-all shadow-glow-purple flex items-center gap-1.5 border border-purple-400/40"
+          >
+            <LayoutDashboard className="w-3.5 h-3.5" />
+            <span>
+              {user?.role === 'BRAND'
+                ? 'Dashboard'
+                : user?.role === 'CLIPPER'
+                ? 'Dashboard'
+                : 'Admin Panel'}
+            </span>
+            <ArrowUpRight className="w-3 h-3" />
+          </a>
 
           {/* Mobile hamburger */}
           <button
@@ -353,11 +348,11 @@ export default function Navbar() {
               Sign In
             </a>
             <a
-              href="#contact"
-              onClick={(e) => handleNavClick(e, '#contact')}
-              className="flex-1 py-2.5 rounded-xl text-center text-xs font-bold text-white bg-gradient-to-r from-[#d946ef] to-[#8b5cf6]"
+              href={getDashboardUrl()}
+              className="flex-1 py-2.5 rounded-xl text-center text-xs font-bold text-white bg-gradient-to-r from-purple-600 to-indigo-600 flex items-center justify-center gap-1.5 border border-purple-400/40"
             >
-              Book a call ↗
+              <LayoutDashboard className="w-3.5 h-3.5" />
+              <span>Admin Panel</span>
             </a>
           </div>
         </div>
