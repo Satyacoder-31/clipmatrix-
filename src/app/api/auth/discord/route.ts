@@ -8,66 +8,31 @@ export async function GET(request: Request) {
 
   // Demo / guest fallback for previewing clipper dashboard without Discord OAuth app credentials
   if (isDemo) {
-    const demoUsername = 'DiscordClipper';
-    const email = 'clipper@discord.clipmatrix.in';
-
-    let user = await prisma.user.findFirst({
-      where: { email },
-      include: { clipperProfile: true, wallet: true },
-    });
-
-    if (!user) {
-      const defaultHash = await hashPassword('discord_demo_clipper_2026');
-      user = await prisma.user.create({
-        data: {
-          email,
-          name: demoUsername,
-          passwordHash: defaultHash,
-          role: 'CLIPPER',
-          status: 'ACTIVE',
-          avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=DiscordClipper&backgroundColor=5865F2`,
-          wallet: {
-            create: {
-              balance: 14500,
-              pendingBalance: 3200,
-              escrowBalance: 0,
-              lifetimeEarned: 48500,
-              lifetimeSpent: 0,
-            },
-          },
-          clipperProfile: {
-            create: {
-              instagramHandle: '@discord_clipper',
-              youtubeHandle: '@discord_clipper',
-              editingSoftware: 'CapCut / Premiere Pro / After Effects',
-              portfolioUrl: 'https://discord.com',
-              upiId: 'clipper@okhdfcbank',
-              city: 'Mumbai',
-              isVerified: true,
-              level: 'PRO',
-            },
-          },
-        },
+    try {
+      let user = await prisma.user.findUnique({
+        where: { email: 'clipper@clipmatrix.com' },
         include: { clipperProfile: true, wallet: true },
       });
+
+      const token = generateToken({
+        userId: user?.id || 'clipper_seed_id',
+        email: user?.email || 'clipper@clipmatrix.com',
+        role: 'CLIPPER',
+        name: user?.name || 'Aarav (Elite Clipper)',
+      });
+
+      const response = NextResponse.redirect(new URL('/dashboard/clipper', request.url));
+      response.cookies.set('clipmatrix_session', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 7 * 24 * 60 * 60,
+      });
+      return response;
+    } catch {
+      return NextResponse.redirect(new URL('/dashboard/clipper', request.url));
     }
-
-    const token = generateToken({
-      userId: user.id,
-      email: user.email,
-      role: 'CLIPPER',
-      name: user.name,
-    });
-
-    const response = NextResponse.redirect(new URL('/dashboard/clipper', request.url));
-    response.cookies.set('clipmatrix_session', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 7 * 24 * 60 * 60,
-    });
-    return response;
   }
 
   const clientId = process.env.DISCORD_CLIENT_ID;
