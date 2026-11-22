@@ -30,12 +30,18 @@ interface NavItem {
 }
 
 export default function Navbar() {
+  const pathname = usePathname();
+
+  // Hide public navbar inside dashboard after login
+  if (pathname?.startsWith('/dashboard')) {
+    return null;
+  }
+
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<string>('hero');
   const [user, setUser] = useState<any>(null);
-  const pathname = usePathname();
 
   useEffect(() => {
     let ticking = false;

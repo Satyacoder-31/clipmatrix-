@@ -45,7 +45,7 @@ export default function RootLayout({
           <ScrollProgressBar />
           <DynamicBackground />
           <Navbar />
-          <main className="min-h-[calc(100vh-280px)]">{children}</main>
+          <main className="min-h-screen">{children}</main>
           <Footer />
         </SmoothScroll>
       </body>
