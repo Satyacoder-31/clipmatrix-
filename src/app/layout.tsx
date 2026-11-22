@@ -40,7 +40,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-screen bg-[#0a0e23] text-white antialiased selection:bg-purple-600 selection:text-white relative">
+      <body className="min-h-screen bg-[#070a1a] text-white antialiased selection:bg-purple-600 selection:text-white relative">
         <SmoothScroll>
           <ScrollProgressBar />
           <DynamicBackground />

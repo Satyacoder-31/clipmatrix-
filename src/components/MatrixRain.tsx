@@ -29,11 +29,11 @@ export default function MatrixRain() {
 
     // Reference palette: Primary Blue #2563EB, Primary Purple #7C3AED, Accent Cyan #00D4FF
     const colors = [
-      'rgba(37, 99, 235, 0.75)',  // Primary Blue #2563EB
-      'rgba(124, 58, 237, 0.80)', // Primary Purple #7C3AED
-      'rgba(0, 212, 255, 0.85)',  // Accent Cyan #00D4FF
-      'rgba(99, 102, 241, 0.70)', // Indigo
-      'rgba(56, 189, 248, 0.75)', // Sky blue
+      'rgba(37, 99, 235, 0.55)',  // Primary Blue #2563EB
+      'rgba(124, 58, 237, 0.60)', // Primary Purple #7C3AED
+      'rgba(0, 212, 255, 0.65)',  // Accent Cyan #00D4FF
+      'rgba(99, 102, 241, 0.50)', // Indigo
+      'rgba(56, 189, 248, 0.55)', // Sky blue
     ];
 
     const maxRows = Math.ceil(height / fontSize);
@@ -115,7 +115,7 @@ export default function MatrixRain() {
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 w-full h-full pointer-events-none opacity-80 mix-blend-screen"
+      className="absolute inset-0 w-full h-full pointer-events-none opacity-65 mix-blend-screen"
       style={{ willChange: 'transform' }}
     />
   );
