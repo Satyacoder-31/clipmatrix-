@@ -102,7 +102,7 @@ export default function LoginPage() {
                   <span>Joining as a Clipper?</span>
                   <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#5865F2]/30 text-white font-mono">DISCORD ONLY</span>
                 </div>
-                <div className="text-[11px] text-slate-300/70">Login with your Discord username</div>
+                <div className="text-[11px] text-slate-300/70">1-click direct login with Discord</div>
               </div>
             </div>
             <ArrowRight className="w-4 h-4 text-[#8ea1e1] group-hover:translate-x-1 transition-transform" />
