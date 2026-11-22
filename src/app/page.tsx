@@ -157,27 +157,44 @@ export default function HomePage() {
         id="hero"
         className="relative pt-10 pb-20 lg:pt-16 lg:pb-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col items-center text-center scroll-mt-24"
       >
-        {/* Central High-Impact Headline - Exactly 3 Attractive Lines */}
-        <h1
-          className="text-4xl sm:text-6xl md:text-7xl lg:text-[76px] font-black text-white tracking-[-0.03em] text-center leading-[1.08] max-w-5xl uppercase"
-          style={{ fontFamily: "'Plus Jakarta Sans', 'Syne', sans-serif" }}
+        {/* Brand Badge featuring improved logo */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full border border-purple-500/40 bg-[#120826]/90 backdrop-blur-xl mb-6 shadow-[0_0_25px_rgba(124,58,237,0.35)] group hover:border-[#00D4FF]/50 transition-all cursor-default"
         >
-          {/* Line 1: Pure White Statement */}
-          <span className="block text-white drop-shadow-[0_0_25px_rgba(255,255,255,0.18)]">
+          <img
+            src="/clipmatrix-logo.png"
+            alt="Clip Matrix Monogram"
+            className="w-5 h-5 object-contain drop-shadow-[0_0_8px_rgba(0,212,255,0.7)] group-hover:scale-110 transition-transform"
+          />
+          <span className="text-xs font-mono font-bold tracking-widest text-transparent bg-gradient-to-r from-purple-300 via-pink-300 to-cyan-300 bg-clip-text uppercase">
+            THE PERFORMANCE CREATOR NETWORK
+          </span>
+        </motion.div>
+
+        {/* Central High-Impact Headline - Exactly 3 Attractive Lines with Thick Bold Typography */}
+        <h1
+          className="text-4xl sm:text-6xl md:text-7xl lg:text-[74px] xl:text-[80px] font-black text-white tracking-[-0.03em] text-center leading-[1.06] max-w-6xl mx-auto uppercase"
+          style={{ fontFamily: "'Plus Jakarta Sans', 'Syne', sans-serif", fontWeight: 900 }}
+        >
+          {/* Line 1: Pure White Thick Statement */}
+          <span className="block text-white drop-shadow-[0_4px_25px_rgba(255,255,255,0.22)] whitespace-nowrap">
             VIRAL CLIPPING AGENCY
           </span>
 
           {/* Line 2: Glowing Sunset Rose to Electric Cyan Gradient */}
-          <span className="block bg-gradient-to-r from-[#fed7aa] via-[#f472b6] to-[#38bdf8] bg-clip-text text-transparent drop-shadow-[0_0_35px_rgba(244,114,182,0.35)] py-1">
+          <span className="block bg-gradient-to-r from-[#fed7aa] via-[#f472b6] to-[#38bdf8] bg-clip-text text-transparent drop-shadow-[0_4px_35px_rgba(244,114,182,0.4)] py-1 whitespace-nowrap">
             INFLUENCER MARKETING PLATFORM
           </span>
 
           {/* Line 3: Signature Brand Finish with Cyber Cyan & Purple Accent */}
-          <span className="flex items-center justify-center flex-wrap gap-x-3.5 tracking-[-0.02em] pt-1">
-            <span className="text-white">SCALE VIEWS WITH</span>
+          <span className="flex items-center justify-center gap-x-3.5 tracking-[-0.02em] pt-1 whitespace-nowrap">
+            <span className="text-white drop-shadow-[0_4px_20px_rgba(255,255,255,0.18)]">SCALE VIEWS WITH</span>
             <span
-              className="bg-gradient-to-r from-[#c084fc] via-[#e879f9] to-[#00d4ff] bg-clip-text text-transparent inline-block tracking-normal drop-shadow-[0_0_35px_rgba(192,132,252,0.5)]"
-              style={{ fontFamily: "'Bagel Fat One', cursive" }}
+              className="bg-gradient-to-r from-[#c084fc] via-[#e879f9] to-[#00d4ff] bg-clip-text text-transparent inline-block tracking-normal drop-shadow-[0_4px_35px_rgba(192,132,252,0.6)] font-black"
+              style={{ fontFamily: "'Plus Jakarta Sans', 'Syne', sans-serif", fontWeight: 900 }}
             >
               CLIP MATRIX.
             </span>

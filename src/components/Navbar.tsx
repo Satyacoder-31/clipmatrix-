@@ -205,15 +205,15 @@ export default function Navbar() {
         <a
           href="#hero"
           onClick={(e) => handleNavClick(e, '#hero')}
-          className="flex items-center gap-2.5 group shrink-0"
+          className="flex items-center gap-3 group shrink-0"
         >
           <img
             src="/clipmatrix-logo.png"
             alt="Clip Matrix Logo"
-            className="w-9 h-9 object-contain group-hover:scale-105 transition-transform drop-shadow-[0_0_12px_rgba(124,58,237,0.55)]"
+            className="w-10 h-10 sm:w-11 sm:h-11 object-contain group-hover:scale-105 transition-transform drop-shadow-[0_0_14px_rgba(0,212,255,0.65)]"
           />
-          <span className="font-extrabold text-white text-base font-display tracking-tight hidden sm:inline">
-            CLIP<span className="text-[#00D4FF]">MATRIX</span>
+          <span className="font-black text-white text-base sm:text-lg font-display tracking-tight hidden sm:inline">
+            CLIP<span className="text-[#00D4FF] drop-shadow-[0_0_12px_rgba(0,212,255,0.7)]">MATRIX</span>
           </span>
         </a>
 
