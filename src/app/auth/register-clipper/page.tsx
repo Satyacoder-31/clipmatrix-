@@ -1,13 +1,22 @@
 'use client';
 
 import React, { Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { ArrowRight, ShieldCheck, Zap, Sparkles, CheckCircle2, AlertCircle } from 'lucide-react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { ArrowRight, ShieldCheck, Zap, Sparkles, CheckCircle2, AlertCircle, ArrowLeft, LogOut } from 'lucide-react';
 import Link from 'next/link';
 
 function DiscordClipperContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const errorParam = searchParams.get('error');
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch {}
+    router.push('/');
+    router.refresh();
+  };
 
   const getErrorMessage = () => {
     if (!errorParam) return null;
@@ -26,17 +35,38 @@ function DiscordClipperContent() {
   const errorMessage = getErrorMessage();
 
   return (
-    <div className="w-full max-w-md rounded-3xl bg-[#0e1026]/90 backdrop-blur-2xl border border-[#5865F2]/30 p-8 sm:p-10 space-y-7 shadow-2xl shadow-indigo-950/80 relative z-10 text-center">
-      {/* Brand & Discord Header */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-center gap-3">
-          <div className="p-2 rounded-2xl bg-[#160B3E]/90 border border-purple-500/40 shadow-[0_0_15px_rgba(124,58,237,0.4)] flex items-center justify-center">
-            <img
-              src="/clipmatrix-logo.png"
-              alt="Clip Matrix Logo"
-              className="w-10 h-10 object-contain drop-shadow-[0_0_12px_rgba(0,212,255,0.7)]"
-            />
-          </div>
+    <div className="w-full max-w-md space-y-4 relative z-10">
+      {/* Top Navigation & Logout Bar */}
+      <div className="flex items-center justify-between px-2 text-xs">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-slate-400 hover:text-white transition-colors group font-semibold"
+        >
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform text-cyan-400" />
+          <span>Main Website</span>
+        </Link>
+
+        <button
+          onClick={handleLogout}
+          type="button"
+          className="inline-flex items-center gap-1 text-rose-400 hover:text-rose-300 transition-colors font-semibold cursor-pointer py-1 px-2.5 rounded-lg hover:bg-rose-500/10"
+        >
+          <LogOut className="w-3.5 h-3.5" />
+          <span>Logout & Home</span>
+        </button>
+      </div>
+
+      <div className="rounded-3xl bg-[#0e1026]/90 backdrop-blur-2xl border border-[#5865F2]/30 p-8 sm:p-10 space-y-7 shadow-2xl shadow-indigo-950/80 text-center">
+        {/* Brand & Discord Header */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-center gap-3">
+            <Link href="/" className="p-2 rounded-2xl bg-[#160B3E]/90 border border-purple-500/40 shadow-[0_0_15px_rgba(124,58,237,0.4)] flex items-center justify-center hover:scale-105 transition-transform">
+              <img
+                src="/clipmatrix-logo.png"
+                alt="Clip Matrix Logo"
+                className="w-10 h-10 object-contain drop-shadow-[0_0_12px_rgba(0,212,255,0.7)]"
+              />
+            </Link>
           <div className="w-1.5 h-1.5 rounded-full bg-white/40" />
           <div className="w-12 h-12 rounded-2xl bg-[#5865F2]/20 border border-[#5865F2]/40 flex items-center justify-center text-[#5865F2] shadow-[0_0_20px_rgba(88,101,242,0.35)]">
             {/* Official Discord Gamepad Icon */}
@@ -114,7 +144,8 @@ function DiscordClipperContent() {
         </Link>
       </div>
     </div>
-  );
+  </div>
+);
 }
 
 export default function ClipperDiscordLoginPage() {

@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Scissors, Building2, ShieldAlert, ArrowRight, Lock, Mail, Sparkles } from 'lucide-react';
+import Link from 'next/link';
+import { Scissors, Building2, ShieldAlert, ArrowRight, Lock, Mail, Sparkles, ArrowLeft, LogOut, Home } from 'lucide-react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -10,6 +11,14 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch {}
+    router.push('/');
+    router.refresh();
+  };
 
   const handleLogin = async (e?: React.FormEvent, demoRole?: string) => {
     if (e) e.preventDefault();
@@ -44,19 +53,39 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-200px)] flex items-center justify-center p-4 sm:p-6 lg:p-8">
+    <div className="min-h-[calc(100vh-140px)] flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 space-y-4">
+      {/* Top Navigation & Logout Bar */}
+      <div className="w-full max-w-5xl flex items-center justify-between px-2 text-xs">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors group font-semibold"
+        >
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform text-cyan-400" />
+          <span>Return to Main Website</span>
+        </Link>
+
+        <button
+          onClick={handleLogout}
+          type="button"
+          className="inline-flex items-center gap-1.5 text-rose-400 hover:text-rose-300 transition-colors font-semibold cursor-pointer py-1 px-3 rounded-lg hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20"
+        >
+          <LogOut className="w-3.5 h-3.5" />
+          <span>Logout & Go to Home</span>
+        </button>
+      </div>
+
       <div className="w-full max-w-5xl rounded-3xl bg-[#120a22] border border-purple-900/60 overflow-hidden shadow-2xl shadow-purple-950/80 grid grid-cols-1 lg:grid-cols-12">
         {/* Left Side: Creative & Brand Visual */}
         <div className="lg:col-span-5 bg-gradient-to-br from-[#1d1038] via-[#150a28] to-[#0c0517] p-8 sm:p-10 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-purple-900/50 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-purple-600/20 rounded-full blur-3xl pointer-events-none" />
 
           <div className="space-y-4 relative z-10">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-purple-600 flex items-center justify-center text-white shadow-glow-purple">
+            <Link href="/" className="flex items-center gap-2.5 group w-fit">
+              <div className="w-9 h-9 rounded-xl bg-purple-600 flex items-center justify-center text-white shadow-glow-purple group-hover:scale-105 transition-transform">
                 <Scissors className="w-4 h-4 -rotate-45" />
               </div>
               <span className="font-bold text-lg text-white font-display">CLIP MATRIX</span>
-            </div>
+            </Link>
 
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white font-display leading-tight pt-4">
               Access The Viral Creator Network

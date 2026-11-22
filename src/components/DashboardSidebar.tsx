@@ -1,32 +1,31 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
-  Home,
-  Search,
-  FileText,
+  LayoutDashboard,
+  Compass,
+  Film,
+  Wallet,
   Bell,
-  User,
-  DollarSign,
+  UserCheck,
   Share2,
-  Zap,
-  Award,
+  Trophy,
   MessageSquare,
-  Info,
+  ShieldCheck,
   BookOpen,
-  Moon,
   LogOut,
+  ExternalLink,
   X,
-  Menu,
-  CheckCircle2,
+  Sparkles,
+  ArrowUpRight,
+  TrendingUp,
   PlusCircle,
   FolderKanban,
   CheckSquare,
   CreditCard,
-  ShieldCheck,
-  Video,
+  Users,
 } from 'lucide-react';
 
 interface DashboardSidebarProps {
@@ -51,79 +50,77 @@ export default function DashboardSidebar({
     } catch {
       // Ignore network errors on logout
     }
-    router.push('/auth/login');
+    // Return directly to the main landing page
+    router.push('/');
     router.refresh();
   };
 
-  const toggleDarkMode = () => {
-    // Already in dark mode
-    if (typeof window !== 'undefined') {
-      document.documentElement.classList.toggle('dark');
-    }
-  };
-
-  // Navigation Items customized per role matching the exact visual references
-  const clipperPersonalItems = [
-    { label: 'Dashboard', href: '/dashboard/clipper', icon: Home },
-    { label: 'Browse Campaigns', href: '/campaigns', icon: Search },
-    { label: 'My Submissions', href: '/dashboard/clipper/submissions', icon: FileText },
+  // Distinct Clip Matrix Workspace Items
+  const clipperWorkspace = [
+    { label: 'Command Dashboard', href: '/dashboard/clipper', icon: LayoutDashboard },
+    { label: 'Campaign Marketplace', href: '/campaigns', icon: Compass, badge: 'LIVE' },
+    { label: 'My Video Clips', href: '/dashboard/clipper/submissions', icon: Film },
+    { label: 'Escrow Earnings', href: '/dashboard/clipper/earnings', icon: Wallet },
     { label: 'Notifications', href: '/dashboard/clipper/notifications', icon: Bell },
-    { label: 'Profile & Accounts', href: '/dashboard/clipper/profile', icon: User },
-    { label: 'Earnings', href: '/dashboard/clipper/earnings', icon: DollarSign },
-    { label: 'Referrals', href: '/dashboard/clipper/referrals', icon: Share2 },
+    { label: 'Creator Profile', href: '/dashboard/clipper/profile', icon: UserCheck },
+    { label: '5% Referrals', href: '/dashboard/clipper/referrals', icon: Share2 },
   ];
 
-  const brandPersonalItems = [
-    { label: 'Dashboard', href: '/dashboard/brand', icon: Home },
-    { label: 'Browse Campaigns', href: '/campaigns', icon: Search },
-    { label: 'Create Campaign', href: '/dashboard/brand/campaigns/new', icon: PlusCircle },
-    { label: 'My Campaigns', href: '/dashboard/brand/campaigns', icon: FolderKanban },
+  const brandWorkspace = [
+    { label: 'Brand Overview', href: '/dashboard/brand', icon: LayoutDashboard },
+    { label: 'Launch Campaign', href: '/dashboard/brand/campaigns/new', icon: PlusCircle, badge: 'NEW' },
+    { label: 'Campaign Manager', href: '/dashboard/brand/campaigns', icon: FolderKanban },
     { label: 'Review Submissions', href: '/dashboard/brand/submissions', icon: CheckSquare },
-    { label: 'Billing & Escrow', href: '/dashboard/brand/billing', icon: CreditCard },
+    { label: 'Escrow & Billing', href: '/dashboard/brand/billing', icon: CreditCard },
+    { label: 'Marketplace View', href: '/campaigns', icon: Compass },
     { label: 'Notifications', href: '/dashboard/clipper/notifications', icon: Bell },
   ];
 
-  const adminPersonalItems = [
-    { label: 'Dashboard', href: '/dashboard/admin', icon: Home },
-    { label: 'Campaigns Hub', href: '/dashboard/admin/campaigns', icon: FolderKanban },
-    { label: 'Verify Views', href: '/dashboard/admin/verification', icon: CheckSquare },
+  const adminWorkspace = [
+    { label: 'Command Hub', href: '/dashboard/admin', icon: LayoutDashboard },
+    { label: 'Verify Views Engine', href: '/dashboard/admin/verification', icon: CheckSquare, badge: 'LIVE' },
+    { label: 'Campaign Controls', href: '/dashboard/admin/campaigns', icon: FolderKanban },
     { label: 'Payout Requests', href: '/dashboard/admin/withdrawals', icon: CreditCard },
-    { label: 'Users Directory', href: '/dashboard/admin/users', icon: User },
+    { label: 'Users Directory', href: '/dashboard/admin/users', icon: Users },
     { label: 'Notifications', href: '/dashboard/clipper/notifications', icon: Bell },
   ];
 
-  const personalItems =
-    role === 'BRAND' ? brandPersonalItems : role === 'ADMIN' ? adminPersonalItems : clipperPersonalItems;
+  const workspaceItems =
+    role === 'BRAND' ? brandWorkspace : role === 'ADMIN' ? adminWorkspace : clipperWorkspace;
 
-  const allItems = [
-    { label: 'ClipMatrix Marketplace', href: '/campaigns', icon: Zap },
-    { label: 'Leaderboard', href: '/dashboard/clipper/leaderboard', icon: Award },
-    { label: 'ClipMatrix Chat', href: '/dashboard/clipper/chat', icon: MessageSquare },
-    { label: 'Guidelines', href: role === 'BRAND' ? '/brand-agreement' : '/clipper-agreement', icon: Info },
-    { label: 'ClipMatrix Academy', href: '/blog', icon: BookOpen },
+  const networkItems = [
+    { label: 'Viral Leaderboard', href: '/dashboard/clipper/leaderboard', icon: Trophy },
+    { label: 'Creator Lounge & Chat', href: '/dashboard/clipper/chat', icon: MessageSquare },
+    { label: 'Escrow Rules & Policy', href: role === 'BRAND' ? '/brand-agreement' : '/clipper-agreement', icon: ShieldCheck },
+    { label: 'Clipping Academy', href: '/blog', icon: BookOpen },
   ];
 
-  // User display name & initial
-  const displayName = user?.name || (role === 'CLIPPER' ? 'Satyaaaa' : role === 'BRAND' ? 'Aether AI' : 'Super Admin');
+  const displayName = user?.name || (role === 'CLIPPER' ? 'Aarav Sharma' : role === 'BRAND' ? 'Aether AI Labs' : 'Super Admin');
   const initial = displayName.trim().charAt(0).toUpperCase();
   const displayRole = user?.role || role;
+  const balance = user?.wallet?.balance || (role === 'CLIPPER' ? 14200 : role === 'BRAND' ? 45000 : 950000);
 
   return (
-    <aside className="w-72 bg-[#0c1022] border-r border-white/[0.08] flex flex-col justify-between h-screen sticky top-0 shrink-0 z-40 select-none overflow-y-auto scrollbar-thin scrollbar-thumb-white/10">
+    <aside className="w-72 bg-[#080b1e]/95 backdrop-blur-2xl border-r border-purple-500/20 flex flex-col justify-between h-screen sticky top-0 shrink-0 z-40 select-none overflow-y-auto scrollbar-thin scrollbar-thumb-purple-500/20 shadow-2xl shadow-indigo-950/50">
       <div className="p-5 space-y-6">
-        {/* Top Header / Brand Logo */}
-        <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+        {/* Top Header / Clip Matrix Medallion Brand */}
+        <div className="flex items-center justify-between pb-3.5 border-b border-white/[0.08]">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="p-1.5 rounded-xl bg-[#160B3E]/90 border border-purple-500/40 shadow-[0_0_12px_rgba(124,58,237,0.35)] flex items-center justify-center">
+            <div className="p-1.5 rounded-xl bg-[#160B3E]/90 border border-purple-500/40 shadow-[0_0_15px_rgba(124,58,237,0.4)] flex items-center justify-center group-hover:scale-105 transition-transform">
               <img
                 src="/clipmatrix-logo.png"
                 alt="Clip Matrix Logo"
-                className="w-7 h-7 object-contain drop-shadow-[0_0_10px_rgba(0,212,255,0.7)]"
+                className="w-7 h-7 object-contain drop-shadow-[0_0_12px_rgba(0,212,255,0.7)]"
               />
             </div>
-            <span className="font-extrabold text-base tracking-tight text-white font-display">
-              CLIP<span className="text-[#00D4FF]">MATRIX</span>
-            </span>
+            <div>
+              <span className="font-extrabold text-base tracking-tight text-white font-display">
+                CLIP<span className="text-[#00D4FF]">MATRIX</span>
+              </span>
+              <div className="text-[9px] font-mono text-purple-400/80 uppercase tracking-widest">
+                CREATOR PLATFORM
+              </div>
+            </div>
           </Link>
 
           {setMobileOpen && (
@@ -136,14 +133,15 @@ export default function DashboardSidebar({
           )}
         </div>
 
-        {/* Section 1: PERSONAL */}
+        {/* Category 1: WORKSPACE */}
         <div className="space-y-1">
-          <div className="text-[11px] font-bold text-slate-400 tracking-wider uppercase px-3 py-1 font-mono">
-            PERSONAL
+          <div className="text-[10px] font-mono font-bold text-purple-400/90 tracking-widest uppercase px-3 py-1 flex items-center justify-between">
+            <span>WORKSPACE</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
           </div>
 
           <div className="space-y-1">
-            {personalItems.map((item) => {
+            {workspaceItems.map((item) => {
               const isActive = pathname === item.href;
               const Icon = item.icon;
 
@@ -151,32 +149,46 @@ export default function DashboardSidebar({
                 <Link
                   key={item.label}
                   href={item.href}
-                  className={`flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all group ${
+                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all group ${
                     isActive
-                      ? 'bg-[#00B887] text-white shadow-lg shadow-emerald-500/20 font-bold'
+                      ? 'bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 text-white shadow-[0_0_20px_rgba(124,58,237,0.4)] font-bold'
                       : 'text-slate-300 hover:text-white hover:bg-white/[0.05]'
                   }`}
                 >
-                  <Icon
-                    className={`w-5 h-5 shrink-0 transition-transform group-hover:scale-105 ${
-                      isActive ? 'text-white' : 'text-slate-400 group-hover:text-white'
-                    }`}
-                  />
-                  <span>{item.label}</span>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Icon
+                      className={`w-4 h-4 shrink-0 transition-transform group-hover:scale-110 ${
+                        isActive ? 'text-white' : 'text-purple-400/70 group-hover:text-cyan-400'
+                      }`}
+                    />
+                    <span className="truncate">{item.label}</span>
+                  </div>
+
+                  {item.badge && (
+                    <span
+                      className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded ${
+                        isActive
+                          ? 'bg-white/20 text-white'
+                          : 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30'
+                      }`}
+                    >
+                      {item.badge}
+                    </span>
+                  )}
                 </Link>
               );
             })}
           </div>
         </div>
 
-        {/* Section 2: ALL */}
-        <div className="space-y-1 pt-2">
-          <div className="text-[11px] font-bold text-slate-400 tracking-wider uppercase px-3 py-1 font-mono">
-            ALL
+        {/* Category 2: NETWORK & COMMUNITY */}
+        <div className="space-y-1 pt-1">
+          <div className="text-[10px] font-mono font-bold text-slate-400 tracking-widest uppercase px-3 py-1">
+            NETWORK & COMMUNITY
           </div>
 
           <div className="space-y-1">
-            {allItems.map((item) => {
+            {networkItems.map((item) => {
               const isActive = pathname === item.href;
               const Icon = item.icon;
 
@@ -184,71 +196,89 @@ export default function DashboardSidebar({
                 <Link
                   key={item.label}
                   href={item.href}
-                  className={`flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all group ${
+                  className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all group ${
                     isActive
-                      ? 'bg-[#00B887] text-white shadow-lg shadow-emerald-500/20 font-bold'
+                      ? 'bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 text-white shadow-[0_0_20px_rgba(124,58,237,0.4)] font-bold'
                       : 'text-slate-300 hover:text-white hover:bg-white/[0.05]'
                   }`}
                 >
                   <Icon
-                    className={`w-5 h-5 shrink-0 transition-transform group-hover:scale-105 ${
-                      isActive ? 'text-white' : 'text-slate-400 group-hover:text-white'
+                    className={`w-4 h-4 shrink-0 transition-transform group-hover:scale-110 ${
+                      isActive ? 'text-white' : 'text-purple-400/70 group-hover:text-cyan-400'
                     }`}
                   />
-                  <span>{item.label}</span>
+                  <span className="truncate">{item.label}</span>
                 </Link>
               );
             })}
           </div>
         </div>
 
-        {/* Highlight Card: PAID OUT TO CLIPPERS */}
-        <div className="rounded-2xl bg-[#00B887]/10 border border-[#00B887]/25 p-4 space-y-1 shadow-inner">
-          <div className="text-[11px] font-bold text-slate-400 tracking-wider uppercase font-mono">
-            PAID OUT TO CLIPPERS
+        {/* Distinctive Clip Matrix Escrow Pulse Card */}
+        <div className="rounded-2xl bg-gradient-to-br from-[#160b36]/90 via-[#0e0c26]/90 to-[#070a1a] border border-purple-500/30 p-4 space-y-2 relative overflow-hidden shadow-lg group">
+          <div className="absolute -top-6 -right-6 w-20 h-20 bg-cyan-500/15 rounded-full blur-xl pointer-events-none group-hover:bg-cyan-500/25 transition-all" />
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-mono text-cyan-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+              <Sparkles className="w-3 h-3 text-cyan-300" />
+              <span>ESCROW SHIELD</span>
+            </span>
+            <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-mono font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              Protected
+            </span>
           </div>
-          <div className="text-2xl font-black text-[#00B887] font-display flex items-baseline gap-1.5">
-            <span>$1,079,315</span>
-            <span className="text-xs font-bold text-slate-400">USD</span>
+
+          <div className="space-y-0.5">
+            <div className="text-lg font-black text-white font-display tracking-tight">
+              ₹1,84,50,000+
+            </div>
+            <div className="text-[11px] text-purple-200/70 leading-tight">
+              Verified payouts issued to top performance clippers.
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Bottom Sticky User & Action Profile */}
-      <div className="p-5 border-t border-white/[0.08] bg-[#090d1c]/90 space-y-4">
-        {/* User Info Bar */}
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-[#00B887] text-white font-black flex items-center justify-center text-lg shrink-0 shadow-md">
+      {/* Bottom Sticky User Profile & Navigation Controls */}
+      <div className="p-4 border-t border-purple-500/20 bg-[#070a1a]/95 space-y-3.5">
+        {/* User Card */}
+        <div className="flex items-center gap-3 p-2 rounded-xl bg-white/[0.03] border border-white/[0.05]">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 to-cyan-500 text-white font-bold flex items-center justify-center text-sm shrink-0 shadow-md">
             {initial}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="font-bold text-sm text-white truncate">{displayName}</div>
-            <div className="mt-0.5">
-              <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#00B887]/15 text-[#00B887] border border-[#00B887]/30 uppercase tracking-wide font-mono">
+            <div className="font-bold text-xs text-white truncate">{displayName}</div>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
                 {displayRole}
+              </span>
+              <span className="text-[10px] text-emerald-400 font-mono font-semibold">
+                ₹{balance.toLocaleString('en-IN')}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Action Buttons: Dark Mode & Logout */}
-        <div className="space-y-2 pt-1">
-          <button
-            type="button"
-            onClick={toggleDarkMode}
-            className="w-full py-2.5 px-4 rounded-xl border border-white/10 hover:border-white/20 bg-white/[0.02] hover:bg-white/[0.06] text-xs font-semibold text-slate-300 flex items-center justify-center gap-2 transition-all cursor-pointer"
+        {/* Dual Actions: Go to Main Page & Logout */}
+        <div className="space-y-1.5">
+          <Link
+            href="/"
+            className="w-full py-2 px-3 rounded-xl border border-purple-500/30 hover:border-cyan-400/50 bg-[#140b2e]/60 hover:bg-[#1a0e3c] text-xs font-semibold text-cyan-300 hover:text-white flex items-center justify-between transition-all group"
           >
-            <Moon className="w-4 h-4 text-slate-400" />
-            <span>Dark Mode</span>
-          </button>
+            <div className="flex items-center gap-2">
+              <ExternalLink className="w-3.5 h-3.5 text-cyan-400 group-hover:rotate-12 transition-transform" />
+              <span>Go to Main Website</span>
+            </div>
+            <ArrowUpRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+          </Link>
 
           <button
             type="button"
             onClick={handleLogout}
-            className="w-full py-2.5 px-4 rounded-xl border border-white/10 hover:border-rose-500/30 bg-white/[0.02] hover:bg-rose-500/10 text-xs font-bold text-[#00B887] hover:text-rose-400 flex items-center justify-center gap-2 transition-all cursor-pointer"
+            className="w-full py-2 px-3 rounded-xl border border-rose-500/20 hover:border-rose-500/40 bg-rose-950/10 hover:bg-rose-950/30 text-xs font-bold text-rose-300 hover:text-rose-200 flex items-center justify-center gap-2 transition-all cursor-pointer"
           >
-            <LogOut className="w-4 h-4" />
-            <span>Logout</span>
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Logout to Main Page</span>
           </button>
         </div>
       </div>
