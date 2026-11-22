@@ -1,11 +1,19 @@
 'use client';
 
 import React, { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import Lenis from 'lenis';
 
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+
   useEffect(() => {
-    // Premium inertial momentum smooth scrolling
+    // Disable smooth scroll interception in dashboard so native inner container scrolling works perfectly
+    if (pathname?.startsWith('/dashboard')) {
+      return;
+    }
+
+    // Premium inertial momentum smooth scrolling for public website pages
     // "when scrolled it should scroll a bit more automatically"
     const lenis = new Lenis({
       duration: 1.4, // Inertial glide duration
@@ -33,7 +41,7 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
       lenis.destroy();
       delete (window as any).__lenis;
     };
-  }, []);
+  }, [pathname]);
 
   return <>{children}</>;
 }

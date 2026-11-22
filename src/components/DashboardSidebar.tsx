@@ -101,10 +101,13 @@ export default function DashboardSidebar({
   const balance = user?.wallet?.balance || (role === 'CLIPPER' ? 14200 : role === 'BRAND' ? 45000 : 950000);
 
   return (
-    <aside className="w-72 bg-[#080b1e]/95 backdrop-blur-2xl border-r border-purple-500/20 flex flex-col justify-between h-screen sticky top-0 shrink-0 z-40 select-none overflow-y-auto scrollbar-thin scrollbar-thumb-purple-500/20 shadow-2xl shadow-indigo-950/50">
-      <div className="p-5 space-y-6">
-        {/* Top Header / Clip Matrix Medallion Brand */}
-        <div className="flex items-center justify-between pb-3.5 border-b border-white/[0.08]">
+    <aside
+      data-lenis-prevent="true"
+      className="w-72 bg-[#080b1e]/95 backdrop-blur-2xl border-r border-purple-500/20 flex flex-col h-screen sticky top-0 shrink-0 z-40 select-none shadow-2xl shadow-indigo-950/50"
+    >
+      {/* 1. Fixed Top Header / Medallion Brand */}
+      <div className="p-4 px-5 pb-3.5 border-b border-white/[0.08] shrink-0">
+        <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 group">
             <div className="p-1.5 rounded-xl bg-[#160B3E]/90 border border-purple-500/40 shadow-[0_0_15px_rgba(124,58,237,0.4)] flex items-center justify-center group-hover:scale-105 transition-transform">
               <img
@@ -132,7 +135,13 @@ export default function DashboardSidebar({
             </button>
           )}
         </div>
+      </div>
 
+      {/* 2. Scrollable Middle Navigation Section */}
+      <div
+        data-lenis-prevent="true"
+        className="flex-1 overflow-y-auto overscroll-contain p-4 px-5 space-y-6 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-purple-500/30 hover:scrollbar-thumb-purple-500/60"
+      >
         {/* Category 1: WORKSPACE */}
         <div className="space-y-1">
           <div className="text-[10px] font-mono font-bold text-purple-400/90 tracking-widest uppercase px-3 py-1 flex items-center justify-between">
@@ -239,8 +248,8 @@ export default function DashboardSidebar({
         </div>
       </div>
 
-      {/* Bottom Sticky User Profile & Navigation Controls */}
-      <div className="p-4 border-t border-purple-500/20 bg-[#070a1a]/95 space-y-3.5">
+      {/* 3. Docked Bottom User Profile & Navigation Controls */}
+      <div className="p-4 border-t border-purple-500/20 bg-[#070a1a]/95 space-y-3 shrink-0">
         {/* User Card */}
         <div className="flex items-center gap-3 p-2 rounded-xl bg-white/[0.03] border border-white/[0.05]">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 to-cyan-500 text-white font-bold flex items-center justify-center text-sm shrink-0 shadow-md">
