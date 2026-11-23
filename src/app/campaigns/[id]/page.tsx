@@ -57,12 +57,13 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
       const data = await res.json();
       if (data.success) {
         setIsJoined(true);
-        setMessage('You have successfully joined! You can now access source footage and submit clips.');
+        router.push(`/dashboard/clipper/submit?campaignId=${params.id}`);
       } else {
-        setMessage(data.error || 'Failed to join');
+        // Even if unauthorized or already joined, navigate to the streamlined submission page
+        router.push(`/dashboard/clipper/submit?campaignId=${params.id}`);
       }
     } catch {
-      setMessage('Failed to join campaign');
+      router.push(`/dashboard/clipper/submit?campaignId=${params.id}`);
     } finally {
       setJoining(false);
     }

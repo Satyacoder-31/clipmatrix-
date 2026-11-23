@@ -136,9 +136,9 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const {
+    let {
       campaignId,
-      platform, // INSTAGRAM, YOUTUBE, TIKTOK
+      platform,
       videoUrl,
       title,
       caption,
@@ -148,8 +148,38 @@ export async function POST(request: Request) {
       initialViews,
     } = body;
 
-    if (!campaignId || !platform || !videoUrl || !title) {
-      return NextResponse.json({ error: 'Missing required submission fields' }, { status: 400 });
+    if (!videoUrl || typeof videoUrl !== 'string' || !videoUrl.trim()) {
+      return NextResponse.json({ error: 'Please enter a valid video or reel link' }, { status: 400 });
+    }
+
+    const cleanUrl = videoUrl.trim();
+
+    // Auto-detect social platform if not specified
+    if (!platform) {
+      if (cleanUrl.includes('youtube.com') || cleanUrl.includes('youtu.be')) {
+        platform = 'YOUTUBE';
+      } else if (cleanUrl.includes('tiktok.com')) {
+        platform = 'TIKTOK';
+      } else if (cleanUrl.includes('facebook.com') || cleanUrl.includes('fb.watch')) {
+        platform = 'FACEBOOK';
+      } else {
+        platform = 'INSTAGRAM';
+      }
+    }
+
+    // Default or fallback campaign if not provided
+    if (!campaignId) {
+      const activeCamp = await prisma.campaign.findFirst({
+        where: { status: 'ACTIVE' },
+        orderBy: { createdAt: 'desc' },
+      });
+      if (activeCamp) {
+        campaignId = activeCamp.id;
+      }
+    }
+
+    if (!campaignId) {
+      return NextResponse.json({ error: 'Campaign ID is required' }, { status: 400 });
     }
 
     // Validate campaign exists and is active
@@ -160,6 +190,11 @@ export async function POST(request: Request) {
 
     if (!campaign) {
       return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
+    }
+
+    // Auto-generate title if omitted (streamlined submission)
+    if (!title || !title.trim()) {
+      title = `${campaign.title} Clip (${platform.toUpperCase()})`;
     }
 
     // Generate unique submission number
