@@ -9,11 +9,12 @@ export async function GET(request: Request) {
 
   const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || 'clipmatrix-production.up.railway.app';
   const protocol = request.headers.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https');
+  const baseUrl = `${protocol}://${host}`;
   const redirectUri = `${protocol}://${host}/api/auth/youtube/callback`;
 
   if (error || !code) {
     return NextResponse.redirect(
-      new URL(`/dashboard/clipper/profile?error=${encodeURIComponent(error || 'cancelled')}`, request.url)
+      new URL(`/dashboard/clipper/profile?error=${encodeURIComponent(error || 'cancelled')}`, baseUrl)
     );
   }
 
@@ -22,7 +23,7 @@ export async function GET(request: Request) {
 
   if (!clientId || !clientSecret) {
     return NextResponse.redirect(
-      new URL('/dashboard/clipper/profile?setupGoogle=true&error=missing_credentials', request.url)
+      new URL('/dashboard/clipper/profile?setupGoogle=true&error=missing_credentials', baseUrl)
     );
   }
 
@@ -46,7 +47,7 @@ export async function GET(request: Request) {
       const errText = await tokenResponse.text();
       console.error('Google token exchange failed:', errText);
       return NextResponse.redirect(
-        new URL(`/dashboard/clipper/profile?error=token_failed&details=${encodeURIComponent(errText)}`, request.url)
+        new URL(`/dashboard/clipper/profile?error=token_failed&details=${encodeURIComponent(errText)}`, baseUrl)
       );
     }
 
@@ -193,13 +194,13 @@ export async function GET(request: Request) {
     return NextResponse.redirect(
       new URL(
         `/dashboard/clipper/profile?connected=youtube&handle=${encodeURIComponent(handle)}&subscribers=${subscriberCount}`,
-        request.url
+        baseUrl
       )
     );
   } catch (err: any) {
     console.error('YouTube OAuth Callback Exception:', err);
     return NextResponse.redirect(
-      new URL(`/dashboard/clipper/profile?error=oauth_exception&message=${encodeURIComponent(err.message)}`, request.url)
+      new URL(`/dashboard/clipper/profile?error=oauth_exception&message=${encodeURIComponent(err.message)}`, baseUrl)
     );
   }
 }

@@ -23,8 +23,10 @@ export async function GET(request: Request) {
     return NextResponse.redirect(metaAuthUrl);
   }
 
+  const baseUrl = `${protocol}://${host}`;
+
   // If META_APP_ID is not configured yet, redirect back to profile with setup instructions
   return NextResponse.redirect(
-    new URL(`/dashboard/clipper/profile?setupMeta=true&redirectUri=${encodeURIComponent(redirectUri)}`, request.url)
+    new URL(`/dashboard/clipper/profile?setupMeta=true&redirectUri=${encodeURIComponent(redirectUri)}`, baseUrl)
   );
 }

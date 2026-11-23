@@ -33,8 +33,10 @@ export async function GET(request: Request) {
     return NextResponse.redirect(googleAuthUrl);
   }
 
+  const baseUrl = `${protocol}://${host}`;
+
   // If GOOGLE_CLIENT_ID is not configured yet, redirect back to profile with setup instructions
   return NextResponse.redirect(
-    new URL(`/dashboard/clipper/profile?setupGoogle=true&redirectUri=${encodeURIComponent(redirectUri)}`, request.url)
+    new URL(`/dashboard/clipper/profile?setupGoogle=true&redirectUri=${encodeURIComponent(redirectUri)}`, baseUrl)
   );
 }

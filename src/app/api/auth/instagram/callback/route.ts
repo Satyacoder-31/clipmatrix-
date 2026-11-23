@@ -9,11 +9,12 @@ export async function GET(request: Request) {
 
   const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || 'clipmatrix-production.up.railway.app';
   const protocol = request.headers.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https');
+  const baseUrl = `${protocol}://${host}`;
   const redirectUri = `${protocol}://${host}/api/auth/instagram/callback`;
 
   if (error || !code) {
     return NextResponse.redirect(
-      new URL(`/dashboard/clipper/profile?error=${encodeURIComponent(error || 'cancelled')}`, request.url)
+      new URL(`/dashboard/clipper/profile?error=${encodeURIComponent(error || 'cancelled')}`, baseUrl)
     );
   }
 
@@ -22,7 +23,7 @@ export async function GET(request: Request) {
 
   if (!appId || !appSecret) {
     return NextResponse.redirect(
-      new URL('/dashboard/clipper/profile?setupMeta=true&error=missing_credentials', request.url)
+      new URL('/dashboard/clipper/profile?setupMeta=true&error=missing_credentials', baseUrl)
     );
   }
 
@@ -37,7 +38,7 @@ export async function GET(request: Request) {
     if (!tokenRes.ok) {
       const errText = await tokenRes.text();
       return NextResponse.redirect(
-        new URL(`/dashboard/clipper/profile?error=token_failed&details=${encodeURIComponent(errText)}`, request.url)
+        new URL(`/dashboard/clipper/profile?error=token_failed&details=${encodeURIComponent(errText)}`, baseUrl)
       );
     }
 
@@ -111,11 +112,11 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.redirect(
-      new URL(`/dashboard/clipper/profile?connected=instagram&handle=${encodeURIComponent(igUsername)}`, request.url)
+      new URL(`/dashboard/clipper/profile?connected=instagram&handle=${encodeURIComponent(igUsername)}`, baseUrl)
     );
   } catch (err: any) {
     return NextResponse.redirect(
-      new URL(`/dashboard/clipper/profile?error=oauth_exception&message=${encodeURIComponent(err.message)}`, request.url)
+      new URL(`/dashboard/clipper/profile?error=oauth_exception&message=${encodeURIComponent(err.message)}`, baseUrl)
     );
   }
 }
