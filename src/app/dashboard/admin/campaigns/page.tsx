@@ -136,7 +136,7 @@ export default function AdminCampaignsPage() {
         <div className="p-5 rounded-2xl bg-[#0c1022] border border-white/[0.08] space-y-1">
           <div className="text-[10px] font-mono uppercase text-slate-400">Total Campaign Budget</div>
           <div className="text-2xl font-black text-white font-display">
-            ₹{totalBudget.toLocaleString('en-IN')}
+            ${totalBudget.toLocaleString()}
           </div>
           <div className="text-xs text-emerald-400 font-mono">Disbursed upon campaign conclusion</div>
         </div>
@@ -231,19 +231,19 @@ export default function AdminCampaignsPage() {
                     <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
                       <div className="text-[10px] text-slate-400">Total Budget</div>
                       <div className="font-bold text-white font-mono mt-0.5">
-                        ₹{camp.totalBudget?.toLocaleString('en-IN')}
+                        ${camp.totalBudget?.toLocaleString()}
                       </div>
                     </div>
                     <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
                       <div className="text-[10px] text-slate-400">Remaining Budget</div>
                       <div className="font-bold text-emerald-400 font-mono mt-0.5">
-                        ₹{camp.remainingBudget?.toLocaleString('en-IN')}
+                        ${camp.remainingBudget?.toLocaleString()}
                       </div>
                     </div>
                     <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
                       <div className="text-[10px] text-slate-400">Reward Model</div>
                       <div className="font-bold text-cyan-300 font-mono mt-0.5">
-                        ₹{camp.cpmRate || 150} {camp.rewardModel}
+                        ${Number(camp.cpmRate || 0.50).toFixed(2)} CPM
                       </div>
                     </div>
                     <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
@@ -317,10 +317,11 @@ export default function AdminCampaignsPage() {
 
             <div className="space-y-3">
               <div>
-                <label className="text-xs text-purple-300 font-mono">CPM Rate (₹ per 1,000 views)</label>
+                <label className="text-xs text-purple-300 font-mono">CPM Rate ($ per 1,000 views)</label>
                 <input
                   type="number"
-                  min="50"
+                  step="0.01"
+                  min="0.1"
                   value={newCpm}
                   onChange={(e) => setNewCpm(Number(e.target.value))}
                   className="w-full mt-1 p-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white font-mono text-sm outline-none focus:border-cyan-400"
@@ -328,10 +329,10 @@ export default function AdminCampaignsPage() {
               </div>
 
               <div>
-                <label className="text-xs text-purple-300 font-mono">Total Campaign Budget (₹)</label>
+                <label className="text-xs text-purple-300 font-mono">Total Campaign Budget ($)</label>
                 <input
                   type="number"
-                  min="5000"
+                  min="50"
                   value={newBudget}
                   onChange={(e) => setNewBudget(Number(e.target.value))}
                   className="w-full mt-1 p-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white font-mono text-sm outline-none focus:border-cyan-400"

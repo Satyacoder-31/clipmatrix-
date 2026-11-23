@@ -193,6 +193,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
     }
 
+    if (campaign.status === 'PAUSED') {
+      return NextResponse.json(
+        { error: 'This campaign is currently paused by admin. Submissions are temporarily closed.' },
+        { status: 400 }
+      );
+    }
+
     // Attempt real-time metadata & statistics enrichment via scraper
     let scrapedStats: any = null;
     try {

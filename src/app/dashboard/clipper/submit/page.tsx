@@ -19,6 +19,7 @@ import {
   ShieldCheck,
   Zap,
   Eye,
+  Lock,
 } from 'lucide-react';
 
 // Platform SVG Icons
@@ -63,7 +64,7 @@ export default function SubmitClipPage() {
 
   // Load campaigns
   useEffect(() => {
-    fetch('/api/campaigns')
+    fetch('/api/campaigns?status=ALL')
       .then((r) => r.json())
       .then((data) => {
         if (data.campaigns && data.campaigns.length > 0) {
@@ -200,7 +201,7 @@ export default function SubmitClipPage() {
                 >
                   {campaigns.map((c) => (
                     <option key={c.id} value={c.id}>
-                      Switch: {c.title}
+                      {c.status === 'PAUSED' ? `[PAUSED] ${c.title}` : `Switch: ${c.title}`}
                     </option>
                   ))}
                 </select>
@@ -212,13 +213,26 @@ export default function SubmitClipPage() {
 
             {/* Meta Row */}
             <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400 mt-3 font-medium">
-              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.03] border border-white/10">
-                <Calendar className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Active Campaign</span>
+              <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full font-mono font-bold ${
+                currentCampaign.status === 'PAUSED'
+                  ? 'bg-amber-500/10 border border-amber-500/30 text-amber-400'
+                  : 'bg-white/[0.03] border border-white/10'
+              }`}>
+                {currentCampaign.status === 'PAUSED' ? (
+                  <>
+                    <Lock className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Paused Campaign</span>
+                  </>
+                ) : (
+                  <>
+                    <Calendar className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>Active Campaign</span>
+                  </>
+                )}
               </span>
               <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono font-bold">
                 <DollarSign className="w-3.5 h-3.5" />
-                <span>₹{currentCampaign.cpmRate || 120} CPM</span>
+                <span>$0.50 CPM</span>
               </span>
               <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.03] border border-white/10 font-mono">
                 <Users className="w-3.5 h-3.5 text-purple-400" />
@@ -252,68 +266,81 @@ export default function SubmitClipPage() {
               Paste your content URL below. We'll automatically detect the platform and verify views.
             </p>
 
-            {/* Single Input Form - No other video information requested */}
-            <form onSubmit={handleSubmit} className="max-w-2xl mx-auto">
-              <div className="flex flex-col sm:flex-row items-center gap-2.5">
-                <div className="relative flex-1 w-full">
-                  <input
-                    type="url"
-                    required
-                    value={videoUrl}
-                    onChange={(e) => setVideoUrl(e.target.value)}
-                    placeholder="https://www.instagram.com/reel/... or https://youtube.com/shorts/..."
-                    className="w-full px-5 py-3.5 rounded-2xl bg-black/40 border border-white/10 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 transition-all shadow-inner"
-                  />
-                  {detected && (
-                    <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-cyan-300 bg-cyan-500/15 px-2.5 py-1 rounded-lg border border-cyan-500/30 font-mono">
-                      {detected} Detected
-                    </span>
-                  )}
+            {currentCampaign?.status === 'PAUSED' ? (
+              <div className="p-6 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-center space-y-2 max-w-xl mx-auto my-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 font-mono text-xs font-bold border border-amber-500/40">
+                  <Lock className="w-3.5 h-3.5" />
+                  <span>CAMPAIGN PAUSED</span>
                 </div>
-
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="w-full sm:w-auto px-7 py-3.5 rounded-2xl font-bold text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 transition-all shadow-lg shadow-purple-500/25 flex items-center justify-center gap-2 text-sm disabled:opacity-50 shrink-0 cursor-pointer"
-                >
-                  <Send className="w-4 h-4" />
-                  <span>{submitting ? 'Submitting...' : 'Submit Clip'}</span>
-                </button>
+                <h3 className="text-base font-bold text-white font-display">Submissions Temporarily Closed</h3>
+                <p className="text-xs text-amber-200/80 leading-relaxed">
+                  The brand sponsor or admin has paused this campaign. New video submissions are not accepted while paused. Please select another active campaign from the dropdown above.
+                </p>
               </div>
-
-              {/* Optional view count helper when Instagram Reel is detected */}
-              {detected === 'Instagram' && (
-                <div className="mt-3 flex items-center gap-3 bg-purple-950/40 border border-purple-500/20 rounded-2xl px-4 py-2.5 text-left transition-all">
-                  <Eye className="w-4 h-4 text-cyan-400 shrink-0" />
-                  <div className="flex-1 text-xs text-slate-300">
-                    <span className="font-semibold text-white">Instagram Views:</span> Current view count from your app (optional):
+            ) : (
+              /* Single Input Form - No other video information requested */
+              <form onSubmit={handleSubmit} className="max-w-2xl mx-auto">
+                <div className="flex flex-col sm:flex-row items-center gap-2.5">
+                  <div className="relative flex-1 w-full">
+                    <input
+                      type="url"
+                      required
+                      value={videoUrl}
+                      onChange={(e) => setVideoUrl(e.target.value)}
+                      placeholder="https://www.instagram.com/reel/... or https://youtube.com/shorts/..."
+                      className="w-full px-5 py-3.5 rounded-2xl bg-black/40 border border-white/10 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 transition-all shadow-inner"
+                    />
+                    {detected && (
+                      <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-cyan-300 bg-cyan-500/15 px-2.5 py-1 rounded-lg border border-cyan-500/30 font-mono">
+                        {detected} Detected
+                      </span>
+                    )}
                   </div>
-                  <input
-                    type="number"
-                    min="0"
-                    value={initialViews}
-                    onChange={(e) => setInitialViews(e.target.value)}
-                    placeholder="e.g. 50000"
-                    className="w-28 px-3 py-1.5 rounded-xl bg-black/60 border border-white/10 text-white text-xs font-mono focus:outline-none focus:border-cyan-400"
-                  />
-                </div>
-              )}
 
-              {feedback && (
-                <div
-                  className={`mt-4 p-3 rounded-2xl text-xs font-medium flex items-center justify-center gap-2 ${
-                    feedback.type === 'success'
-                      ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
-                      : 'bg-rose-500/10 border border-rose-500/30 text-rose-400'
-                  }`}
-                >
-                  {feedback.type === 'success' ? (
-                    <CheckCircle2 className="w-4 h-4 shrink-0" />
-                  ) : null}
-                  <span>{feedback.message}</span>
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="w-full sm:w-auto px-7 py-3.5 rounded-2xl font-bold text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 transition-all shadow-lg shadow-purple-500/25 flex items-center justify-center gap-2 text-sm disabled:opacity-50 shrink-0 cursor-pointer"
+                  >
+                    <Send className="w-4 h-4" />
+                    <span>{submitting ? 'Submitting...' : 'Submit Clip'}</span>
+                  </button>
                 </div>
-              )}
-            </form>
+
+                {/* Optional view count helper when Instagram Reel is detected */}
+                {detected === 'Instagram' && (
+                  <div className="mt-3 flex items-center gap-3 bg-purple-950/40 border border-purple-500/20 rounded-2xl px-4 py-2.5 text-left transition-all">
+                    <Eye className="w-4 h-4 text-cyan-400 shrink-0" />
+                    <div className="flex-1 text-xs text-slate-300">
+                      <span className="font-semibold text-white">Instagram Views:</span> Current view count from your app (optional):
+                    </div>
+                    <input
+                      type="number"
+                      min="0"
+                      value={initialViews}
+                      onChange={(e) => setInitialViews(e.target.value)}
+                      placeholder="e.g. 50000"
+                      className="w-28 px-3 py-1.5 rounded-xl bg-black/60 border border-white/10 text-white text-xs font-mono focus:outline-none focus:border-cyan-400"
+                    />
+                  </div>
+                )}
+
+                {feedback && (
+                  <div
+                    className={`mt-4 p-3 rounded-2xl text-xs font-medium flex items-center justify-center gap-2 ${
+                      feedback.type === 'success'
+                        ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
+                        : 'bg-rose-500/10 border border-rose-500/30 text-rose-400'
+                    }`}
+                  >
+                    {feedback.type === 'success' ? (
+                      <CheckCircle2 className="w-4 h-4 shrink-0" />
+                    ) : null}
+                    <span>{feedback.message}</span>
+                  </div>
+                )}
+              </form>
+            )}
           </div>
 
           {/* Bottom Tabs: My Submissions, My Stats, Leaderboard */}

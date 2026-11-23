@@ -292,8 +292,8 @@ function ClipperProfileInner() {
       )}
 
       {/* SECTION 1: CLIPPER DETAILS CARD */}
-      <div className="rounded-3xl bg-gradient-to-b from-[#11162a]/95 via-[#0b1020]/95 to-[#060812] border border-cyan-500/30 p-6 sm:p-7 space-y-6 shadow-xl relative overflow-hidden">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
+      <div className="rounded-3xl bg-gradient-to-b from-[#11162a]/95 via-[#0b1020]/95 to-[#060810] border border-cyan-500/30 p-6 sm:p-7 space-y-4 shadow-xl relative overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             {/* Creator Avatar */}
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-500 to-purple-600 flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-cyan-500/20 shrink-0">
@@ -323,44 +323,20 @@ function ClipperProfileInner() {
           </button>
         </div>
 
-        {/* Profile Info Grid / Edit Form */}
-        {isEditingProfile ? (
-          <form onSubmit={handleSaveProfileDetails} className="space-y-4 pt-1">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-300">Display Name</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-slate-700 text-white text-xs focus:outline-none focus:border-cyan-400"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-300">Contact Phone</label>
-                <input
-                  type="text"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="e.g. +91 98765 43210"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-slate-700 text-white text-xs focus:outline-none focus:border-cyan-400"
-                />
-              </div>
-
-              <div className="space-y-1.5 sm:col-span-2">
-                <label className="text-xs font-bold text-slate-300">Editing Software</label>
-                <input
-                  type="text"
-                  value={editingSoftware}
-                  onChange={(e) => setEditingSoftware(e.target.value)}
-                  placeholder="e.g. CapCut, Premiere Pro, After Effects"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-slate-700 text-white text-xs focus:outline-none focus:border-cyan-400"
-                />
-              </div>
+        {/* Profile Info Edit Form (if toggled) */}
+        {isEditingProfile && (
+          <form onSubmit={handleSaveProfileDetails} className="space-y-4 pt-1 border-t border-white/10">
+            <div className="space-y-1.5 max-w-sm">
+              <label className="text-xs font-bold text-slate-300">Display Name</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-slate-700 text-white text-xs focus:outline-none focus:border-cyan-400"
+              />
             </div>
 
-            <div className="flex justify-end gap-2.5 pt-2">
+            <div className="flex justify-start gap-2.5 pt-2">
               <button
                 type="button"
                 onClick={() => setIsEditingProfile(false)}
@@ -377,28 +353,6 @@ function ClipperProfileInner() {
               </button>
             </div>
           </form>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-            <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
-              <div className="text-[10px] text-slate-400 uppercase font-mono">Editing Tools</div>
-              <div className="font-semibold text-white truncate">{editingSoftware || 'CapCut, Premiere'}</div>
-            </div>
-
-            <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
-              <div className="text-[10px] text-slate-400 uppercase font-mono">Experience</div>
-              <div className="font-semibold text-cyan-300 font-mono">{experienceYears || '1-3 years'}</div>
-            </div>
-
-            <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
-              <div className="text-[10px] text-slate-400 uppercase font-mono">Phone</div>
-              <div className="font-semibold text-white font-mono">{phone || 'Not provided'}</div>
-            </div>
-
-            <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
-              <div className="text-[10px] text-slate-400 uppercase font-mono">Country</div>
-              <div className="font-semibold text-purple-300">India 🇮🇳</div>
-            </div>
-          </div>
         )}
       </div>
 

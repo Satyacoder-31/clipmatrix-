@@ -298,19 +298,19 @@ export default function ClipperEarningsPage() {
 
       {/* 4 Main Overview Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Total Expected */}
+        {/* Card 1: Total Approved Earnings */}
         <div className="rounded-2xl p-4 sm:p-5 bg-[#140b2a] border border-purple-900/50 relative overflow-hidden shadow-lg">
           <div className="flex items-center justify-between text-purple-400 mb-2">
-            <span className="text-[11px] font-mono uppercase tracking-wider font-semibold">Total Expected</span>
+            <span className="text-[11px] font-mono uppercase tracking-wider font-semibold">Total Approved Earnings</span>
             <DollarSign className="w-4 h-4 text-purple-400" />
           </div>
           <div className="text-2xl sm:text-3xl font-bold font-mono text-white">
-            {formatCurrency(totalExpectedEarnings)}
+            {formatCurrency(totalGrossEarnings)}
           </div>
-          <div className="text-[11px] text-purple-300/60 mt-1 font-mono">Gross approved + in review</div>
+          <div className="text-[11px] text-purple-300/60 mt-1 font-mono">Approved videos ($0.50 CPM)</div>
         </div>
 
-        {/* Paid Out */}
+        {/* Card 2: Paid Out */}
         <div className="rounded-2xl p-4 sm:p-5 bg-[#140b2a] border border-purple-900/50 relative overflow-hidden shadow-lg">
           <div className="flex items-center justify-between text-purple-400 mb-2">
             <span className="text-[11px] font-mono uppercase tracking-wider font-semibold">Paid Out</span>
@@ -322,7 +322,7 @@ export default function ClipperEarningsPage() {
           <div className="text-[11px] text-emerald-300/60 mt-1 font-mono">Disbursed by admin</div>
         </div>
 
-        {/* Remaining Payout */}
+        {/* Card 3: Remaining Payout */}
         <div className="rounded-2xl p-4 sm:p-5 bg-gradient-to-br from-emerald-950/30 to-[#140b2a] border border-emerald-500/30 relative overflow-hidden shadow-lg">
           <div className="flex items-center justify-between text-emerald-400 mb-2">
             <span className="text-[11px] font-mono uppercase tracking-wider font-semibold">Remaining Payout</span>
@@ -331,19 +331,19 @@ export default function ClipperEarningsPage() {
           <div className="text-2xl sm:text-3xl font-bold font-mono text-emerald-300">
             {formatCurrency(remainingPayout)}
           </div>
-          <div className="text-[11px] text-emerald-400/80 mt-1 font-mono">Due upon campaign end</div>
+          <div className="text-[11px] text-emerald-400/80 mt-1 font-mono">Unpaid approved balance due</div>
         </div>
 
-        {/* Pending Approval */}
+        {/* Card 4: Pending Review */}
         <div className="rounded-2xl p-4 sm:p-5 bg-[#140b2a] border border-purple-900/50 relative overflow-hidden shadow-lg">
           <div className="flex items-center justify-between text-purple-400 mb-2">
-            <span className="text-[11px] font-mono uppercase tracking-wider font-semibold">Pending Approval</span>
+            <span className="text-[11px] font-mono uppercase tracking-wider font-semibold">Pending Review</span>
             <AlertCircle className="w-4 h-4 text-cyan-400" />
           </div>
           <div className="text-2xl sm:text-3xl font-bold font-mono text-cyan-300">
             {formatCurrency(pendingApprovalAmount)}
           </div>
-          <div className="text-[11px] text-purple-300/60 mt-1 font-mono">{pendingSubmissions.length} clips under review</div>
+          <div className="text-[11px] text-purple-300/60 mt-1 font-mono">{pendingSubmissions.length} clips awaiting moderation</div>
         </div>
       </div>
 
@@ -540,7 +540,7 @@ export default function ClipperEarningsPage() {
             <div className="w-16 h-16 rounded-full bg-teal-500/10 border-2 border-teal-500/40 mx-auto flex items-center justify-center font-bold text-teal-300 text-sm font-mono px-1">
               {formatCurrency(totalGrossEarnings)}
             </div>
-            <div className="text-xs text-purple-300 font-medium">Total Gross Earnings</div>
+            <div className="text-xs text-purple-300 font-medium">Approved Videos Earnings</div>
           </div>
         </div>
       </div>

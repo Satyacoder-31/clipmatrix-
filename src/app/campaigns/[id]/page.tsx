@@ -17,6 +17,7 @@ import {
   ExternalLink,
   Scissors,
   Check,
+  Lock,
 } from 'lucide-react';
 import { formatCurrency, formatNumber } from '@/lib/utils';
 
@@ -131,16 +132,21 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
             <div className="text-xs uppercase font-mono text-purple-400">Reward Structure</div>
             <div className="text-3xl font-extrabold text-emerald-400 font-display">
               {campaign.rewardModel === 'CPM'
-                ? `₹${campaign.cpmRate} / 1k views`
+                ? `$${campaign.cpmRate || 0.50} / 1k views`
                 : campaign.rewardModel === 'FIXED'
-                ? `₹${campaign.rewardPerClip} / clip`
-                : `₹${campaign.rewardPerClip} + ₹${campaign.cpmRate} CPM`}
+                ? `$${campaign.rewardPerClip} / clip`
+                : `$${campaign.rewardPerClip} + $${campaign.cpmRate || 0.50} CPM`}
             </div>
             <div className="text-xs text-purple-300">
-              Remaining Escrow Pool: <strong className="text-white">₹{campaign.remainingBudget.toLocaleString('en-IN')}</strong>
+              Remaining Escrow Pool: <strong className="text-white">${campaign.remainingBudget.toLocaleString()}</strong>
             </div>
 
-            {isJoined ? (
+            {campaign.status === 'PAUSED' ? (
+              <div className="py-3.5 px-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold flex items-center justify-center gap-2">
+                <Lock className="w-4 h-4 text-amber-400" />
+                <span>Campaign Paused (Submissions Closed)</span>
+              </div>
+            ) : isJoined ? (
               <div className="space-y-2">
                 <div className="py-2.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-bold flex items-center justify-center gap-2">
                   <Check className="w-4 h-4" /> You are participating in this campaign
