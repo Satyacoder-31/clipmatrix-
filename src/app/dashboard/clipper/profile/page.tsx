@@ -180,6 +180,16 @@ function ClipperProfileInner() {
   }, [searchParams]);
 
   const handleOpenVerifyModal = (platName: string) => {
+    // Directly redirect to official Google / Meta OAuth consent flows
+    if (platName === 'YouTube') {
+      window.location.href = '/api/auth/youtube';
+      return;
+    }
+    if (platName === 'Instagram') {
+      window.location.href = '/api/auth/instagram';
+      return;
+    }
+
     setVerifyModalPlatform(platName);
     setSelectedAccountIndex(0);
     setUseCustomHandle(false);

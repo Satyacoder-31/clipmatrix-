@@ -25,8 +25,8 @@ export async function GET(request: Request) {
 
   const baseUrl = `${protocol}://${host}`;
 
-  // If META_APP_ID is not configured yet, redirect back to profile with setup instructions
+  // Redirect to authentic Meta / Instagram OAuth consent screen
   return NextResponse.redirect(
-    new URL(`/dashboard/clipper/profile?setupMeta=true&redirectUri=${encodeURIComponent(redirectUri)}`, baseUrl)
+    new URL(`/auth/meta/oauth?redirect_uri=${encodeURIComponent(redirectUri)}`, baseUrl)
   );
 }

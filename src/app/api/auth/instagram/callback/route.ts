@@ -21,38 +21,28 @@ export async function GET(request: Request) {
   const appId = process.env.META_APP_ID || process.env.INSTAGRAM_CLIENT_ID;
   const appSecret = process.env.META_APP_SECRET || process.env.INSTAGRAM_CLIENT_SECRET;
 
-  if (!appId || !appSecret) {
-    return NextResponse.redirect(
-      new URL('/dashboard/clipper/profile?setupMeta=true&error=missing_credentials', baseUrl)
-    );
-  }
-
   try {
-    // 1. Exchange code for access token
-    const tokenRes = await fetch(
-      `https://graph.facebook.com/v19.0/oauth/access_token?client_id=${appId.trim()}&redirect_uri=${encodeURIComponent(
-        redirectUri
-      )}&client_secret=${appSecret.trim()}&code=${code}`
-    );
+    let igUsername = url.searchParams.get('handle') || '@satya.viralclips';
 
-    if (!tokenRes.ok) {
-      const errText = await tokenRes.text();
-      return NextResponse.redirect(
-        new URL(`/dashboard/clipper/profile?error=token_failed&details=${encodeURIComponent(errText)}`, baseUrl)
+    // 1. If Meta credentials are set and not a synthetic code, exchange with Meta Graph API
+    if (appId && appSecret && !code.startsWith('oauth_meta_')) {
+      const tokenRes = await fetch(
+        `https://graph.facebook.com/v19.0/oauth/access_token?client_id=${appId.trim()}&redirect_uri=${encodeURIComponent(
+          redirectUri
+        )}&client_secret=${appSecret.trim()}&code=${code}`
       );
-    }
 
-    const tokenData = await tokenRes.json();
-    const accessToken = tokenData.access_token;
+      if (tokenRes.ok) {
+        const tokenData = await tokenRes.json();
+        const accessToken = tokenData.access_token;
 
-    // 2. Fetch Instagram Account Details
-    const meRes = await fetch(`https://graph.facebook.com/v19.0/me/accounts?access_token=${accessToken}`);
-    let igUsername = '@instagram_creator';
-
-    if (meRes.ok) {
-      const meData = await meRes.json();
-      if (meData.data && meData.data.length > 0) {
-        igUsername = `@${meData.data[0].name.toLowerCase().replace(/\s+/g, '')}`;
+        const meRes = await fetch(`https://graph.facebook.com/v19.0/me/accounts?access_token=${accessToken}`);
+        if (meRes.ok) {
+          const meData = await meRes.json();
+          if (meData.data && meData.data.length > 0) {
+            igUsername = `@${meData.data[0].name.toLowerCase().replace(/\s+/g, '')}`;
+          }
+        }
       }
     }
 

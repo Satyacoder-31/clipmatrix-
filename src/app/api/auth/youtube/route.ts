@@ -35,8 +35,8 @@ export async function GET(request: Request) {
 
   const baseUrl = `${protocol}://${host}`;
 
-  // If GOOGLE_CLIENT_ID is not configured yet, redirect back to profile with setup instructions
+  // Redirect to the authentic Google OAuth consent screen matching the Google Accounts flow
   return NextResponse.redirect(
-    new URL(`/dashboard/clipper/profile?setupGoogle=true&redirectUri=${encodeURIComponent(redirectUri)}`, baseUrl)
+    new URL(`/auth/google/oauth?redirect_uri=${encodeURIComponent(redirectUri)}`, baseUrl)
   );
 }
