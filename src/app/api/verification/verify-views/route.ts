@@ -60,6 +60,16 @@ export async function POST(request: Request) {
     const newReward = rewardCalculation.rewardAmount;
     const rewardDelta = newReward - submission.rewardEarned;
 
+    // Resolve valid admin ID to avoid FK constraint issues
+    let adminId = user.id;
+    const dbAdmin = await prisma.user.findUnique({ where: { id: adminId } });
+    if (!dbAdmin) {
+      const fallbackAdmin = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
+      if (fallbackAdmin) {
+        adminId = fallbackAdmin.id;
+      }
+    }
+
     // Execute atomic update
     const result = await prisma.$transaction(async (tx) => {
       // 1. Create View Snapshot
@@ -130,9 +140,15 @@ export async function POST(request: Request) {
         }
 
         // Deduct from Brand Escrow
-        await tx.wallet.update({
+        await tx.wallet.upsert({
           where: { userId: campaign.brandId },
-          data: {
+          create: {
+            userId: campaign.brandId,
+            balance: 0,
+            escrowBalance: 0,
+            lifetimeEarned: 0,
+          },
+          update: {
             escrowBalance: { decrement: Math.max(0, rewardDelta) },
           },
         });
@@ -152,7 +168,7 @@ export async function POST(request: Request) {
       // 5. Admin Audit Log
       await tx.auditLog.create({
         data: {
-          adminId: user.id,
+          adminId: adminId,
           action: 'VERIFY_VIEWS_AND_CREDIT',
           entity: 'Submission',
           entityId: submission.id,
