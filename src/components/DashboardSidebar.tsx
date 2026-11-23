@@ -109,21 +109,18 @@ export default function DashboardSidebar({
   const isAdminWorkspace = role === 'ADMIN';
 
   const displayName = isClipperWorkspace
-    ? (user?.role === 'CLIPPER' && user?.name ? user.name : 'Aarav Sharma')
+    ? (user?.role === 'CLIPPER' && user?.name ? user.name : 'Aarav Sharma (Elite Clipper)')
     : isBrandWorkspace
     ? (user?.role === 'BRAND' && user?.name ? user.name : 'Aether AI Labs')
-    : (user?.role === 'ADMIN' && user?.name ? user.name : 'ClipMatrix Super Admin');
+    : 'ClipMatrix Super Admin';
 
   const initial = displayName.trim().charAt(0).toUpperCase();
   const displayRole = role; // Strictly matches the active dashboard workspace
-  const balance =
-    (role === user?.role && user?.wallet?.balance !== undefined)
-      ? user.wallet.balance
-      : isClipperWorkspace
-      ? 186
-      : isBrandWorkspace
-      ? 45000
-      : 25000;
+  const balance = isClipperWorkspace
+    ? (user?.role === 'CLIPPER' && user?.wallet?.balance !== undefined ? user.wallet.balance : 186)
+    : isBrandWorkspace
+    ? (user?.role === 'BRAND' && user?.wallet?.balance !== undefined ? user.wallet.balance : 45000)
+    : 25000;
 
   const handleSwitchPersona = async (targetRole: 'CLIPPER' | 'ADMIN' | 'BRAND') => {
     try {

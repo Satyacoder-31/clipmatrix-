@@ -219,7 +219,7 @@ export default function AdminSubmissionsReviewPage() {
 
       const data = await res.json();
       if (res.ok && data.success) {
-        setToastMsg(`✅ Verified ${viewsNum.toLocaleString()} views for ${auditSub.submissionNumber}! Clipper user wallet credited ₹${data.rewardEarned?.toLocaleString() || ''}.`);
+        setToastMsg(`✅ Verified ${viewsNum.toLocaleString()} views for ${auditSub.submissionNumber}! Clipper user wallet credited $${Number(data.rewardEarned || 0).toFixed(2)}.`);
         setAuditMsg(`✅ Successfully verified! Clipper user wallet credited.`);
         fetchSubmissions();
         setAuditSub((prev: any) => (prev ? { ...prev, status: 'VIEWS_VERIFIED', verifiedViews: viewsNum } : null));
@@ -482,7 +482,7 @@ export default function AdminSubmissionsReviewPage() {
 
                   <div className="flex items-center gap-2 text-[11px] text-slate-400 mt-2">
                     <span className="font-mono text-emerald-400 font-bold">
-                      ₹{c.cpmRate || 120} CPM
+                      ${Number(c.cpmRate || 0.50).toFixed(2)} CPM
                     </span>
                     <span>•</span>
                     <span className="truncate text-slate-400">{c.industry || 'Viral'}</span>
@@ -525,7 +525,7 @@ export default function AdminSubmissionsReviewPage() {
             </div>
             <div className="flex items-center gap-3 shrink-0">
               <span className="font-mono text-emerald-300 bg-emerald-500/15 px-3 py-1 rounded-full border border-emerald-500/30 font-bold">
-                Reward: ₹{activeCampaign.cpmRate} CPM / ₹{activeCampaign.rewardPerClip || 500} per clip
+                Reward: ${Number(activeCampaign.cpmRate || 0.50).toFixed(2)} CPM
               </span>
               <button
                 onClick={() => setSelectedCampaignId('ALL')}
@@ -710,7 +710,7 @@ export default function AdminSubmissionsReviewPage() {
                       <span>
                         CPM:{' '}
                         <strong className="text-emerald-400 font-mono">
-                          ₹{sub.campaign?.cpmRate || 150}
+                          ${Number(sub.campaign?.cpmRate || 0.50).toFixed(2)}
                         </strong>
                       </span>
 
@@ -1031,10 +1031,10 @@ export default function AdminSubmissionsReviewPage() {
                 <div className="text-right">
                   <div className="text-xs text-slate-400">Estimated Clipper Payout</div>
                   <div className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-300 font-mono">
-                    ₹
+                    $
                     {(
                       ((parseInt(auditVerifiedViews || '0', 10) / 1000) *
-                        (auditSub.campaign?.cpmRate || 120))
+                        Number(auditSub.campaign?.cpmRate || 0.50))
                     ).toFixed(2)}
                   </div>
                 </div>

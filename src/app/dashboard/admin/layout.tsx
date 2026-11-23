@@ -24,20 +24,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         // If authenticated as non-ADMIN, switch to ADMIN persona for admin management suite
         if (data.user.role !== 'ADMIN') {
-          const switchRes = await fetch('/api/auth/switch-role', {
+          await fetch('/api/auth/switch-role', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ role: 'ADMIN' }),
           });
-          const switchData = await switchRes.json();
-          if (switchData.user) {
-            setUser(switchData.user);
-            router.refresh();
-            return;
-          }
         }
 
-        setUser(data.user);
+        setUser({
+          name: 'ClipMatrix Super Admin',
+          role: 'ADMIN',
+          email: 'admin@clipmatrix.com',
+        });
       } catch {
         setUser({
           name: 'ClipMatrix Super Admin',

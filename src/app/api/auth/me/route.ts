@@ -39,8 +39,8 @@ export async function PATCH(request: Request) {
     const body = await request.json();
     const { upiId, bankName, bankAccountNumber, bankIfsc, editingSoftware, phone, name } = body;
 
-    // Update base user details if provided
-    if (name || phone) {
+    // Update base user details if provided (only rename if not Super Admin)
+    if ((name || phone) && user.role !== 'ADMIN') {
       await prisma.user.update({
         where: { id: user.id },
         data: {

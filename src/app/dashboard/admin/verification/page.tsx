@@ -208,15 +208,15 @@ export default function AdminVerificationPage() {
               <div className="grid grid-cols-3 gap-3 p-3.5 rounded-xl bg-[#0e071c] border border-purple-900/40 text-center text-xs">
                 <div>
                   <div className="text-[10px] text-purple-400">Reward Model</div>
-                  <div className="font-bold text-white mt-0.5">{selectedSub.campaign?.rewardModel}</div>
+                  <div className="font-bold text-white mt-0.5">{selectedSub.campaign?.rewardModel || 'CPM'}</div>
                 </div>
                 <div>
                   <div className="text-[10px] text-purple-400">CPM Rate</div>
-                  <div className="font-bold text-emerald-400 mt-0.5">₹{selectedSub.campaign?.cpmRate} / 1k</div>
+                  <div className="font-bold text-emerald-400 mt-0.5">${Number(selectedSub.campaign?.cpmRate || 0.50).toFixed(2)} / 1k</div>
                 </div>
                 <div>
                   <div className="text-[10px] text-purple-400">Current Earned</div>
-                  <div className="font-bold text-white mt-0.5">₹{selectedSub.rewardEarned?.toLocaleString('en-IN')}</div>
+                  <div className="font-bold text-white mt-0.5">${Number(selectedSub.rewardEarned || 0).toFixed(2)}</div>
                 </div>
               </div>
 
@@ -385,16 +385,13 @@ export default function AdminVerificationPage() {
                 <div>
                   <div className="text-[10px] text-purple-300 uppercase font-mono">Calculated Reward Output</div>
                   <div className="text-2xl font-extrabold text-emerald-400 font-display">
-                    ₹
-                    {(
-                      Math.floor(
-                        (parseInt(verifiedViews || '0', 10) / 1000) * (selectedSub.campaign?.cpmRate || 120)
-                      ) || 0
-                    ).toLocaleString('en-IN')}
+                    ${(
+                      ((parseInt(verifiedViews || '0', 10) / 1000) * Number(selectedSub.campaign?.cpmRate || 0.50)) || 0
+                    ).toFixed(2)}
                   </div>
                 </div>
                 <div className="text-right text-[11px] text-purple-300/80">
-                  Will credit to: <strong className="text-white">{selectedSub.clipper?.name}</strong>
+                  Will credit to: <strong className="text-white">{selectedSub.clipper?.name || 'Clipper'}</strong>
                 </div>
               </div>
 
