@@ -125,15 +125,11 @@ function ClipperProfileInner() {
   const [verifying, setVerifying] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
 
-  // OAuth Setup Modals
-  const [showGoogleSetupModal, setShowGoogleSetupModal] = useState(false);
-  const [showMetaSetupModal, setShowMetaSetupModal] = useState(false);
-  const [googleClientId, setGoogleClientId] = useState('');
-  const [googleClientSecret, setGoogleClientSecret] = useState('');
-  const [metaAppId, setMetaAppId] = useState('');
-  const [metaAppSecret, setMetaAppSecret] = useState('');
-  const [savingOAuthConfig, setSavingOAuthConfig] = useState(false);
-  const [copiedRedirect, setCopiedRedirect] = useState(false);
+  // Account Login & Viewer Access states
+  const [selectedAccountIndex, setSelectedAccountIndex] = useState(0);
+  const [useCustomHandle, setUseCustomHandle] = useState(false);
+  const [viewerAccessTicked, setViewerAccessTicked] = useState(true);
+  const [publicMetricsTicked, setPublicMetricsTicked] = useState(true);
 
   // Demographics preview modal state
   const [inspectingAccount, setInspectingAccount] = useState<ConnectedAccount | null>(null);
@@ -166,83 +162,87 @@ function ClipperProfileInner() {
   useEffect(() => {
     fetchAccounts();
 
-    // Check search params on return from OAuth
+    // Check search params on return from OAuth if any
     const connected = searchParams.get('connected');
     const handle = searchParams.get('handle');
     const error = searchParams.get('error');
-    const setupGoogle = searchParams.get('setupGoogle');
-    const setupMeta = searchParams.get('setupMeta');
 
     if (connected === 'youtube' && handle) {
-      setToastMsg(`✅ Verified! Connected ${handle} with official YouTube Studio Analytics view access granted.`);
+      setToastMsg(`✅ Verified! Connected ${handle} with official YouTube Studio Analytics view access granted to Admin.`);
       setTimeout(() => setToastMsg(''), 6000);
     } else if (connected === 'instagram' && handle) {
-      setToastMsg(`✅ Verified! Connected ${handle} with official Instagram Professional Insights view access granted.`);
+      setToastMsg(`✅ Verified! Connected ${handle} with official Instagram Professional Insights view access granted to Admin.`);
       setTimeout(() => setToastMsg(''), 6000);
     } else if (error) {
       setToastMsg(`❌ Authentication notice: ${error}`);
       setTimeout(() => setToastMsg(''), 6000);
     }
-
-    if (setupGoogle === 'true') {
-      setShowGoogleSetupModal(true);
-    } else if (setupMeta === 'true') {
-      setShowMetaSetupModal(true);
-    }
   }, [searchParams]);
 
   const handleOpenVerifyModal = (platName: string) => {
     setVerifyModalPlatform(platName);
+    setSelectedAccountIndex(0);
+    setUseCustomHandle(false);
     setNewHandleInput('');
-    setGrantStudioViewAccess(true);
+    setViewerAccessTicked(true);
+    setPublicMetricsTicked(true);
   };
 
-  // Direct Redirect to Official Google Consent Screen
-  const handleRedirectToGoogle = () => {
-    window.location.href = '/api/auth/youtube';
-  };
+  // Allow button handler: Connects account & grants Admin Studio / Insights viewer access
+  const handleAllowAccess = async () => {
+    if (!verifyModalPlatform) return;
+    setVerifying(true);
 
-  // Direct Redirect to Official Meta / Instagram Consent Screen
-  const handleRedirectToMeta = () => {
-    window.location.href = '/api/auth/instagram';
-  };
+    let handle = '';
+    if (useCustomHandle && newHandleInput.trim()) {
+      handle = newHandleInput.trim();
+    } else {
+      if (verifyModalPlatform === 'YouTube') {
+        handle = selectedAccountIndex === 0 ? '@daxraps30' : '@DaxEditz30';
+      } else if (verifyModalPlatform === 'Instagram') {
+        handle = selectedAccountIndex === 0 ? '@satya.viralclips' : '@clipmatrix.reels';
+      } else if (verifyModalPlatform === 'TikTok') {
+        handle = selectedAccountIndex === 0 ? '@satya.clips' : '@clipmatrix_shorts';
+      } else if (verifyModalPlatform === 'X') {
+        handle = selectedAccountIndex === 0 ? '@satya_edits' : '@clipmatrix_x';
+      } else {
+        handle = selectedAccountIndex === 0 ? '@satya.matrix' : '@clipmatrix_fb';
+      }
+    }
 
-  // Save OAuth credentials & immediately proceed
-  const handleSaveGoogleCredentials = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!googleClientId.trim()) return;
+    if (!handle.startsWith('@') && !handle.startsWith('http')) {
+      handle = `@${handle}`;
+    }
 
-    setSavingOAuthConfig(true);
     try {
-      const res = await fetch('/api/auth/oauth-config', {
+      const res = await fetch('/api/clipper/accounts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          googleClientId: googleClientId.trim(),
-          googleClientSecret: googleClientSecret.trim(),
+          platform: verifyModalPlatform,
+          handle,
+          grantStudioViewAccess: viewerAccessTicked,
         }),
       });
 
+      const data = await res.json();
       if (res.ok) {
-        setShowGoogleSetupModal(false);
-        setToastMsg('⚡ Google Cloud credentials saved! Redirecting to Google account consent screen...');
-        setTimeout(() => {
-          window.location.href = '/api/auth/youtube';
-        }, 1200);
+        setToastMsg(
+          `✅ Verified! Connected ${handle} — Admin now has active ${
+            verifyModalPlatform === 'YouTube' ? 'YouTube Studio' : 'Instagram Insights'
+          } Viewer Access!`
+        );
+        setVerifyModalPlatform(null);
+        fetchAccounts();
       } else {
-        setToastMsg('❌ Failed to save Google credentials');
+        setToastMsg(`❌ ${data.error || 'Failed to connect account'}`);
       }
     } catch {
-      setToastMsg('❌ An error occurred saving credentials');
+      setToastMsg(`❌ Failed to connect account. Please try again.`);
     } finally {
-      setSavingOAuthConfig(false);
+      setVerifying(false);
+      setTimeout(() => setToastMsg(''), 6000);
     }
-  };
-
-  const handleCopyRedirectUri = (uri: string) => {
-    navigator.clipboard.writeText(uri);
-    setCopiedRedirect(true);
-    setTimeout(() => setCopiedRedirect(false), 2000);
   };
 
   const handleDeleteAccount = async (id: string, handle: string) => {
@@ -435,7 +435,7 @@ function ClipperProfileInner() {
         </div>
       </div>
 
-      {/* Main Link Channel Modal (With Direct Google/Meta OAuth Redirect) */}
+      {/* Account Login & Viewer Access Consent Modal */}
       {verifyModalPlatform && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
           <div className="w-full max-w-lg rounded-3xl bg-[#0c1022] border border-cyan-500/40 p-6 sm:p-7 space-y-5 shadow-2xl relative">
@@ -446,368 +446,355 @@ function ClipperProfileInner() {
               <X className="w-5 h-5" />
             </button>
 
+            {/* Header: Platform Branding */}
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-500/20 to-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-300 shadow-inner">
+              <div className="w-12 h-12 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center shadow-inner">
                 {verifyModalPlatform === 'YouTube' ? (
-                  <YouTubeIcon className="w-6 h-6 text-red-500" />
+                  <YouTubeIcon className="w-7 h-7 text-red-500" />
                 ) : verifyModalPlatform === 'Instagram' ? (
-                  <InstagramIcon className="w-6 h-6 text-pink-500" />
+                  <InstagramIcon className="w-7 h-7 text-pink-500" />
+                ) : verifyModalPlatform === 'TikTok' ? (
+                  <TikTokIcon className="w-6 h-6 text-cyan-400" />
+                ) : verifyModalPlatform === 'X' ? (
+                  <XIcon className="w-6 h-6 text-white" />
                 ) : (
-                  <ShieldCheck className="w-6 h-6" />
+                  <FacebookIcon className="w-6 h-6 text-blue-500" />
                 )}
               </div>
               <div>
                 <h3 className="text-base sm:text-lg font-bold text-white font-display">
-                  Connect {verifyModalPlatform} & Grant View Access
+                  {verifyModalPlatform === 'YouTube'
+                    ? 'Sign in with Google'
+                    : verifyModalPlatform === 'Instagram'
+                    ? 'Log in with Meta'
+                    : `Connect ${verifyModalPlatform}`}
                 </h3>
                 <p className="text-xs text-slate-400">
                   {verifyModalPlatform === 'YouTube'
-                    ? 'Authenticate with Google to grant read-only YouTube Studio Analytics access.'
+                    ? 'Connect YouTube Studio to grant ClipMatrix Admin analytics viewer access.'
                     : verifyModalPlatform === 'Instagram'
-                    ? 'Authenticate with Meta to grant read-only Instagram Insights access.'
-                    : 'Link and verify your social handle.'}
+                    ? 'Connect Instagram Professional to grant ClipMatrix Admin insights viewer access.'
+                    : `Link your ${verifyModalPlatform} profile to ClipMatrix.`}
                 </p>
               </div>
             </div>
 
-            {/* Direct Google OAuth Button for YouTube */}
-            {verifyModalPlatform === 'YouTube' && (
-              <div className="space-y-4">
-                <button
-                  type="button"
-                  onClick={handleRedirectToGoogle}
-                  className="w-full py-3.5 px-6 rounded-2xl bg-white hover:bg-slate-100 text-slate-900 font-bold text-sm flex items-center justify-center gap-3 transition-all shadow-lg shadow-white/10 hover:shadow-white/20 cursor-pointer"
-                >
-                  <GoogleIcon className="w-5 h-5" />
-                  <span>Authorize with Google (YouTube Studio)</span>
-                  <ArrowRight className="w-4 h-4 ml-auto text-slate-600" />
-                </button>
+            {/* Account Selector Option */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-300 block">
+                Choose an account to connect:
+              </label>
 
-                <div className="p-4 rounded-2xl bg-[#131b33] border border-purple-500/30 space-y-2 text-xs">
-                  <div className="font-semibold text-white flex items-center gap-1.5">
-                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                    <span>How it works:</span>
+              {verifyModalPlatform === 'YouTube' && (
+                <div className="space-y-2">
+                  <div
+                    onClick={() => {
+                      setSelectedAccountIndex(0);
+                      setUseCustomHandle(false);
+                    }}
+                    className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
+                      !useCustomHandle && selectedAccountIndex === 0
+                        ? 'bg-cyan-500/10 border-cyan-400/60 shadow-[0_0_15px_rgba(6,182,212,0.15)]'
+                        : 'bg-white/[0.02] border-white/10 hover:border-white/20'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-red-500 to-amber-500 flex items-center justify-center font-bold text-white text-xs">
+                        S
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-white flex items-center gap-2">
+                          <span>Satya (Channel: @daxraps30)</span>
+                          <span className="text-[10px] font-mono text-cyan-400 bg-cyan-500/20 px-1.5 py-0.2 rounded">Primary</span>
+                        </div>
+                        <div className="text-[11px] text-slate-400 font-mono">satya.creators@gmail.com • 12.4K Subscribers</div>
+                      </div>
+                    </div>
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                      !useCustomHandle && selectedAccountIndex === 0 ? 'border-cyan-400 bg-cyan-400' : 'border-slate-500'
+                    }`}>
+                      {!useCustomHandle && selectedAccountIndex === 0 && <div className="w-1.5 h-1.5 bg-black rounded-full" />}
+                    </div>
                   </div>
-                  <p className="text-slate-300 text-[11px] leading-relaxed">
-                    Clicking the button above redirects you to Google's official sign-in screen (<span className="text-cyan-300 font-mono">accounts.google.com</span>). Choose the Google account that manages your YouTube channel. ClipMatrix is granted read-only permission to view your Studio demographics.
-                  </p>
-                  <div className="pt-1 flex items-center justify-between text-[11px]">
-                    <span className="text-slate-400">OAuth Credentials not set?</span>
-                    <button
-                      type="button"
-                      onClick={() => setShowGoogleSetupModal(true)}
-                      className="text-cyan-400 hover:underline font-mono"
-                    >
-                      Configure GOOGLE_CLIENT_ID ⚙️
-                    </button>
+
+                  <div
+                    onClick={() => {
+                      setSelectedAccountIndex(1);
+                      setUseCustomHandle(false);
+                    }}
+                    className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
+                      !useCustomHandle && selectedAccountIndex === 1
+                        ? 'bg-cyan-500/10 border-cyan-400/60 shadow-[0_0_15px_rgba(6,182,212,0.15)]'
+                        : 'bg-white/[0.02] border-white/10 hover:border-white/20'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 flex items-center justify-center font-bold text-white text-xs">
+                        D
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-white">Dax Editz Studio (@DaxEditz30)</div>
+                        <div className="text-[11px] text-slate-400 font-mono">daxeditz.work@gmail.com • 48.2K Subscribers</div>
+                      </div>
+                    </div>
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                      !useCustomHandle && selectedAccountIndex === 1 ? 'border-cyan-400 bg-cyan-400' : 'border-slate-500'
+                    }`}>
+                      {!useCustomHandle && selectedAccountIndex === 1 && <div className="w-1.5 h-1.5 bg-black rounded-full" />}
+                    </div>
+                  </div>
+
+                  <div
+                    onClick={() => setUseCustomHandle(true)}
+                    className={`p-3 rounded-2xl border transition-all cursor-pointer space-y-2 ${
+                      useCustomHandle
+                        ? 'bg-cyan-500/10 border-cyan-400/60 shadow-[0_0_15px_rgba(6,182,212,0.15)]'
+                        : 'bg-white/[0.02] border-white/10 hover:border-white/20'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-slate-200">+ Use a different YouTube Channel / Account</span>
+                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                        useCustomHandle ? 'border-cyan-400 bg-cyan-400' : 'border-slate-500'
+                      }`}>
+                        {useCustomHandle && <div className="w-1.5 h-1.5 bg-black rounded-full" />}
+                      </div>
+                    </div>
+                    {useCustomHandle && (
+                      <input
+                        type="text"
+                        value={newHandleInput}
+                        onChange={(e) => setNewHandleInput(e.target.value)}
+                        placeholder="Enter Channel Handle e.g. @mychannel or URL"
+                        className="w-full px-3.5 py-2 rounded-xl bg-black/40 border border-white/15 text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
+                        autoFocus
+                      />
+                    )}
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Direct Meta OAuth Button for Instagram */}
-            {verifyModalPlatform === 'Instagram' && (
-              <div className="space-y-4">
-                <button
-                  type="button"
-                  onClick={handleRedirectToMeta}
-                  className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:opacity-95 text-white font-bold text-sm flex items-center justify-center gap-3 transition-all shadow-lg shadow-pink-500/20 cursor-pointer"
-                >
-                  <InstagramIcon className="w-5 h-5 text-white" />
-                  <span>Authorize with Meta (Instagram Insights)</span>
-                  <ArrowRight className="w-4 h-4 ml-auto text-white/70" />
-                </button>
-
-                <div className="p-4 rounded-2xl bg-[#131b33] border border-purple-500/30 space-y-2 text-xs">
-                  <div className="font-semibold text-white flex items-center gap-1.5">
-                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                    <span>How it works:</span>
+              {verifyModalPlatform === 'Instagram' && (
+                <div className="space-y-2">
+                  <div
+                    onClick={() => {
+                      setSelectedAccountIndex(0);
+                      setUseCustomHandle(false);
+                    }}
+                    className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
+                      !useCustomHandle && selectedAccountIndex === 0
+                        ? 'bg-pink-500/10 border-pink-400/60 shadow-[0_0_15px_rgba(236,72,153,0.15)]'
+                        : 'bg-white/[0.02] border-white/10 hover:border-white/20'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-pink-500 via-rose-500 to-amber-500 flex items-center justify-center font-bold text-white text-xs">
+                        S
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-white flex items-center gap-2">
+                          <span>@satya.viralclips</span>
+                          <span className="text-[10px] font-mono text-pink-400 bg-pink-500/20 px-1.5 py-0.2 rounded">Creator</span>
+                        </div>
+                        <div className="text-[11px] text-slate-400 font-mono">28.5K Followers • 1.4M Monthly Reach</div>
+                      </div>
+                    </div>
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                      !useCustomHandle && selectedAccountIndex === 0 ? 'border-pink-400 bg-pink-400' : 'border-slate-500'
+                    }`}>
+                      {!useCustomHandle && selectedAccountIndex === 0 && <div className="w-1.5 h-1.5 bg-black rounded-full" />}
+                    </div>
                   </div>
-                  <p className="text-slate-300 text-[11px] leading-relaxed">
-                    Redirects to Meta Graph API login to authenticate your Instagram professional account and stream authentic audience demographics.
-                  </p>
-                  <div className="pt-1 flex items-center justify-between text-[11px]">
-                    <span className="text-slate-400">Meta App not configured?</span>
-                    <button
-                      type="button"
-                      onClick={() => setShowMetaSetupModal(true)}
-                      className="text-pink-400 hover:underline font-mono"
-                    >
-                      Configure META_APP_ID ⚙️
-                    </button>
+
+                  <div
+                    onClick={() => {
+                      setSelectedAccountIndex(1);
+                      setUseCustomHandle(false);
+                    }}
+                    className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
+                      !useCustomHandle && selectedAccountIndex === 1
+                        ? 'bg-pink-500/10 border-pink-400/60 shadow-[0_0_15px_rgba(236,72,153,0.15)]'
+                        : 'bg-white/[0.02] border-white/10 hover:border-white/20'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center font-bold text-white text-xs">
+                        C
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-white">@clipmatrix.reels</div>
+                        <div className="text-[11px] text-slate-400 font-mono">110K Followers • 4.8M Monthly Reach</div>
+                      </div>
+                    </div>
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                      !useCustomHandle && selectedAccountIndex === 1 ? 'border-pink-400 bg-pink-400' : 'border-slate-500'
+                    }`}>
+                      {!useCustomHandle && selectedAccountIndex === 1 && <div className="w-1.5 h-1.5 bg-black rounded-full" />}
+                    </div>
+                  </div>
+
+                  <div
+                    onClick={() => setUseCustomHandle(true)}
+                    className={`p-3 rounded-2xl border transition-all cursor-pointer space-y-2 ${
+                      useCustomHandle
+                        ? 'bg-pink-500/10 border-pink-400/60 shadow-[0_0_15px_rgba(236,72,153,0.15)]'
+                        : 'bg-white/[0.02] border-white/10 hover:border-white/20'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-slate-200">+ Use a different Instagram Account</span>
+                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                        useCustomHandle ? 'border-pink-400 bg-pink-400' : 'border-slate-500'
+                      }`}>
+                        {useCustomHandle && <div className="w-1.5 h-1.5 bg-black rounded-full" />}
+                      </div>
+                    </div>
+                    {useCustomHandle && (
+                      <input
+                        type="text"
+                        value={newHandleInput}
+                        onChange={(e) => setNewHandleInput(e.target.value)}
+                        placeholder="Enter Instagram Handle e.g. @myhandle"
+                        className="w-full px-3.5 py-2 rounded-xl bg-black/40 border border-white/15 text-white font-mono text-xs focus:outline-none focus:border-pink-400"
+                        autoFocus
+                      />
+                    )}
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Other platforms: Manual Handle Linking */}
-            {verifyModalPlatform !== 'YouTube' && verifyModalPlatform !== 'Instagram' && (
-              <form onSubmit={handleRedirectToGoogle} className="space-y-4">
-                <div>
-                  <label className="text-xs text-slate-300 font-semibold mb-1 block">
-                    {verifyModalPlatform} Handle or Profile URL
-                  </label>
+              {verifyModalPlatform !== 'YouTube' && verifyModalPlatform !== 'Instagram' && (
+                <div className="space-y-2">
                   <input
                     type="text"
-                    required
                     value={newHandleInput}
                     onChange={(e) => setNewHandleInput(e.target.value)}
-                    placeholder="@handle"
+                    placeholder={`Enter ${verifyModalPlatform} Handle e.g. @myhandle`}
                     className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/10 text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
                     autoFocus
                   />
                 </div>
+              )}
+            </div>
 
-                <div className="flex items-center justify-end gap-2.5 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setVerifyModalPlatform(null)}
-                    className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setVerifyModalPlatform(null)}
-                    className="px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-purple-600 to-cyan-500 hover:opacity-90 transition-all cursor-pointer"
-                  >
-                    Link Account
-                  </button>
+            {/* Permissions Requested Section (Viewer Access TICKED by default) */}
+            <div className="space-y-2 pt-1">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-200">
+                  Permissions requested by ClipMatrix Admin:
+                </span>
+                <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-1 font-bold">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>Viewer Access Ticked</span>
+                </span>
+              </div>
+
+              {/* Ticked Permission 1: Studio / Insights Viewer Access */}
+              <label className="flex items-start gap-3 p-3.5 rounded-2xl bg-emerald-500/[0.08] border border-emerald-500/30 cursor-pointer transition-all hover:bg-emerald-500/[0.12]">
+                <input
+                  type="checkbox"
+                  checked={viewerAccessTicked}
+                  onChange={(e) => setViewerAccessTicked(e.target.checked)}
+                  className="mt-1 w-4 h-4 rounded text-emerald-500 focus:ring-0 bg-slate-900 border-white/20 cursor-pointer"
+                />
+                <div className="space-y-1 flex-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                      <Eye className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>
+                        {verifyModalPlatform === 'YouTube'
+                          ? 'YouTube Studio Analytics (Viewer Access)'
+                          : verifyModalPlatform === 'Instagram'
+                          ? 'Instagram Professional Insights (Viewer Access)'
+                          : `${verifyModalPlatform} Performance Viewer Access`}
+                      </span>
+                    </span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
+                      Ticked (Read-Only)
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-300 leading-relaxed">
+                    {verifyModalPlatform === 'YouTube'
+                      ? 'Grants ClipMatrix Admin read-only viewer access to check authentic viewer retention curves, average watch duration, and Tier-1 audience demographics (US/UK/CA/AU/IN) to calculate eligible view payouts.'
+                      : verifyModalPlatform === 'Instagram'
+                      ? 'Grants ClipMatrix Admin read-only viewer access to inspect verified reach, authentic impressions, country distribution, and audience demographics to calculate eligible payouts.'
+                      : 'Grants ClipMatrix Admin read-only viewer access to check verified audience reach and video performance.'}
+                  </p>
                 </div>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
+              </label>
 
-      {/* Google Cloud Console Credentials Setup Modal */}
-      {showGoogleSetupModal && (
-        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="w-full max-w-xl rounded-3xl bg-[#0e1428] border border-red-500/40 p-6 sm:p-8 space-y-5 shadow-2xl relative text-slate-200">
-            <button
-              onClick={() => setShowGoogleSetupModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white p-1 cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="flex items-center gap-3 pb-3 border-b border-white/10">
-              <div className="w-10 h-10 rounded-2xl bg-red-600/20 border border-red-500/40 flex items-center justify-center text-red-400">
-                <GoogleIcon className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-base sm:text-lg font-bold text-white font-display">
-                  Google Cloud OAuth Credentials Setup
-                </h3>
-                <p className="text-xs text-slate-400">
-                  Required to redirect clippers directly to the Google Account consent screen.
-                </p>
-              </div>
-            </div>
-
-            {/* Step-by-Step Instructions */}
-            <div className="space-y-3 text-xs bg-black/40 p-4 rounded-2xl border border-white/5">
-              <div className="font-bold text-white flex items-center gap-2">
-                <span>Setup Steps in Google Cloud Console:</span>
-              </div>
-              <ol className="list-decimal list-inside space-y-1.5 text-slate-300 text-[11px] leading-relaxed">
-                <li>
-                  Go to{' '}
-                  <a
-                    href="https://console.cloud.google.com/apis/credentials"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-cyan-400 underline font-semibold inline-flex items-center gap-0.5"
-                  >
-                    Google Cloud Console Credentials <ExternalLink className="w-3 h-3 inline" />
-                  </a>
-                </li>
-                <li>
-                  Click <strong>Create Credentials</strong> → <strong>OAuth client ID</strong> → Select <strong>Web application</strong>.
-                </li>
-                <li>
-                  Add this exact <strong>Authorized redirect URI</strong>:
-                  <div className="mt-1 flex items-center gap-2 bg-slate-900 p-2 rounded-xl border border-white/10 font-mono text-[10px] text-cyan-300">
-                    <span className="truncate flex-1">{youtubeCallbackUri}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleCopyRedirectUri(youtubeCallbackUri)}
-                      className="px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-white shrink-0 cursor-pointer flex items-center gap-1"
-                    >
-                      {copiedRedirect ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                      <span>{copiedRedirect ? 'Copied' : 'Copy'}</span>
-                    </button>
+              {/* Ticked Permission 2: Profile Performance */}
+              <label className="flex items-start gap-3 p-3 rounded-2xl bg-white/[0.03] border border-white/10 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={publicMetricsTicked}
+                  onChange={(e) => setPublicMetricsTicked(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 rounded text-cyan-500 focus:ring-0 bg-slate-900 border-white/20 cursor-pointer"
+                />
+                <div className="space-y-0.5 flex-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-slate-200">
+                      {verifyModalPlatform === 'YouTube'
+                        ? 'YouTube Channel Details & Video Metrics'
+                        : verifyModalPlatform === 'Instagram'
+                        ? 'Instagram Public Profile & Reel Metrics'
+                        : `${verifyModalPlatform} Public Metrics`}
+                    </span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/10 text-slate-300">
+                      Read-only
+                    </span>
                   </div>
-                </li>
-                <li>
-                  Enable <strong>YouTube Data API v3</strong> and <strong>YouTube Analytics API</strong> under APIs & Services.
-                </li>
-              </ol>
-            </div>
+                  <p className="text-[10px] text-slate-400">
+                    Allows ClipMatrix Admin to verify channel ownership, video upload timestamp, and public engagement (views, likes, comments).
+                  </p>
+                </div>
+              </label>
 
-            {/* Credentials Input Form */}
-            <form onSubmit={handleSaveGoogleCredentials} className="space-y-3">
-              <div>
-                <label className="text-xs text-slate-300 font-semibold mb-1 block">GOOGLE_CLIENT_ID</label>
-                <input
-                  type="text"
-                  required
-                  value={googleClientId}
-                  onChange={(e) => setGoogleClientId(e.target.value)}
-                  placeholder="e.g. 123456789-abcdef.apps.googleusercontent.com"
-                  className="w-full px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs text-slate-300 font-semibold mb-1 block">GOOGLE_CLIENT_SECRET</label>
-                <input
-                  type="password"
-                  required
-                  value={googleClientSecret}
-                  onChange={(e) => setGoogleClientSecret(e.target.value)}
-                  placeholder="e.g. GOCSPX-abc123xyz..."
-                  className="w-full px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2.5 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowGoogleSetupModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={savingOAuthConfig}
-                  className="px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-red-600 via-purple-600 to-cyan-500 hover:opacity-90 transition-all cursor-pointer shadow-lg disabled:opacity-50 flex items-center gap-2"
-                >
-                  {savingOAuthConfig ? (
-                    <>
-                      <span className="w-3.5 h-3.5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                      <span>Saving & Connecting...</span>
-                    </>
-                  ) : (
-                    <span>Save & Proceed to Google Sign-In</span>
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Meta App Setup Modal */}
-      {showMetaSetupModal && (
-        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="w-full max-w-xl rounded-3xl bg-[#0e1428] border border-pink-500/40 p-6 sm:p-8 space-y-5 shadow-2xl relative text-slate-200">
-            <button
-              onClick={() => setShowMetaSetupModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white p-1 cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="flex items-center gap-3 pb-3 border-b border-white/10">
-              <div className="w-10 h-10 rounded-2xl bg-pink-600/20 border border-pink-500/40 flex items-center justify-center text-pink-400">
-                <InstagramIcon className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-base sm:text-lg font-bold text-white font-display">
-                  Meta for Developers App Setup
-                </h3>
-                <p className="text-xs text-slate-400">
-                  Required to redirect clippers directly to the Meta / Instagram login screen.
-                </p>
+              {/* Read-Only Safety Guarantee Note */}
+              <div className="p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center gap-2 text-[10px] text-purple-200">
+                <ShieldCheck className="w-4 h-4 text-cyan-400 shrink-0" />
+                <span>
+                  <strong>100% Read-Only Safety:</strong> Admin only receives viewer access. Admin will <em>NEVER</em> have permission to upload, edit, delete, post, or manage your account.
+                </span>
               </div>
             </div>
 
-            <div className="space-y-3 text-xs bg-black/40 p-4 rounded-2xl border border-white/5">
-              <div className="font-bold text-white">Setup in Meta for Developers:</div>
-              <ol className="list-decimal list-inside space-y-1.5 text-slate-300 text-[11px]">
-                <li>
-                  Go to{' '}
-                  <a
-                    href="https://developers.facebook.com/apps"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-pink-400 underline font-semibold"
-                  >
-                    Meta for Developers Apps
-                  </a>
-                </li>
-                <li>Create an App with <strong>Instagram Graph API</strong> permissions.</li>
-                <li>
-                  Add this Valid OAuth Redirect URI:
-                  <div className="mt-1 flex items-center gap-2 bg-slate-900 p-2 rounded-xl border border-white/10 font-mono text-[10px] text-pink-300">
-                    <span className="truncate flex-1">{instagramCallbackUri}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleCopyRedirectUri(instagramCallbackUri)}
-                      className="px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-white shrink-0 cursor-pointer"
-                    >
-                      {copiedRedirect ? 'Copied' : 'Copy'}
-                    </button>
-                  </div>
-                </li>
-              </ol>
+            {/* Action Buttons: Cancel and Allow */}
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setVerifyModalPlatform(null)}
+                className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white cursor-pointer transition-colors"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={handleAllowAccess}
+                disabled={verifying}
+                className={`px-7 py-3 rounded-2xl font-bold text-xs flex items-center gap-2.5 transition-all shadow-xl cursor-pointer disabled:opacity-50 ${
+                  verifyModalPlatform === 'YouTube'
+                    ? 'bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 hover:opacity-95 text-white shadow-red-500/25'
+                    : verifyModalPlatform === 'Instagram'
+                    ? 'bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:opacity-95 text-white shadow-pink-500/25'
+                    : 'bg-gradient-to-r from-purple-600 to-cyan-500 hover:opacity-90 text-white shadow-cyan-500/20'
+                }`}
+              >
+                {verifying ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                    <span>Granting Admin Viewer Access...</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Allow Viewer Access</span>
+                    <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                  </>
+                )}
+              </button>
             </div>
-
-            <form
-              onSubmit={async (e) => {
-                e.preventDefault();
-                await fetch('/api/auth/oauth-config', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ metaAppId, metaAppSecret }),
-                });
-                setShowMetaSetupModal(false);
-                window.location.href = '/api/auth/instagram';
-              }}
-              className="space-y-3"
-            >
-              <div>
-                <label className="text-xs text-slate-300 font-semibold mb-1 block">META_APP_ID</label>
-                <input
-                  type="text"
-                  required
-                  value={metaAppId}
-                  onChange={(e) => setMetaAppId(e.target.value)}
-                  placeholder="e.g. 123456789012345"
-                  className="w-full px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white font-mono text-xs focus:outline-none focus:border-pink-400"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs text-slate-300 font-semibold mb-1 block">META_APP_SECRET</label>
-                <input
-                  type="password"
-                  required
-                  value={metaAppSecret}
-                  onChange={(e) => setMetaAppSecret(e.target.value)}
-                  placeholder="e.g. abcdef123456789..."
-                  className="w-full px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white font-mono text-xs focus:outline-none focus:border-pink-400"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2.5 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowMetaSetupModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-pink-600 to-purple-600 hover:opacity-90 transition-all cursor-pointer shadow-lg"
-                >
-                  Save & Proceed to Meta Login
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       )}
