@@ -50,9 +50,9 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState<'brand' | 'clipper'>('brand');
 
   // ROI Calculator state
-  const [calcBudget, setCalcBudget] = useState(100000);
-  const [calcCpm, setCalcCpm] = useState(120);
-  const [calcAov, setCalcAov] = useState(1800);
+  const [calcBudget, setCalcBudget] = useState(2500);
+  const [calcCpm, setCalcCpm] = useState(0.5);
+  const [calcAov, setCalcAov] = useState(45);
   const [calcConversion, setCalcConversion] = useState(1.2);
 
   // Clipper Simulator state
@@ -61,8 +61,8 @@ export default function HomePage() {
   // Brand Simulator state
   const [prevTitle, setPrevTitle] = useState('Aether AI 2.0 Global Launch');
   const [prevIndustry, setPrevIndustry] = useState('Tech & AI');
-  const [prevBudget, setPrevBudget] = useState(150000);
-  const [prevCpm, setPrevCpm] = useState(140);
+  const [prevBudget, setPrevBudget] = useState(2500);
+  const [prevCpm, setPrevCpm] = useState(0.5);
 
   // Contact form state
   const [contactName, setContactName] = useState('');
@@ -92,7 +92,7 @@ export default function HomePage() {
   const estimatedRoas = (estimatedRevenue / calcBudget).toFixed(1);
 
   // Clipper earnings
-  const potentialClipperEarnings = Math.floor((viewsSim / 1000) * 140);
+  const potentialClipperEarnings = Number(((viewsSim / 1000) * 0.5).toFixed(2));
 
   // Brand estimated views
   const brandEstimatedViews = Math.floor((prevBudget / prevCpm) * 1000);
@@ -323,13 +323,13 @@ export default function HomePage() {
                 <span className="flex items-center gap-1 text-purple-300">
                   <Eye className="w-3.5 h-3.5 text-purple-400" /> 1.48M Views
                 </span>
-                <span className="text-emerald-400 font-mono font-bold">+₹20,720 Earned</span>
+                <span className="text-emerald-400 font-mono font-bold">+$740 Earned</span>
               </div>
             </div>
 
             <div className="mt-3 flex items-center justify-between text-xs px-1">
               <span className="text-purple-300/80">Clipper: <strong className="text-white">@nikhil.cuts</strong></span>
-              <span className="text-xs font-mono text-cyan-400 font-semibold">CPM: ₹140</span>
+              <span className="text-xs font-mono text-cyan-400 font-semibold">CPM: $0.50</span>
             </div>
           </motion.div>
 
@@ -453,7 +453,7 @@ export default function HomePage() {
 
             <div className="mt-3 flex items-center justify-between text-xs px-1">
               <span className="text-purple-300/80">Brand: <strong className="text-white">Aether AI 2.0</strong></span>
-              <span className="text-xs font-mono text-emerald-400 font-semibold">CPV: ₹0.11</span>
+              <span className="text-xs font-mono text-emerald-400 font-semibold">CPM: $0.50</span>
             </div>
           </motion.div>
         </div>
@@ -470,7 +470,7 @@ export default function HomePage() {
               { label: 'Active Clippers', value: '3,420+', color: 'text-purple-400' },
               { label: 'Campaigns Ran', value: '240+', color: 'text-white' },
               { label: 'Brands Onboarded', value: '120+', color: 'text-cyan-400' },
-              { label: 'Clipper Payouts', value: '₹1.8Cr+', color: 'text-emerald-400' },
+              { label: 'Clipper Payouts', value: '$250,000+', color: 'text-emerald-400' },
               { label: 'Approved Clips', value: '18,500+', color: 'text-white' },
             ].map((stat, idx) => (
               <motion.div
@@ -584,8 +584,8 @@ export default function HomePage() {
               <tbody className="divide-y divide-purple-900/30">
                 <tr>
                   <td className="py-4 px-4 font-medium text-white">Pricing Model</td>
-                  <td className="py-4 px-4 font-semibold text-emerald-400 bg-purple-950/20">Guaranteed CPM (₹80 - ₹150)</td>
-                  <td className="py-4 px-4 text-slate-400">Fixed ₹1L - ₹5L Upfront Retainer</td>
+                  <td className="py-4 px-4 font-semibold text-emerald-400 bg-purple-950/20">Guaranteed $0.50 CPM ($0.50/1k views)</td>
+                  <td className="py-4 px-4 text-slate-400">Fixed $2,000 - $10,000 Upfront Retainer</td>
                 </tr>
                 <tr>
                   <td className="py-4 px-4 font-medium text-white">Financial Security</td>
@@ -658,7 +658,7 @@ export default function HomePage() {
               </div>
 
               <div>
-                <label className="text-xs text-purple-300 font-medium">Campaign Escrow Budget (₹)</label>
+                <label className="text-xs text-purple-300 font-medium">Campaign Budget ($ USD)</label>
                 <input
                   type="number"
                   value={prevBudget}
@@ -674,10 +674,10 @@ export default function HomePage() {
                 <div className="text-lg font-bold text-white font-display">{prevTitle}</div>
                 <div className="text-xs text-purple-300">
                   Industry: <span className="text-white font-semibold">{prevIndustry}</span> • Model:{' '}
-                  <span className="text-emerald-400 font-bold">CPM (₹{prevCpm}/1k views)</span>
+                  <span className="text-emerald-400 font-bold">CPM ($0.50/1k views)</span>
                 </div>
                 <div className="text-xs text-purple-300/80 leading-relaxed">
-                  Clippers will cut 9:16 vertical clips from your video links and receive ₹{prevCpm} per 1,000 verified
+                  Clippers will cut 9:16 vertical clips from your video links and receive $0.50 per 1,000 verified
                   views directly via escrow.
                 </div>
               </div>
@@ -754,12 +754,12 @@ export default function HomePage() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
               <div className="p-4 rounded-xl bg-[#140b26] border border-purple-900/40">
                 <div className="text-xs text-purple-300">Campaign CPM Rate</div>
-                <div className="text-xl font-bold text-purple-400 mt-1">₹140 / 1k views</div>
+                <div className="text-xl font-bold text-purple-400 mt-1">$0.50 / 1k views</div>
               </div>
               <div className="p-4 rounded-xl bg-[#140b26] border border-purple-900/40">
                 <div className="text-xs text-purple-300">Calculated Payout</div>
                 <div className="text-2xl font-extrabold text-emerald-400 mt-1 font-display">
-                  ₹{potentialClipperEarnings.toLocaleString('en-IN')}
+                  ${potentialClipperEarnings.toLocaleString('en-US')}
                 </div>
               </div>
               <div className="p-4 rounded-xl bg-[#140b26] border border-purple-900/40">
@@ -899,15 +899,15 @@ export default function HomePage() {
                           <div className="text-[10px] text-purple-300/70 uppercase">Clipper Reward</div>
                           <div className="text-sm font-bold text-emerald-400">
                             {camp.rewardModel === 'CPM'
-                              ? `₹${camp.cpmRate} / 1k views`
+                              ? `${camp.cpmRate || 0.5} / 1k views`
                               : camp.rewardModel === 'FIXED'
-                                ? `₹${camp.rewardPerClip} / clip`
-                                : `₹${camp.rewardPerClip} + CPM`}
+                                ? `${camp.rewardPerClip} / clip`
+                                : `${camp.rewardPerClip} + CPM`}
                           </div>
                         </div>
                         <div className="text-right">
                           <div className="text-[10px] text-purple-300/70 uppercase">Total Budget</div>
-                          <div className="text-xs font-semibold text-white">₹{camp.totalBudget?.toLocaleString('en-IN')}</div>
+                          <div className="text-xs font-semibold text-white">${camp.totalBudget?.toLocaleString('en-US')}</div>
                         </div>
                       </div>
 
@@ -1042,7 +1042,7 @@ export default function HomePage() {
                 title: 'How Aether AI Scaled From 0 to 1.8M Verified Views in 18 Days',
                 metric1: '1,850,000+',
                 label1: 'Verified Views',
-                metric2: '₹0.11',
+                metric2: '$0.50 CPM',
                 label2: 'Average CPV',
                 metric3: '14,200',
                 label3: 'Freemium Signups',
@@ -1054,7 +1054,7 @@ export default function HomePage() {
               {
                 brand: 'KicksDrop India',
                 industry: 'D2C Fashion & Sneakers',
-                title: 'Generating ₹28 Lakhs in Sneaker GMV via Travis Scott ASMR Unboxings',
+                title: 'Generating $350,000 in Sneaker GMV via Travis Scott ASMR Unboxings',
                 metric1: '920,000+',
                 label1: 'Verified Views',
                 metric2: '4.8x',
@@ -1183,7 +1183,7 @@ export default function HomePage() {
 
               <div className="px-3 py-1 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-white flex items-center gap-1.5">
                 <span className="text-purple-400">Available:</span>
-                <span className="font-bold text-emerald-400">₹3,52,400</span>
+                <span className="font-bold text-emerald-400">$4,400</span>
               </div>
             </div>
           </div>
@@ -1207,7 +1207,7 @@ export default function HomePage() {
                   </div>
                   <div className="flex items-center justify-between pb-2 border-b border-purple-900/30">
                     <span className="text-xs text-purple-300">Spent in escrow</span>
-                    <span className="text-xl font-bold font-mono text-emerald-400">₹27,15,000</span>
+                    <span className="text-xl font-bold font-mono text-emerald-400">$34,000</span>
                   </div>
                   <button
                     onClick={() => smoothScroll('#contact')}
@@ -1287,7 +1287,7 @@ export default function HomePage() {
                     platforms: ['🎵'],
                     date: '22 Sep 2026',
                     views: '310K',
-                    budget: '₹2,05,000',
+                    budget: '$2,500',
                     progress: 17,
                   },
                   {
@@ -1296,7 +1296,7 @@ export default function HomePage() {
                     platforms: ['🎵', '📷'],
                     date: '20 Sep 2026',
                     views: '1.2M',
-                    budget: '₹4,95,000',
+                    budget: '$5,000',
                     progress: 32,
                   },
                   {
@@ -1305,7 +1305,7 @@ export default function HomePage() {
                     platforms: ['🎵'],
                     date: '18 Sep 2026',
                     views: '980K',
-                    budget: '₹3,70,000',
+                    budget: '$4,000',
                     progress: 33,
                   },
                   {
@@ -1314,7 +1314,7 @@ export default function HomePage() {
                     platforms: ['🎵', '▶'],
                     date: '16 Sep 2026',
                     views: '760K',
-                    budget: '₹2,50,000',
+                    budget: '$3,000',
                     progress: 38,
                   },
                   {
@@ -1323,7 +1323,7 @@ export default function HomePage() {
                     platforms: ['🎵', '𝕏'],
                     date: '14 Sep 2026',
                     views: '2.1M',
-                    budget: '₹6,60,000',
+                    budget: '$6,500',
                     progress: 42,
                   },
                   {
@@ -1332,7 +1332,7 @@ export default function HomePage() {
                     platforms: ['🎵', '📷'],
                     date: '12 Sep 2026',
                     views: '810K',
-                    budget: '₹3,70,000',
+                    budget: '$4,000',
                     progress: 56,
                   },
                   {
@@ -1341,7 +1341,7 @@ export default function HomePage() {
                     platforms: ['🎵', '📷'],
                     date: '10 Sep 2026',
                     views: '1.6M',
-                    budget: '₹4,95,000',
+                    budget: '$5,000',
                     progress: 62,
                   },
                 ].map((item) => (
@@ -1428,7 +1428,7 @@ export default function HomePage() {
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-purple-200">Campaign Budget</span>
-                  <span className="text-white font-bold font-mono">₹{calcBudget.toLocaleString('en-IN')}</span>
+                  <span className="text-white font-bold font-mono">${calcBudget.toLocaleString('en-US')}</span>
                 </div>
                 <input
                   type="range"
@@ -1444,7 +1444,7 @@ export default function HomePage() {
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-purple-200">Target CPM Rate (Cost per 1k Views)</span>
-                  <span className="text-white font-bold font-mono">₹{calcCpm}</span>
+                  <span className="text-white font-bold font-mono">${calcCpm}</span>
                 </div>
                 <input
                   type="range"
@@ -1460,7 +1460,7 @@ export default function HomePage() {
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-purple-200">Average Product Price / Subscription</span>
-                  <span className="text-white font-bold font-mono">₹{calcAov.toLocaleString('en-IN')}</span>
+                  <span className="text-white font-bold font-mono">${calcAov.toLocaleString('en-US')}</span>
                 </div>
                 <input
                   type="range"
@@ -1494,15 +1494,15 @@ export default function HomePage() {
                 <div className="p-4 rounded-xl bg-[#110722] border border-purple-900/40">
                   <div className="text-xs text-purple-300">Cost Per View (CPV)</div>
                   <div className="text-2xl sm:text-3xl font-extrabold text-cyan-400 mt-1 font-display">
-                    ₹{estimatedCostPerView}
+                    ${estimatedCostPerView}
                   </div>
-                  <div className="text-[10px] text-cyan-300/70 mt-1">vs ₹1.20 Meta Ads</div>
+                  <div className="text-[10px] text-cyan-300/70 mt-1">vs $1.80 Meta Ads</div>
                 </div>
 
                 <div className="p-4 rounded-xl bg-[#110722] border border-purple-900/40">
                   <div className="text-xs text-purple-300">Projected Revenue</div>
                   <div className="text-2xl sm:text-3xl font-extrabold text-emerald-400 mt-1 font-display">
-                    ₹{estimatedRevenue.toLocaleString('en-IN')}
+                    ${estimatedRevenue.toLocaleString('en-US')}
                   </div>
                   <div className="text-[10px] text-emerald-300/70 mt-1">Based on {estimatedConversions} sales</div>
                 </div>

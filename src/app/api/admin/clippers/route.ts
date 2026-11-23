@@ -1,0 +1,293 @@
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { getCurrentUser } from '@/lib/auth';
+
+export async function GET() {
+  try {
+    const user = await getCurrentUser();
+    if (!user || user.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Admin permissions required' }, { status: 403 });
+    }
+
+    const clippers = await prisma.user.findMany({
+      where: { role: 'CLIPPER' },
+      include: {
+        clipperProfile: true,
+        wallet: true,
+        submissions: {
+          include: {
+            campaign: {
+              select: { id: true, title: true, cpmRate: true },
+            },
+          },
+          orderBy: { submittedAt: 'desc' },
+        },
+        withdrawals: {
+          orderBy: { requestedAt: 'desc' },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    let overallApprovedViews = 0;
+    let overallGrossEarnings = 0;
+    let overallPaidOut = 0;
+    let overallUnpaidDue = 0;
+
+    const formattedClippers = clippers.map((clipper) => {
+      const approvedSubs = clipper.submissions.filter(
+        (s) => s.status === 'APPROVED' || s.status === 'VIEWS_VERIFIED'
+      );
+      const pendingSubs = clipper.submissions.filter(
+        (s) => s.status === 'PENDING_REVIEW'
+      );
+
+      // Total views delivered on approved clips
+      const totalApprovedViews = approvedSubs.reduce(
+        (acc, s) => acc + (s.verifiedViews || s.reportedViews || 0),
+        0
+      );
+
+      // Total earnings generated at $0.50 CPM standard: (views / 1000) * 0.5
+      const totalEarnings = Number(
+        approvedSubs
+          .reduce((acc, s) => acc + (s.rewardEarned || ((s.verifiedViews || s.reportedViews || 0) / 1000) * 0.5), 0)
+          .toFixed(2)
+      );
+
+      // Total paid out through processed payouts
+      const processedWithdrawals = clipper.withdrawals.filter(
+        (w) => w.status === 'PROCESSED'
+      );
+      const totalPaidOut = Number(
+        processedWithdrawals.reduce((acc, w) => acc + w.amount, 0).toFixed(2)
+      );
+
+      // Unpaid earnings due to be paid to clipper
+      const unpaidEarnings = Math.max(0, Number((totalEarnings - totalPaidOut).toFixed(2)));
+
+      // Pending review views & estimated earnings
+      const pendingViews = pendingSubs.reduce(
+        (acc, s) => acc + (s.reportedViews || 0),
+        0
+      );
+      const pendingEstimatedEarnings = Number(((pendingViews / 1000) * 0.5).toFixed(2));
+
+      // Multi-account breakdown: group approved videos and views by postAccountHandle
+      const accountMap: Record<
+        string,
+        {
+          handle: string;
+          platform: string;
+          totalApprovedClips: number;
+          totalApprovedViews: number;
+          accountEarnings: number;
+          videos: any[];
+        }
+      > = {};
+
+      for (const s of approvedSubs) {
+        const handle = s.postAccountHandle?.trim() || `${s.platform.toLowerCase()}_account`;
+        const platform = s.platform || 'INSTAGRAM';
+        const views = s.verifiedViews || s.reportedViews || 0;
+        const reward = Number((s.rewardEarned || (views / 1000) * 0.5).toFixed(2));
+
+        if (!accountMap[handle]) {
+          accountMap[handle] = {
+            handle,
+            platform,
+            totalApprovedClips: 0,
+            totalApprovedViews: 0,
+            accountEarnings: 0,
+            videos: [],
+          };
+        }
+
+        accountMap[handle].totalApprovedClips += 1;
+        accountMap[handle].totalApprovedViews += views;
+        accountMap[handle].accountEarnings = Number(
+          (accountMap[handle].accountEarnings + reward).toFixed(2)
+        );
+        accountMap[handle].videos.push({
+          id: s.id,
+          submissionNumber: s.submissionNumber,
+          title: s.title,
+          videoUrl: s.videoUrl,
+          campaignTitle: s.campaign?.title || 'Active Campaign',
+          platform: s.platform,
+          verifiedViews: views,
+          rewardEarned: reward,
+          submittedAt: s.submittedAt,
+        });
+      }
+
+      const accounts = Object.values(accountMap);
+
+      // Payout details
+      const upiId = clipper.clipperProfile?.upiId || null;
+      const bankName = clipper.clipperProfile?.bankName || null;
+      const bankAccountNumber = clipper.clipperProfile?.bankAccountNumber || null;
+      const bankIfsc = clipper.clipperProfile?.bankIfsc || null;
+      const hasPayoutMethod = Boolean(upiId || bankAccountNumber);
+
+      overallApprovedViews += totalApprovedViews;
+      overallGrossEarnings += totalEarnings;
+      overallPaidOut += totalPaidOut;
+      overallUnpaidDue += unpaidEarnings;
+
+      return {
+        id: clipper.id,
+        name: clipper.name,
+        email: clipper.email,
+        phone: clipper.phone || null,
+        avatar: clipper.avatar || null,
+        status: clipper.status,
+        joinedAt: clipper.createdAt,
+        paymentDetails: {
+          upiId,
+          bankName,
+          bankAccountNumber,
+          bankIfsc,
+          hasPayoutMethod,
+          preferredMethod: upiId ? 'UPI' : bankAccountNumber ? 'BANK' : 'NONE',
+        },
+        metrics: {
+          totalSubmissions: clipper.submissions.length,
+          approvedClipsCount: approvedSubs.length,
+          pendingClipsCount: pendingSubs.length,
+          totalApprovedViews,
+          totalEarnings,
+          totalPaidOut,
+          unpaidEarnings,
+          pendingViews,
+          pendingEstimatedEarnings,
+        },
+        accounts,
+        payoutHistory: clipper.withdrawals,
+      };
+    });
+
+    return NextResponse.json({
+      summary: {
+        totalClippersCount: clippers.length,
+        totalApprovedViews: overallApprovedViews,
+        totalGrossEarnings: Number(overallGrossEarnings.toFixed(2)),
+        totalPaidOut: Number(overallPaidOut.toFixed(2)),
+        totalUnpaidDue: Number(overallUnpaidDue.toFixed(2)),
+      },
+      clippers: formattedClippers,
+    });
+  } catch (error) {
+    console.error('Error fetching admin clippers:', error);
+    return NextResponse.json({ error: 'Failed to fetch clippers data' }, { status: 500 });
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const user = await getCurrentUser();
+    if (!user || user.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Admin permissions required' }, { status: 403 });
+    }
+
+    const {
+      clipperId,
+      amount,
+      method,
+      accountDetails,
+      payoutTxnId,
+      adminNotes,
+    } = await request.json();
+
+    const payoutAmount = parseFloat(amount);
+    if (!clipperId || isNaN(payoutAmount) || payoutAmount <= 0) {
+      return NextResponse.json({ error: 'Valid clipper ID and positive amount are required' }, { status: 400 });
+    }
+
+    const clipper = await prisma.user.findUnique({
+      where: { id: clipperId },
+      include: { clipperProfile: true, wallet: true },
+    });
+
+    if (!clipper) {
+      return NextResponse.json({ error: 'Clipper not found' }, { status: 404 });
+    }
+
+    const resolvedTxnId =
+      payoutTxnId?.trim() ||
+      `UTR-${Date.now().toString().slice(-8)}-${Math.floor(Math.random() * 900 + 100)}`;
+    const resolvedAccountDetails =
+      accountDetails ||
+      clipper.clipperProfile?.upiId ||
+      clipper.clipperProfile?.bankAccountNumber ||
+      'Direct Payout';
+
+    const payout = await prisma.$transaction(async (tx) => {
+      // 1. Create processed withdrawal record
+      const withdrawal = await tx.withdrawal.create({
+        data: {
+          clipperId,
+          amount: payoutAmount,
+          method: method || 'UPI',
+          accountDetails: resolvedAccountDetails,
+          status: 'PROCESSED',
+          payoutTxnId: resolvedTxnId,
+          adminNotes: adminNotes || 'Admin settled payout post campaign completion.',
+          requestedAt: new Date(),
+          processedAt: new Date(),
+        },
+      });
+
+      // 2. Adjust wallet balance
+      if (clipper.wallet) {
+        await tx.wallet.update({
+          where: { userId: clipperId },
+          data: {
+            balance: { decrement: payoutAmount },
+          },
+        });
+
+        await tx.transaction.create({
+          data: {
+            walletId: clipper.wallet.id,
+            userId: clipperId,
+            amount: -payoutAmount,
+            type: 'WITHDRAWAL',
+            status: 'COMPLETED',
+            description: `Admin Payout via ${method || 'UPI'} (${resolvedAccountDetails}). Ref: ${resolvedTxnId}`,
+            referenceId: withdrawal.id,
+          },
+        });
+      }
+
+      // 3. Create Notification for the clipper
+      await tx.notification.create({
+        data: {
+          userId: clipperId,
+          title: '💵 Payout Disbursed to Your Account!',
+          message: `Admin has sent a payout of $${payoutAmount.toFixed(2)} to your ${method || 'UPI'} account (${resolvedAccountDetails}). Reference / UTR: ${resolvedTxnId}.`,
+          type: 'WITHDRAWAL',
+          link: '/dashboard/clipper/earnings',
+        },
+      });
+
+      // 4. Create Audit Log
+      await tx.auditLog.create({
+        data: {
+          adminId: user.id,
+          action: 'PROCESS_PAYOUT',
+          entity: 'Withdrawal',
+          entityId: withdrawal.id,
+          details: `Admin disbursed $${payoutAmount.toFixed(2)} to clipper ${clipper.name} (${clipper.email}). Ref: ${resolvedTxnId}`,
+        },
+      });
+
+      return withdrawal;
+    });
+
+    return NextResponse.json({ success: true, payout });
+  } catch (error) {
+    console.error('Error processing admin payout:', error);
+    return NextResponse.json({ error: 'Failed to process payout' }, { status: 500 });
+  }
+}

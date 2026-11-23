@@ -83,9 +83,9 @@ export async function GET(request: Request) {
           industry: 'Tech & AI',
           description: 'Create 15-45s fast-paced video edits showing Nova AI generating cinematic video from prompt.',
           rewardModel: 'CPM',
-          cpmRate: 150,
-          totalBudget: 50000,
-          remainingBudget: 38500,
+          cpmRate: 0.5,
+          totalBudget: 2500,
+          remainingBudget: 1850,
           targetViews: 350000,
           verifiedViews: 82000,
           status: 'ACTIVE',
@@ -101,9 +101,9 @@ export async function GET(request: Request) {
           industry: 'FinTech',
           description: 'Extract punchy hooks from founder podcast regarding 0% brokerage and SIP automation.',
           rewardModel: 'CPM',
-          cpmRate: 120,
-          totalBudget: 75000,
-          remainingBudget: 52000,
+          cpmRate: 0.5,
+          totalBudget: 3500,
+          remainingBudget: 2400,
           targetViews: 600000,
           verifiedViews: 195000,
           status: 'ACTIVE',
@@ -160,8 +160,8 @@ export async function POST(request: Request) {
     }
 
     const budgetNum = parseFloat(totalBudget);
-    if (isNaN(budgetNum) || budgetNum < 5000) {
-      return NextResponse.json({ error: 'Minimum campaign budget is ₹5,000' }, { status: 400 });
+    if (isNaN(budgetNum) || budgetNum < 100) {
+      return NextResponse.json({ error: 'Minimum campaign budget is $100' }, { status: 400 });
     }
 
     // Check brand wallet balance
@@ -172,7 +172,7 @@ export async function POST(request: Request) {
     if (user.role === 'BRAND') {
       if (!brandWallet || brandWallet.balance < budgetNum) {
         return NextResponse.json(
-          { error: `Insufficient wallet balance (Available: ₹${brandWallet?.balance || 0}). Please top up your wallet first.` },
+          { error: `Insufficient treasury balance (Available: $${(brandWallet?.balance || 0).toFixed(2)}). Please fund your campaign balance first.` },
           { status: 400 }
         );
       }
@@ -209,11 +209,11 @@ export async function POST(request: Request) {
           aspectRatio: '9:16',
           rewardModel: rewardModel || 'CPM',
           rewardPerClip: parseFloat(rewardPerClip) || 0,
-          cpmRate: parseFloat(cpmRate) || 120,
-          maxRewardPerClip: parseFloat(maxRewardPerClip) || 15000,
+          cpmRate: parseFloat(cpmRate) || 0.5,
+          maxRewardPerClip: parseFloat(maxRewardPerClip) || 1000,
           totalBudget: budgetNum,
           remainingBudget: budgetNum,
-          targetViews: parseInt(targetViews) || Math.floor((budgetNum / 120) * 1000),
+          targetViews: parseInt(targetViews) || Math.floor((budgetNum / 0.5) * 1000),
           status: 'ACTIVE', // Automatically active or ready
           isFeatured: true,
           deadline: deadline ? new Date(deadline) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),

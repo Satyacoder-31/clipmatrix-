@@ -104,12 +104,12 @@ model Campaign {
   
   // Rewards & Budget
   rewardModel         String   @default("CPM") // CPM, FIXED, MILESTONE, HYBRID
-  rewardPerClip       Float    @default(500)   // For FIXED model (₹)
-  cpmRate             Float    @default(120)   // For CPM model (₹ per 1,000 verified views)
-  milestoneRulesJson  String?  // For MILESTONE model: JSON e.g. [{"views":10000,"reward":500},...]
-  maxRewardPerClip    Float    @default(15000) // Cap to protect budget
-  totalBudget         Float    @default(50000)
-  remainingBudget     Float    @default(50000)
+  rewardPerClip       Float    @default(0)     // For FIXED model ($)
+  cpmRate             Float    @default(0.5)   // For CPM model ($ per 1,000 verified views, default $0.50)
+  milestoneRulesJson  String?  // For MILESTONE model: JSON e.g. [{"views":10000,"reward":5},...]
+  maxRewardPerClip    Float    @default(1000)  // Cap to protect budget ($)
+  totalBudget         Float    @default(2500)
+  remainingBudget     Float    @default(2500)
   targetViews         Int      @default(500000)
   verifiedViews       Int      @default(0)
   

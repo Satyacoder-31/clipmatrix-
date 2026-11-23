@@ -5,17 +5,19 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-IN', {
+export function formatCurrency(amount: number, minimumFractionDigits: number = 2): string {
+  const safeAmount = isNaN(amount) ? 0 : amount;
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'INR',
-    maximumFractionDigits: 0,
-  }).format(amount);
+    currency: 'USD',
+    minimumFractionDigits: Number.isInteger(safeAmount) && minimumFractionDigits === 0 ? 0 : 2,
+    maximumFractionDigits: 2,
+  }).format(safeAmount);
 }
 
 export function formatNumber(num: number): string {
-  if (num >= 10000000) {
-    return (num / 10000000).toFixed(1).replace(/\.0$/, '') + ' Cr';
+  if (num >= 1000000000) {
+    return (num / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
   }
   if (num >= 1000000) {
     return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
@@ -23,7 +25,7 @@ export function formatNumber(num: number): string {
   if (num >= 1000) {
     return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
   }
-  return num.toLocaleString('en-IN');
+  return num.toLocaleString('en-US');
 }
 
 export function getPlatformBadge(platform: string) {

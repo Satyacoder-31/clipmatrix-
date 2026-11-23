@@ -56,16 +56,15 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    // Calculate reward to credit to the clipper user if approved
+    // Calculate reward to credit to the clipper user if approved ($0.50 CPM standard)
     let creditedReward = 0;
     if (status === 'APPROVED' || status === 'VIEWS_VERIFIED') {
       if (typeof rewardAmount === 'number' && rewardAmount > 0) {
-        creditedReward = rewardAmount;
-      } else if (submission.campaign.rewardPerClip > 0) {
-        creditedReward = submission.campaign.rewardPerClip;
-      } else if (submission.campaign.cpmRate > 0) {
+        creditedReward = Number(rewardAmount.toFixed(2));
+      } else {
         const vCount = typeof verifiedViews === 'number' ? verifiedViews : (submission.verifiedViews || submission.reportedViews || 0);
-        creditedReward = Math.floor((vCount / 1000) * submission.campaign.cpmRate);
+        const rate = submission.campaign.cpmRate > 0 ? submission.campaign.cpmRate : 0.5;
+        creditedReward = Number(((vCount / 1000) * rate).toFixed(2));
       }
     }
 
@@ -131,8 +130,8 @@ export async function PATCH(
       message = `Your submission was rejected: "${rejectionReason}". Please review guidelines and submit an update.`;
     } else if (status === 'APPROVED') {
       message = creditedReward > 0
-        ? `Congratulations! Your clip was approved. ₹${creditedReward.toLocaleString('en-IN')} has been added to your balance!`
-        : `Congratulations! Your clip was approved by the brand. View tracking is now active.`;
+        ? `Congratulations! Your clip was approved. $${creditedReward.toFixed(2)} has been credited to your earnings!`
+        : `Congratulations! Your clip was approved. View tracking is active.`;
     }
 
     await prisma.notification.create({

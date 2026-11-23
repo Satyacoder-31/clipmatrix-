@@ -81,7 +81,7 @@ export default function DashboardSidebar({
     { label: 'Review Video Clips', href: '/dashboard/admin/submissions', icon: Film, badge: 'REVIEW' },
     { label: 'Verify Views Engine', href: '/dashboard/admin/verification', icon: CheckSquare, badge: 'LIVE' },
     { label: 'Campaign Controls', href: '/dashboard/admin/campaigns', icon: FolderKanban },
-    { label: 'Payout Requests', href: '/dashboard/admin/withdrawals', icon: CreditCard },
+    { label: 'Clipper Payouts & Earnings', href: '/dashboard/admin/withdrawals', icon: CreditCard },
     { label: 'Users Directory', href: '/dashboard/admin/users', icon: Users },
     { label: 'Notifications', href: '/dashboard/clipper/notifications', icon: Bell },
   ];
@@ -248,7 +248,7 @@ export default function DashboardSidebar({
 
           <div className="space-y-0.5">
             <div className="text-lg font-black text-white font-display tracking-tight">
-              ₹1,84,50,000+
+              $250,000+
             </div>
             <div className="text-[11px] text-purple-200/70 leading-tight">
               Verified payouts issued to top performance clippers.
@@ -271,7 +271,7 @@ export default function DashboardSidebar({
                 {displayRole}
               </span>
               <span className="text-[10px] text-emerald-400 font-mono font-semibold">
-                ₹{balance.toLocaleString('en-IN')}
+                ${balance.toLocaleString('en-US')}
               </span>
             </div>
           </div>
