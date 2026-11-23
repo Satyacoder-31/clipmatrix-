@@ -310,6 +310,4 @@ export async function POST(request: Request) {
     console.error('Error processing admin payout:', error);
     return NextResponse.json({ error: error?.message || 'Failed to process payout' }, { status: 500 });
   }
-    return NextResponse.json({ error: 'Failed to process payout' }, { status: 500 });
-  }
 }
