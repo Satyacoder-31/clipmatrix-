@@ -222,6 +222,13 @@ export async function POST(request: Request) {
       clipper.clipperProfile?.bankAccountNumber ||
       'Direct Payout';
 
+    // Resolve an existing Admin ID from DB for foreign keys
+    let adminDbUser = await prisma.user.findUnique({ where: { id: user.id } });
+    if (!adminDbUser) {
+      adminDbUser = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
+    }
+    const resolvedAdminId = adminDbUser?.id || clipperId;
+
     const payout = await prisma.$transaction(async (tx) => {
       // 1. Create processed withdrawal record
       const withdrawal = await tx.withdrawal.create({
@@ -238,56 +245,71 @@ export async function POST(request: Request) {
         },
       });
 
-      // 2. Adjust wallet balance
-      if (clipper.wallet) {
-        await tx.wallet.update({
-          where: { userId: clipperId },
-          data: {
-            balance: { decrement: payoutAmount },
-          },
-        });
-
-        await tx.transaction.create({
-          data: {
-            walletId: clipper.wallet.id,
-            userId: clipperId,
-            amount: -payoutAmount,
-            type: 'WITHDRAWAL',
-            status: 'COMPLETED',
-            description: `Admin Payout via ${method || 'UPI'} (${resolvedAccountDetails}). Ref: ${resolvedTxnId}`,
-            referenceId: withdrawal.id,
-          },
+      // 2. Adjust wallet balance / ledger
+      let wallet = await tx.wallet.findUnique({ where: { userId: clipperId } });
+      if (!wallet) {
+        wallet = await tx.wallet.create({
+          data: { userId: clipperId, balance: 0, lifetimeEarned: 0 },
         });
       }
 
-      // 3. Create Notification for the clipper
-      await tx.notification.create({
+      await tx.wallet.update({
+        where: { id: wallet.id },
         data: {
-          userId: clipperId,
-          title: '💵 Payout Disbursed to Your Account!',
-          message: `Admin has sent a payout of $${payoutAmount.toFixed(2)} to your ${method || 'UPI'} account (${resolvedAccountDetails}). Reference / UTR: ${resolvedTxnId}.`,
-          type: 'WITHDRAWAL',
-          link: '/dashboard/clipper/earnings',
+          balance: { decrement: payoutAmount },
         },
       });
 
-      // 4. Create Audit Log
-      await tx.auditLog.create({
+      await tx.transaction.create({
         data: {
-          adminId: user.id,
-          action: 'PROCESS_PAYOUT',
-          entity: 'Withdrawal',
-          entityId: withdrawal.id,
-          details: `Admin disbursed $${payoutAmount.toFixed(2)} to clipper ${clipper.name} (${clipper.email}). Ref: ${resolvedTxnId}`,
+          walletId: wallet.id,
+          userId: clipperId,
+          amount: -payoutAmount,
+          type: 'WITHDRAWAL',
+          status: 'COMPLETED',
+          description: `Admin Payout via ${method || 'UPI'} (${resolvedAccountDetails}). Ref: ${resolvedTxnId}`,
+          referenceId: withdrawal.id,
         },
       });
+
+      // 3. Create Notification for the clipper (fail-safe)
+      try {
+        await tx.notification.create({
+          data: {
+            userId: clipperId,
+            title: '💵 Payout Disbursed to Your Account!',
+            message: `Admin has sent a payout of $${payoutAmount.toFixed(2)} to your ${method || 'UPI'} account (${resolvedAccountDetails}). Reference / UTR: ${resolvedTxnId}.`,
+            type: 'WITHDRAWAL',
+            link: '/dashboard/clipper/earnings',
+          },
+        });
+      } catch (e) {
+        console.warn('Failed to send notification:', e);
+      }
+
+      // 4. Create Audit Log (fail-safe)
+      try {
+        await tx.auditLog.create({
+          data: {
+            adminId: resolvedAdminId,
+            action: 'PROCESS_PAYOUT',
+            entity: 'Withdrawal',
+            entityId: withdrawal.id,
+            details: `Admin disbursed $${payoutAmount.toFixed(2)} to clipper ${clipper.name} (${clipper.email}). Ref: ${resolvedTxnId}`,
+          },
+        });
+      } catch (e) {
+        console.warn('Failed to create audit log:', e);
+      }
 
       return withdrawal;
     });
 
     return NextResponse.json({ success: true, payout });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error processing admin payout:', error);
+    return NextResponse.json({ error: error?.message || 'Failed to process payout' }, { status: 500 });
+  }
     return NextResponse.json({ error: 'Failed to process payout' }, { status: 500 });
   }
 }

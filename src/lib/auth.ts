@@ -14,7 +14,7 @@ export interface TokenPayload {
 
 export const DEMO_USERS = {
   CLIPPER: {
-    id: 'user-clipper-demo',
+    id: '144128b2-e84f-4255-a426-6d7a0f0c2c53',
     email: 'clipper@clipmatrix.com',
     name: 'Aarav Sharma (Elite Clipper)',
     role: 'CLIPPER' as const,
@@ -56,7 +56,7 @@ export const DEMO_USERS = {
     },
   },
   BRAND: {
-    id: 'user-brand-demo',
+    id: '8d8e143b-88cc-4135-a590-3823cb5ec2c1',
     email: 'brand@clipmatrix.com',
     name: 'Aether AI Labs',
     role: 'BRAND' as const,
@@ -89,7 +89,7 @@ export const DEMO_USERS = {
     },
   },
   ADMIN: {
-    id: 'user-admin-demo',
+    id: 'f734622d-194d-4ac9-a77e-557824eb9f3d',
     email: 'admin@clipmatrix.com',
     name: 'ClipMatrix Super Admin',
     role: 'ADMIN' as const,
