@@ -14,12 +14,13 @@ export async function GET(request: Request) {
 
     const where: any = {};
 
-    if (status) {
+    if (status && status !== 'ALL') {
       where.status = status;
-    } else {
+    } else if (!status) {
       // By default public marketplace shows active campaigns
       where.status = 'ACTIVE';
     }
+    // If status === 'ALL', no status filter is applied so all campaigns are returned
 
     if (platform && platform !== 'ALL') {
       where.allowedPlatforms = { contains: platform };

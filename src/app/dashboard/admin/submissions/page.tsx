@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   CheckCircle2,
   XCircle,
@@ -28,6 +28,7 @@ import {
   Layers,
   FolderOpen,
   Wallet,
+  Check,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -54,6 +55,7 @@ export default function AdminSubmissionsReviewPage() {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [search, setSearch] = useState('');
+  const [campaignSearch, setCampaignSearch] = useState('');
   const [rejectModalSub, setRejectModalSub] = useState<any>(null);
   const [rejectionReason, setRejectionReason] = useState('Missing required brand hashtag or handle tag in video caption.');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -71,7 +73,7 @@ export default function AdminSubmissionsReviewPage() {
     try {
       const res = await fetch('/api/campaigns?status=ALL');
       const data = await res.json();
-      if (data.campaigns) {
+      if (data.campaigns && Array.isArray(data.campaigns)) {
         setCampaigns(data.campaigns);
       }
     } catch {
@@ -82,12 +84,9 @@ export default function AdminSubmissionsReviewPage() {
   const fetchSubmissions = async () => {
     try {
       setLoading(true);
-      const params = new URLSearchParams();
-      if (statusFilter !== 'ALL') params.set('status', statusFilter);
-      if (selectedCampaignId !== 'ALL') params.set('campaignId', selectedCampaignId);
-      const res = await fetch(`/api/submissions?${params.toString()}`);
+      const res = await fetch('/api/submissions');
       const data = await res.json();
-      if (data.submissions) {
+      if (data.submissions && Array.isArray(data.submissions)) {
         setSubmissions(data.submissions);
       }
     } catch {
@@ -99,11 +98,8 @@ export default function AdminSubmissionsReviewPage() {
 
   useEffect(() => {
     fetchCampaigns();
-  }, []);
-
-  useEffect(() => {
     fetchSubmissions();
-  }, [statusFilter, selectedCampaignId]);
+  }, []);
 
   const handleApprove = async (sub: any) => {
     setActionLoading(sub.id);
@@ -237,33 +233,88 @@ export default function AdminSubmissionsReviewPage() {
     }
   };
 
-  // Compute stats per campaign from current submission set or campaigns
-  const campaignStats = React.useMemo(() => {
-    const map: Record<string, { total: number; pending: number }> = {};
+  // Comprehensive campaigns list: merges /api/campaigns PLUS all campaigns linked to submissions
+  const allCampaignsList = useMemo(() => {
+    const map = new Map<string, any>();
+
+    // 1. Add all from campaigns endpoint
+    campaigns.forEach((c) => {
+      if (c && c.id) map.set(c.id, c);
+    });
+
+    // 2. Add any campaign associated with submissions if not present
+    submissions.forEach((s) => {
+      const c = s.campaign;
+      const cId = s.campaignId || c?.id;
+      if (cId && !map.has(cId)) {
+        map.set(cId, {
+          id: cId,
+          title: c?.title || 'Brand Campaign',
+          brand: c?.brand || { name: 'Brand Sponsor' },
+          cpmRate: c?.cpmRate || 120,
+          rewardPerClip: c?.rewardPerClip || 500,
+          industry: c?.industry || 'Viral Marketing',
+          status: 'ACTIVE',
+        });
+      }
+    });
+
+    return Array.from(map.values());
+  }, [campaigns, submissions]);
+
+  // Compute stats per campaign (total submissions and pending review count)
+  const campaignStats = useMemo(() => {
+    const map: Record<string, { total: number; pending: number; approved: number }> = {};
     submissions.forEach((s) => {
       const cId = s.campaignId || s.campaign?.id;
       if (!cId) return;
-      if (!map[cId]) map[cId] = { total: 0, pending: 0 };
+      if (!map[cId]) map[cId] = { total: 0, pending: 0, approved: 0 };
       map[cId].total += 1;
       if (s.status === 'PENDING_REVIEW') map[cId].pending += 1;
+      if (s.status === 'APPROVED' || s.status === 'VIEWS_VERIFIED') map[cId].approved += 1;
     });
     return map;
   }, [submissions]);
 
-  const filtered = submissions.filter((sub) => {
-    if (!search) return true;
-    const q = search.toLowerCase();
-    return (
-      sub.title?.toLowerCase().includes(q) ||
-      sub.submissionNumber?.toLowerCase().includes(q) ||
-      sub.clipper?.name?.toLowerCase().includes(q) ||
-      sub.postAccountHandle?.toLowerCase().includes(q) ||
-      sub.campaign?.title?.toLowerCase().includes(q)
-    );
-  });
+  // Filtered submissions based on selectedCampaignId, statusFilter, and search query
+  const filtered = useMemo(() => {
+    return submissions.filter((sub) => {
+      // 1. Campaign Filter
+      if (selectedCampaignId !== 'ALL') {
+        const subCampId = sub.campaignId || sub.campaign?.id;
+        if (subCampId !== selectedCampaignId) return false;
+      }
 
-  const pendingCount = submissions.filter((s) => s.status === 'PENDING_REVIEW').length;
-  const activeCampaign = campaigns.find((c) => c.id === selectedCampaignId);
+      // 2. Status Filter
+      if (statusFilter !== 'ALL' && sub.status !== statusFilter) return false;
+
+      // 3. Search Query
+      if (!search) return true;
+      const q = search.toLowerCase();
+      return (
+        sub.title?.toLowerCase().includes(q) ||
+        sub.submissionNumber?.toLowerCase().includes(q) ||
+        sub.clipper?.name?.toLowerCase().includes(q) ||
+        sub.postAccountHandle?.toLowerCase().includes(q) ||
+        sub.campaign?.title?.toLowerCase().includes(q)
+      );
+    });
+  }, [submissions, selectedCampaignId, statusFilter, search]);
+
+  const pendingCountTotal = submissions.filter((s) => s.status === 'PENDING_REVIEW').length;
+  const activeCampaign = allCampaignsList.find((c) => c.id === selectedCampaignId);
+
+  // Filter campaigns by search inside the Review Hub if admin enters search
+  const displayedCampaigns = useMemo(() => {
+    if (!campaignSearch) return allCampaignsList;
+    const q = campaignSearch.toLowerCase();
+    return allCampaignsList.filter(
+      (c) =>
+        c.title?.toLowerCase().includes(q) ||
+        c.brand?.name?.toLowerCase().includes(q) ||
+        c.industry?.toLowerCase().includes(q)
+    );
+  }, [allCampaignsList, campaignSearch]);
 
   return (
     <div className="space-y-8 max-w-6xl">
@@ -278,7 +329,7 @@ export default function AdminSubmissionsReviewPage() {
             Video Clips Review Hub & Moderation
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Select a campaign below to review and approve submitted videos. Approved amounts are consolidated directly into each clipper user's single wallet (paid after campaign ends).
+            Click any campaign below to filter and approve submitted videos. Approved amounts are consolidated directly into each clipper user's single wallet (paid after campaign ends).
           </p>
         </div>
 
@@ -300,142 +351,187 @@ export default function AdminSubmissionsReviewPage() {
         </div>
       )}
 
-      {/* SECTION 1: CAMPAIGNS REVIEW HUB (Clicking a campaign filters all submitted videos for approval) */}
-      <div className="rounded-3xl bg-gradient-to-b from-[#0f1426]/90 via-[#0a0d1c]/95 to-[#060812] border border-cyan-500/30 p-6 space-y-4 shadow-xl">
+      {/* SECTION 1: CAMPAIGNS REVIEW HUB (Clicking any campaign immediately filters submitted videos for approval) */}
+      <div className="rounded-3xl bg-gradient-to-b from-[#0f1426]/95 via-[#0a0d1c]/95 to-[#060812] border border-cyan-500/40 p-6 space-y-4 shadow-2xl relative">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-300">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-500/20 to-purple-500/20 border border-cyan-400/40 flex items-center justify-center text-cyan-300 shadow-inner">
               <Layers className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-white font-display uppercase tracking-wider flex items-center gap-2">
-                <span>Campaigns Review Hub</span>
-                <span className="text-[10px] font-mono font-normal text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
-                  Select Campaign to Review
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm sm:text-base font-bold text-white font-display uppercase tracking-wider">
+                  Campaigns Review Hub
+                </h2>
+                <span className="text-[10px] font-mono font-bold text-cyan-300 bg-cyan-500/15 px-2.5 py-0.5 rounded-full border border-cyan-500/30">
+                  {allCampaignsList.length} Campaigns Available
                 </span>
-              </h2>
+              </div>
               <p className="text-xs text-slate-400 mt-0.5">
                 Click any campaign to inspect all submitted clips awaiting moderation.
               </p>
             </div>
           </div>
 
-          {selectedCampaignId !== 'ALL' && (
-            <button
-              onClick={() => setSelectedCampaignId('ALL')}
-              className="text-xs font-bold text-cyan-400 hover:text-white px-3 py-1.5 rounded-xl bg-white/[0.05] border border-white/10 hover:bg-white/10 transition-colors flex items-center gap-1.5 self-start sm:self-auto cursor-pointer"
-            >
-              <span>← View All Campaigns</span>
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {allCampaignsList.length > 4 && (
+              <input
+                type="text"
+                value={campaignSearch}
+                onChange={(e) => setCampaignSearch(e.target.value)}
+                placeholder="Filter campaigns..."
+                className="px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/10 text-white text-xs outline-none focus:border-cyan-400 w-36 sm:w-44"
+              />
+            )}
+
+            {selectedCampaignId !== 'ALL' && (
+              <button
+                onClick={() => setSelectedCampaignId('ALL')}
+                className="text-xs font-bold text-cyan-300 hover:text-white px-3 py-1.5 rounded-xl bg-cyan-500/15 border border-cyan-500/30 hover:bg-cyan-500/25 transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
+              >
+                <span>← Show All Campaigns</span>
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Campaign Filter Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
+        {/* Campaign Filter Cards Grid (Shows ALL campaigns dynamically) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5 pt-1">
           {/* Card: All Campaigns */}
           <button
             type="button"
             onClick={() => setSelectedCampaignId('ALL')}
-            className={`p-4 rounded-2xl text-left transition-all border cursor-pointer relative group flex flex-col justify-between ${
+            className={`p-4 sm:p-5 rounded-2xl text-left transition-all border cursor-pointer relative group flex flex-col justify-between ${
               selectedCampaignId === 'ALL'
-                ? 'bg-gradient-to-b from-purple-600/30 to-cyan-600/20 border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.25)]'
+                ? 'bg-gradient-to-b from-purple-600/30 via-indigo-600/20 to-cyan-600/30 border-cyan-400 shadow-[0_0_25px_rgba(6,182,212,0.3)] ring-2 ring-cyan-400/50'
                 : 'bg-white/[0.02] border-white/10 hover:border-white/20 hover:bg-white/[0.04]'
             }`}
           >
             <div>
-              <div className="flex items-center justify-between text-xs mb-1.5">
-                <span className="font-mono text-[10px] text-slate-400 uppercase">OVERVIEW</span>
-                {pendingCount > 0 && (
+              <div className="flex items-center justify-between text-xs mb-2">
+                <span className="font-mono text-[10px] text-slate-400 uppercase font-bold tracking-wider">
+                  ALL CAMPAIGNS
+                </span>
+                {pendingCountTotal > 0 ? (
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse">
-                    {pendingCount} Pending
+                    {pendingCountTotal} Pending
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-1">
+                    <Check className="w-3 h-3" /> Caught up
                   </span>
                 )}
               </div>
-              <h3 className="text-sm font-bold text-white font-display">All Campaigns</h3>
-              <p className="text-[11px] text-slate-400 mt-1">Review moderation queue across all brand campaigns</p>
+              <h3 className="text-base font-bold text-white font-display">
+                All Campaigns Queue
+              </h3>
+              <p className="text-[11px] text-slate-400 mt-1 leading-snug">
+                Review submitted clips across all brand campaigns
+              </p>
             </div>
+
             <div className="pt-3 border-t border-white/5 flex justify-between items-center text-xs mt-3">
-              <span className="text-slate-400 font-mono">Total Submitted:</span>
-              <span className="font-bold text-white font-mono">{submissions.length} clips</span>
+              <span className="text-slate-400 font-mono text-[11px]">Total Submitted:</span>
+              <span className="font-bold text-white font-mono bg-white/5 px-2.5 py-0.5 rounded-lg border border-white/10">
+                {submissions.length} clips
+              </span>
             </div>
           </button>
 
-          {/* Dynamic Campaign Cards */}
-          {campaigns.slice(0, 7).map((c) => {
+          {/* Dynamic Campaign Cards (Renders ALL campaigns without truncation) */}
+          {displayedCampaigns.map((c) => {
             const isSelected = selectedCampaignId === c.id;
-            const stats = campaignStats[c.id] || { total: c._count?.submissions || 0, pending: 0 };
+            const stats = campaignStats[c.id] || {
+              total: c._count?.submissions || 0,
+              pending: 0,
+              approved: 0,
+            };
 
             return (
               <button
                 key={c.id}
                 type="button"
                 onClick={() => setSelectedCampaignId(c.id)}
-                className={`p-4 rounded-2xl text-left transition-all border cursor-pointer relative group flex flex-col justify-between ${
+                className={`p-4 sm:p-5 rounded-2xl text-left transition-all border cursor-pointer relative group flex flex-col justify-between ${
                   isSelected
-                    ? 'bg-gradient-to-b from-purple-600/30 to-cyan-600/20 border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.25)]'
+                    ? 'bg-gradient-to-b from-purple-600/30 via-indigo-600/20 to-cyan-600/30 border-cyan-400 shadow-[0_0_25px_rgba(6,182,212,0.3)] ring-2 ring-cyan-400/50'
                     : 'bg-white/[0.02] border-white/10 hover:border-purple-500/40 hover:bg-white/[0.04]'
                 }`}
               >
                 <div>
-                  <div className="flex items-center justify-between text-xs mb-1.5">
-                    <span className="font-mono text-[10px] text-purple-300 uppercase truncate max-w-[120px]">
+                  <div className="flex items-center justify-between text-xs mb-2">
+                    <span className="font-mono text-[10px] text-purple-300 font-bold uppercase truncate max-w-[130px]">
                       {c.brand?.name || 'Brand Campaign'}
                     </span>
                     {stats.pending > 0 ? (
                       <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse">
                         {stats.pending} Pending
                       </span>
-                    ) : (
+                    ) : stats.total > 0 ? (
                       <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3" /> Caught up
+                        <CheckCircle2 className="w-3 h-3" /> Verified
                       </span>
+                    ) : (
+                      <span className="text-[10px] font-mono text-slate-500">0 Clips</span>
                     )}
                   </div>
 
-                  <h3 className="text-sm font-bold text-white font-display line-clamp-1 group-hover:text-cyan-300 transition-colors">
+                  <h3 className="text-sm font-bold text-white font-display line-clamp-2 group-hover:text-cyan-300 transition-colors">
                     {c.title}
                   </h3>
 
-                  <div className="flex items-center gap-2 text-[11px] text-slate-400 mt-1">
-                    <span className="font-mono text-emerald-400 font-semibold">
+                  <div className="flex items-center gap-2 text-[11px] text-slate-400 mt-2">
+                    <span className="font-mono text-emerald-400 font-bold">
                       ₹{c.cpmRate || 120} CPM
                     </span>
                     <span>•</span>
-                    <span className="truncate">{c.industry || 'Viral'}</span>
+                    <span className="truncate text-slate-400">{c.industry || 'Viral'}</span>
                   </div>
                 </div>
 
                 <div className="pt-3 border-t border-white/5 flex justify-between items-center text-xs mt-3">
                   <span className="text-slate-400 font-mono text-[11px]">Submitted Clips:</span>
-                  <span className="font-bold text-white font-mono bg-white/5 px-2 py-0.5 rounded">
-                    {stats.total}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-bold text-white font-mono bg-white/5 px-2.5 py-0.5 rounded-lg border border-white/10">
+                      {stats.total} clips
+                    </span>
+                    {isSelected && (
+                      <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+                    )}
+                  </div>
                 </div>
               </button>
             );
           })}
         </div>
 
-        {/* Selected Campaign Filter Status Bar */}
+        {/* Selected Campaign Filter Indicator Banner */}
         {activeCampaign && (
-          <div className="p-3.5 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-            <div className="flex items-center gap-2.5">
-              <FolderOpen className="w-4 h-4 text-cyan-400 shrink-0" />
-              <span>
-                Filtering review queue for:{' '}
-                <strong className="text-white font-display">{activeCampaign.title}</strong>{' '}
-                <span className="text-slate-400">({activeCampaign.brand?.name})</span>
-              </span>
-            </div>
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-cyan-500/15 via-purple-500/10 to-indigo-500/15 border border-cyan-400/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-lg">
             <div className="flex items-center gap-3">
-              <span className="font-mono text-emerald-300 bg-emerald-500/15 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
+              <div className="w-8 h-8 rounded-xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-300 shrink-0">
+                <FolderOpen className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-slate-400 font-mono text-[11px]">FILTERED CAMPAIGN:</span>
+                  <strong className="text-white font-display text-sm">{activeCampaign.title}</strong>
+                  <span className="text-slate-400">({activeCampaign.brand?.name})</span>
+                </div>
+                <div className="text-[11px] text-cyan-300 mt-0.5 font-mono">
+                  Showing {filtered.length} submitted clips ({campaignStats[activeCampaign.id]?.pending || 0} pending review)
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+              <span className="font-mono text-emerald-300 bg-emerald-500/15 px-3 py-1 rounded-full border border-emerald-500/30 font-bold">
                 Reward: ₹{activeCampaign.cpmRate} CPM / ₹{activeCampaign.rewardPerClip || 500} per clip
               </span>
               <button
                 onClick={() => setSelectedCampaignId('ALL')}
-                className="text-cyan-300 hover:text-white font-bold underline cursor-pointer"
+                className="text-xs font-bold text-cyan-300 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-xl transition-colors cursor-pointer"
               >
-                Clear Filter
+                Reset to All
               </button>
             </div>
           </div>
@@ -450,7 +546,7 @@ export default function AdminSubmissionsReviewPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by clip title, clipper name, handle (@daxraps30), submission ID..."
+            placeholder="Search clips by title, creator name, handle (@daxraps30), submission ID..."
             className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white placeholder-slate-500 text-xs outline-none focus:border-cyan-400 transition-all"
           />
         </div>
@@ -458,8 +554,13 @@ export default function AdminSubmissionsReviewPage() {
         {/* Status Filter Tabs */}
         <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 text-xs">
           {[
-            { label: 'All Clips', val: 'ALL', count: submissions.length },
-            { label: 'Pending Review', val: 'PENDING_REVIEW', count: pendingCount, highlight: pendingCount > 0 },
+            { label: 'All Clips', val: 'ALL', count: filtered.length },
+            {
+              label: 'Pending Review',
+              val: 'PENDING_REVIEW',
+              count: filtered.filter((s) => s.status === 'PENDING_REVIEW').length,
+              highlight: filtered.filter((s) => s.status === 'PENDING_REVIEW').length > 0,
+            },
             { label: 'Approved', val: 'APPROVED' },
             { label: 'Verified', val: 'VIEWS_VERIFIED' },
             { label: 'Rejected', val: 'REJECTED' },
@@ -519,9 +620,17 @@ export default function AdminSubmissionsReviewPage() {
           <h3 className="text-base font-bold text-white">No submissions found</h3>
           <p className="text-xs text-slate-400">
             {selectedCampaignId !== 'ALL'
-              ? 'No clips submitted for this specific campaign yet.'
+              ? `No clips submitted for "${activeCampaign?.title || 'this campaign'}" matching the current filter.`
               : 'There are no clips matching the current filter criteria.'}
           </p>
+          {selectedCampaignId !== 'ALL' && (
+            <button
+              onClick={() => setSelectedCampaignId('ALL')}
+              className="mt-3 px-4 py-2 rounded-xl text-xs font-bold text-cyan-300 bg-cyan-500/10 border border-cyan-500/30 hover:bg-cyan-500/20 cursor-pointer"
+            >
+              View All Campaigns
+            </button>
+          )}
         </div>
       ) : (
         <div className="space-y-4">
