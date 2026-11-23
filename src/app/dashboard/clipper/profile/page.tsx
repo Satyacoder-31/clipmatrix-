@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import {
   User,
   CheckCircle2,
   Trash2,
-  Plus,
   ExternalLink,
   ShieldCheck,
   Sparkles,
@@ -14,19 +14,13 @@ import {
   Check,
   Save,
   Wallet,
-  Eye,
-  Lock,
   ArrowRight,
-  TrendingUp,
-  Key,
-  Copy,
-  AlertCircle,
-  HelpCircle,
-  Play,
-  CreditCard,
-  Building2,
   Smartphone,
   Layers,
+  Edit3,
+  Film,
+  Calendar,
+  Globe2,
 } from 'lucide-react';
 
 function InstagramIcon({ className = 'w-5 h-5' }: { className?: string }) {
@@ -84,15 +78,15 @@ function ClipperProfileInner() {
   const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccount[]>([]);
   const [loadingAccounts, setLoadingAccounts] = useState(true);
 
-  // Form states for Payment & Profile Details
+  // Clipper Details states
   const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [upiId, setUpiId] = useState('');
-  const [bankName, setBankName] = useState('');
-  const [bankAccountNumber, setBankAccountNumber] = useState('');
-  const [bankIfsc, setBankIfsc] = useState('');
   const [editingSoftware, setEditingSoftware] = useState('CapCut, Premiere Pro');
-  const [savingPayment, setSavingPayment] = useState(false);
+  const [experienceYears, setExperienceYears] = useState('1-3 years');
+  const [clipperLevel, setClipperLevel] = useState('PRO_CLIPPER');
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
 
   // Modal state for linking other accounts
   const [verifyModalPlatform, setVerifyModalPlatform] = useState<string | null>(null);
@@ -125,13 +119,12 @@ function ClipperProfileInner() {
       const meData = await meRes.json();
       if (meData.user) {
         setName(meData.user.name || '');
+        setEmail(meData.user.email || '');
         setPhone(meData.user.phone || '');
         if (meData.user.clipperProfile) {
-          setUpiId(meData.user.clipperProfile.upiId || '');
-          setBankName(meData.user.clipperProfile.bankName || '');
-          setBankAccountNumber(meData.user.clipperProfile.bankAccountNumber || '');
-          setBankIfsc(meData.user.clipperProfile.bankIfsc || '');
           setEditingSoftware(meData.user.clipperProfile.editingSoftware || 'CapCut, Premiere Pro');
+          setExperienceYears(meData.user.clipperProfile.experienceYears || '1-3 years');
+          setClipperLevel(meData.user.clipperProfile.level || 'PRO_CLIPPER');
         }
       }
     } catch {
@@ -201,7 +194,7 @@ function ClipperProfileInner() {
 
       const data = await res.json();
       if (res.ok) {
-        setToastMsg(`✅ Verified! Connected ${handle} (${verifyModalPlatform})`);
+        setToastMsg(`✅ Connected ${handle} (${verifyModalPlatform})`);
         setVerifyModalPlatform(null);
         setNewHandleInput('');
         fetchProfileAndAccounts();
@@ -230,9 +223,9 @@ function ClipperProfileInner() {
     }
   };
 
-  const handleSavePaymentDetails = async (e: React.FormEvent) => {
+  const handleSaveProfileDetails = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSavingPayment(true);
+    setSavingProfile(true);
     try {
       const res = await fetch('/api/auth/me', {
         method: 'PATCH',
@@ -240,46 +233,48 @@ function ClipperProfileInner() {
         body: JSON.stringify({
           name,
           phone,
-          upiId,
-          bankName,
-          bankAccountNumber,
-          bankIfsc,
           editingSoftware,
         }),
       });
 
       const data = await res.json();
       if (res.ok) {
-        setToastMsg('✅ Payout details and profile saved successfully!');
+        setToastMsg('✅ Profile details updated successfully!');
+        setIsEditingProfile(false);
       } else {
-        setToastMsg(`❌ ${data.error || 'Failed to save payout details'}`);
+        setToastMsg(`❌ ${data.error || 'Failed to update profile'}`);
       }
     } catch {
-      setToastMsg('❌ Error saving payout details');
+      setToastMsg('❌ Error updating profile details');
     } finally {
-      setSavingPayment(false);
+      setSavingProfile(false);
       setTimeout(() => setToastMsg(''), 5000);
     }
   };
 
+  const initialLetter = (name || 'Clipper').trim().charAt(0).toUpperCase();
+
   return (
     <div className="space-y-8 max-w-5xl mx-auto pb-16">
-      {/* Page Header */}
+      {/* Header Banner */}
       <div className="pb-4 border-b border-white/[0.08]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-white font-display">
-              Clipper Profile & Payout Settings
+              Profile & Accounts
             </h1>
             <p className="text-xs sm:text-sm text-slate-400 mt-1">
-              Link multiple social media channels and enter your UPI / Bank transfer details. All approved clip rewards across all your accounts are consolidated into your single profile and paid out after campaigns end.
+              Manage your personal creator profile and link multiple social media accounts for submitting clips.
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <span className="px-3 py-1.5 rounded-full text-xs font-mono font-bold bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 flex items-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Direct Creator Payouts</span>
-            </span>
+            <Link
+              href="/dashboard/clipper/earnings"
+              className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-emerald-500 to-teal-400 hover:opacity-90 transition-all flex items-center gap-2 shadow-lg shadow-emerald-500/20"
+            >
+              <Wallet className="w-4 h-4" />
+              <span>Earnings & Payouts →</span>
+            </Link>
           </div>
         </div>
       </div>
@@ -296,178 +291,130 @@ function ClipperProfileInner() {
         </div>
       )}
 
-      {/* SECTION 1: PAYMENT OPTION - UPI & BANK ACCOUNT DETAILS (Primary Requirement) */}
-      <div className="rounded-3xl bg-gradient-to-b from-[#12192e]/90 via-[#0d1324]/95 to-[#080c18] border border-cyan-500/30 p-6 sm:p-8 space-y-6 shadow-2xl relative overflow-hidden">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/10">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-cyan-500/20 to-purple-500/20 border border-cyan-400/40 flex items-center justify-center text-cyan-300 shadow-inner">
-              <Wallet className="w-6 h-6" />
+      {/* SECTION 1: CLIPPER DETAILS CARD */}
+      <div className="rounded-3xl bg-gradient-to-b from-[#11162a]/95 via-[#0b1020]/95 to-[#060812] border border-cyan-500/30 p-6 sm:p-7 space-y-6 shadow-xl relative overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
+          <div className="flex items-center gap-4">
+            {/* Creator Avatar */}
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-500 to-purple-600 flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-cyan-500/20 shrink-0">
+              {initialLetter}
             </div>
-            <div>
-              <h2 className="text-base sm:text-lg font-bold text-white font-display flex items-center gap-2">
-                <span>Payment & Bank Transfer Details</span>
-                <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/15 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
-                  REQUIRED FOR PAYOUTS
-                </span>
-              </h2>
-              <p className="text-xs text-slate-400 mt-0.5">
-                We disburse earnings directly to your UPI ID or Bank Account when each campaign ends.
-              </p>
-            </div>
-          </div>
-        </div>
 
-        {/* Multi-Account Single Wallet Consolidation Guarantee Banner */}
-        <div className="p-4 rounded-2xl bg-cyan-500/[0.08] border border-cyan-500/30 flex items-start gap-3 text-xs text-slate-200">
-          <Sparkles className="w-5 h-5 text-cyan-400 shrink-0 mt-0.5" />
-          <div className="space-y-1">
-            <div className="font-bold text-white">Consolidated Single-User Payout Guarantee:</div>
-            <p className="text-[11px] text-slate-300 leading-relaxed">
-              You can connect multiple accounts across YouTube, Instagram, and TikTok. Regardless of which account posts the video, all approved video amounts and view rewards are consolidated into <strong>this one user account</strong>. Payouts are made directly via your UPI or Bank details once campaigns end.
-            </p>
-          </div>
-        </div>
-
-        <form onSubmit={handleSavePaymentDetails} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* UPI ID Field */}
-            <div className="space-y-2 p-5 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-cyan-500/30 transition-all">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-white flex items-center gap-2">
-                  <Smartphone className="w-4 h-4 text-cyan-400" />
-                  <span>UPI ID (Primary Fast Payout)</span>
-                </label>
-                <span className="text-[10px] font-mono text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
-                  Recommended
+            <div className="space-y-1">
+              <div className="flex items-center gap-2.5">
+                <h2 className="text-lg sm:text-xl font-bold text-white font-display">
+                  {name || 'Verified Clipper'}
+                </h2>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+                  {clipperLevel.replace('_', ' ')}
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400">
-                Enter your Virtual Payment Address (e.g. Google Pay, PhonePe, Paytm).
-              </p>
-              <input
-                type="text"
-                value={upiId}
-                onChange={(e) => setUpiId(e.target.value)}
-                placeholder="e.g. yourname@okhdfcbank or 9876543210@paytm"
-                className="w-full px-4 py-3 rounded-xl bg-black/40 border border-slate-700 text-white font-mono text-xs focus:outline-none focus:border-cyan-400 transition-all"
-              />
-            </div>
-
-            {/* Account Holder Name */}
-            <div className="space-y-2 p-5 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-cyan-500/30 transition-all">
-              <label className="text-xs font-bold text-white flex items-center gap-2">
-                <User className="w-4 h-4 text-purple-400" />
-                <span>Account Holder Legal Name</span>
-              </label>
-              <p className="text-[11px] text-slate-400">
-                Full name as registered with your bank or UPI ID.
-              </p>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Satya Kumar"
-                className="w-full px-4 py-3 rounded-xl bg-black/40 border border-slate-700 text-white text-xs focus:outline-none focus:border-cyan-400 transition-all"
-              />
+              <p className="text-xs text-slate-400 font-mono">{email}</p>
             </div>
           </div>
 
-          {/* Bank Account Details Grid */}
-          <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/10 space-y-4">
-            <div className="flex items-center gap-2 pb-2 border-b border-white/5">
-              <Building2 className="w-4 h-4 text-cyan-400" />
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider font-mono">
-                Bank Account Details (NEFT / IMPS)
-              </h3>
-            </div>
+          <button
+            type="button"
+            onClick={() => setIsEditingProfile(!isEditingProfile)}
+            className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-200 bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 transition-colors flex items-center gap-2 self-start sm:self-auto cursor-pointer"
+          >
+            <Edit3 className="w-3.5 h-3.5 text-cyan-400" />
+            <span>{isEditingProfile ? 'Cancel Editing' : 'Edit Profile'}</span>
+          </button>
+        </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* Profile Info Grid / Edit Form */}
+        {isEditingProfile ? (
+          <form onSubmit={handleSaveProfileDetails} className="space-y-4 pt-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-[11px] font-medium text-slate-300">Bank Name</label>
+                <label className="text-xs font-bold text-slate-300">Display Name</label>
                 <input
                   type="text"
-                  value={bankName}
-                  onChange={(e) => setBankName(e.target.value)}
-                  placeholder="e.g. HDFC Bank, SBI, ICICI"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-slate-700 text-white text-xs focus:outline-none focus:border-cyan-400"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[11px] font-medium text-slate-300">Account Number</label>
+                <label className="text-xs font-bold text-slate-300">Contact Phone</label>
                 <input
                   type="text"
-                  value={bankAccountNumber}
-                  onChange={(e) => setBankAccountNumber(e.target.value)}
-                  placeholder="e.g. 50100234567890"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-slate-700 text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="e.g. +91 98765 43210"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-slate-700 text-white text-xs focus:outline-none focus:border-cyan-400"
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-[11px] font-medium text-slate-300">IFSC Code</label>
+              <div className="space-y-1.5 sm:col-span-2">
+                <label className="text-xs font-bold text-slate-300">Editing Software</label>
                 <input
                   type="text"
-                  value={bankIfsc}
-                  onChange={(e) => setBankIfsc(e.target.value.toUpperCase())}
-                  placeholder="e.g. HDFC0001234"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-slate-700 text-white font-mono text-xs focus:outline-none focus:border-cyan-400 uppercase"
+                  value={editingSoftware}
+                  onChange={(e) => setEditingSoftware(e.target.value)}
+                  placeholder="e.g. CapCut, Premiere Pro, After Effects"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-slate-700 text-white text-xs focus:outline-none focus:border-cyan-400"
                 />
               </div>
             </div>
-          </div>
 
-          {/* Additional Profile Info */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-300">Contact Phone Number</label>
-              <input
-                type="text"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="e.g. +91 98765 43210"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-slate-700 text-white text-xs focus:outline-none focus:border-cyan-400"
-              />
+            <div className="flex justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setIsEditingProfile(false)}
+                className="px-4 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-white"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={savingProfile}
+                className="px-5 py-2 rounded-xl text-xs font-bold text-slate-950 bg-gradient-to-r from-emerald-400 to-cyan-400 hover:opacity-90 disabled:opacity-50 cursor-pointer"
+              >
+                {savingProfile ? 'Saving...' : 'Save Profile'}
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+            <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
+              <div className="text-[10px] text-slate-400 uppercase font-mono">Editing Tools</div>
+              <div className="font-semibold text-white truncate">{editingSoftware || 'CapCut, Premiere'}</div>
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-300">Editing Tools / Software</label>
-              <input
-                type="text"
-                value={editingSoftware}
-                onChange={(e) => setEditingSoftware(e.target.value)}
-                placeholder="e.g. CapCut, Premiere Pro, After Effects"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-slate-700 text-white text-xs focus:outline-none focus:border-cyan-400"
-              />
+            <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
+              <div className="text-[10px] text-slate-400 uppercase font-mono">Experience</div>
+              <div className="font-semibold text-cyan-300 font-mono">{experienceYears || '1-3 years'}</div>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
+              <div className="text-[10px] text-slate-400 uppercase font-mono">Phone</div>
+              <div className="font-semibold text-white font-mono">{phone || 'Not provided'}</div>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
+              <div className="text-[10px] text-slate-400 uppercase font-mono">Country</div>
+              <div className="font-semibold text-purple-300">India 🇮🇳</div>
             </div>
           </div>
-
-          <div className="flex justify-end pt-2">
-            <button
-              type="submit"
-              disabled={savingPayment}
-              className="px-6 py-3 rounded-xl font-bold text-slate-950 bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 hover:from-emerald-300 hover:to-cyan-300 disabled:opacity-50 transition-all shadow-lg shadow-emerald-500/20 text-xs flex items-center gap-2 cursor-pointer font-black"
-            >
-              <Save className="w-4 h-4" />
-              <span>{savingPayment ? 'Saving Payout Details...' : 'Save Payment & Profile Details'}</span>
-            </button>
-          </div>
-        </form>
+        )}
       </div>
 
-      {/* SECTION 2: CONNECT MULTIPLE SOCIAL CHANNELS */}
+      {/* SECTION 2: SOCIAL ACCOUNTS (Add New Account) */}
       <div className="rounded-3xl bg-gradient-to-b from-[#0f1322]/90 via-[#0a0d18]/95 to-[#060810] border border-white/[0.08] p-6 space-y-4 shadow-xl">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <h2 className="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-white to-cyan-300 font-display uppercase tracking-wider">
-              Connect Multiple Social Channels
+              Social Accounts
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">
-              Link as many accounts as you use to post clips. All approved videos across all linked accounts credit to your single wallet above.
+              Add new social media channels to submit clips from your personal handles.
             </p>
           </div>
           <span className="text-xs font-mono font-bold text-cyan-400 bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/30 self-start sm:self-auto">
-            {connectedAccounts.length} Connected Accounts
+            {connectedAccounts.length} Connected
           </span>
         </div>
 
@@ -519,13 +466,13 @@ function ClipperProfileInner() {
         </div>
       </div>
 
-      {/* SECTION 3: ACTIVE LINKED CHANNELS LIST */}
+      {/* SECTION 3: CONNECTED ACCOUNTS LIST */}
       <div className="rounded-3xl bg-gradient-to-b from-[#0f1322]/90 via-[#0a0d18]/95 to-[#060810] border border-white/[0.08] p-6 space-y-4 shadow-xl">
         <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
           <div>
-            <h2 className="text-base font-bold text-white font-display">Active Linked Channels</h2>
+            <h2 className="text-base font-bold text-white font-display">Connected Accounts</h2>
             <p className="text-xs text-slate-400 mt-0.5">
-              These accounts are authorized to submit clips under your single profile.
+              These channels are linked to your profile for video moderation and tracking.
             </p>
           </div>
         </div>
@@ -561,7 +508,7 @@ function ClipperProfileInner() {
                       </div>
 
                       <div className="flex items-center gap-2 text-[11px] text-slate-400">
-                        <span>Earnings from this handle credit to your central profile</span>
+                        <span>All approved video earnings from this channel consolidate to your profile</span>
                       </div>
                     </div>
                   </div>
@@ -581,6 +528,29 @@ function ClipperProfileInner() {
             })
           )}
         </div>
+      </div>
+
+      {/* Payout Notice Card pointing to Earnings Section */}
+      <div className="p-5 rounded-3xl bg-gradient-to-r from-emerald-950/40 via-cyan-950/30 to-[#0e1428] border border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl">
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-300 shrink-0">
+            <Wallet className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-white font-display">Looking to connect Payment Methods?</h3>
+            <p className="text-xs text-slate-300 mt-0.5">
+              Head to the <strong>Earnings & Payouts</strong> page to connect your UPI ID or Bank Account for campaign conclusion payments.
+            </p>
+          </div>
+        </div>
+
+        <Link
+          href="/dashboard/clipper/earnings"
+          className="px-5 py-2.5 rounded-xl font-bold text-slate-950 bg-gradient-to-r from-emerald-400 to-cyan-400 hover:opacity-90 transition-all text-xs flex items-center gap-2 shadow-lg shadow-emerald-500/20 shrink-0 self-start sm:self-auto"
+        >
+          <span>Go to Earnings</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
       </div>
 
       {/* Manual Link Modal for TikTok / X / Facebook */}
@@ -609,7 +579,7 @@ function ClipperProfileInner() {
                   Connect {verifyModalPlatform} Account
                 </h3>
                 <p className="text-xs text-slate-400">
-                  Link your handle to submit clips and accumulate earnings into your single profile.
+                  Link your handle to submit clips and accumulate earnings into your profile.
                 </p>
               </div>
             </div>

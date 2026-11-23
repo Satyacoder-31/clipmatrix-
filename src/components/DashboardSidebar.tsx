@@ -60,9 +60,9 @@ export default function DashboardSidebar({
     { label: 'Command Dashboard', href: '/dashboard/clipper', icon: LayoutDashboard },
     { label: 'Campaign Marketplace', href: '/dashboard/clipper/campaigns', icon: Compass, badge: 'LIVE' },
     { label: 'My Video Clips', href: '/dashboard/clipper/submissions', icon: Film },
-    { label: 'Escrow Earnings', href: '/dashboard/clipper/earnings', icon: Wallet },
     { label: 'Notifications', href: '/dashboard/clipper/notifications', icon: Bell },
-    { label: 'Creator Profile', href: '/dashboard/clipper/profile', icon: UserCheck },
+    { label: 'Profile & Accounts', href: '/dashboard/clipper/profile', icon: UserCheck },
+    { label: 'Earnings & Payouts', href: '/dashboard/clipper/earnings', icon: Wallet },
     { label: '5% Referrals', href: '/dashboard/clipper/referrals', icon: Share2 },
   ];
 
@@ -71,7 +71,7 @@ export default function DashboardSidebar({
     { label: 'Launch Campaign', href: '/dashboard/brand/campaigns/new', icon: PlusCircle, badge: 'NEW' },
     { label: 'Campaign Manager', href: '/dashboard/brand/campaigns', icon: FolderKanban },
     { label: 'Review Submissions', href: '/dashboard/brand/submissions', icon: CheckSquare },
-    { label: 'Escrow & Billing', href: '/dashboard/brand/billing', icon: CreditCard },
+    { label: 'Billing & Treasury', href: '/dashboard/brand/billing', icon: CreditCard },
     { label: 'Marketplace View', href: '/dashboard/clipper/campaigns', icon: Compass },
     { label: 'Notifications', href: '/dashboard/clipper/notifications', icon: Bell },
   ];
@@ -93,7 +93,7 @@ export default function DashboardSidebar({
     { label: 'Viral Leaderboard', href: '/dashboard/clipper/leaderboard', icon: Trophy },
     { label: 'Creator Lounge & Chat', href: '/dashboard/clipper/chat', icon: MessageSquare },
     {
-      label: 'Escrow Rules & Policy',
+      label: 'Platform Rules & Policy',
       href: role === 'BRAND' ? '/dashboard/brand/rules' : '/dashboard/clipper/rules',
       icon: ShieldCheck,
     },
@@ -232,17 +232,17 @@ export default function DashboardSidebar({
           </div>
         </div>
 
-        {/* Distinctive Clip Matrix Escrow Pulse Card */}
+        {/* Distinctive Clip Matrix Payout Pulse Card */}
         <div className="rounded-2xl bg-gradient-to-br from-[#160b36]/90 via-[#0e0c26]/90 to-[#070a1a] border border-purple-500/30 p-4 space-y-2 relative overflow-hidden shadow-lg group">
           <div className="absolute -top-6 -right-6 w-20 h-20 bg-cyan-500/15 rounded-full blur-xl pointer-events-none group-hover:bg-cyan-500/25 transition-all" />
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-mono text-cyan-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
               <Sparkles className="w-3 h-3 text-cyan-300" />
-              <span>ESCROW SHIELD</span>
+              <span>DIRECT PAYOUT POOL</span>
             </span>
             <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-mono font-semibold">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              Protected
+              Active
             </span>
           </div>
 
