@@ -125,9 +125,7 @@ function ClipperProfileInner() {
   const [verifying, setVerifying] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
 
-  // Account Login & Viewer Access states
-  const [selectedAccountIndex, setSelectedAccountIndex] = useState(0);
-  const [useCustomHandle, setUseCustomHandle] = useState(false);
+  // Viewer Access states
   const [viewerAccessTicked, setViewerAccessTicked] = useState(true);
   const [publicMetricsTicked, setPublicMetricsTicked] = useState(true);
 
@@ -191,8 +189,6 @@ function ClipperProfileInner() {
     }
 
     setVerifyModalPlatform(platName);
-    setSelectedAccountIndex(0);
-    setUseCustomHandle(false);
     setNewHandleInput('');
     setViewerAccessTicked(true);
     setPublicMetricsTicked(true);
@@ -201,25 +197,14 @@ function ClipperProfileInner() {
   // Allow button handler: Connects account & grants Admin Studio / Insights viewer access
   const handleAllowAccess = async () => {
     if (!verifyModalPlatform) return;
+    const trimmed = newHandleInput.trim();
+    if (!trimmed) {
+      setToastMsg('❌ Please enter a valid handle or username');
+      return;
+    }
     setVerifying(true);
 
-    let handle = '';
-    if (useCustomHandle && newHandleInput.trim()) {
-      handle = newHandleInput.trim();
-    } else {
-      if (verifyModalPlatform === 'YouTube') {
-        handle = selectedAccountIndex === 0 ? '@daxraps30' : '@DaxEditz30';
-      } else if (verifyModalPlatform === 'Instagram') {
-        handle = selectedAccountIndex === 0 ? '@satya.viralclips' : '@clipmatrix.reels';
-      } else if (verifyModalPlatform === 'TikTok') {
-        handle = selectedAccountIndex === 0 ? '@satya.clips' : '@clipmatrix_shorts';
-      } else if (verifyModalPlatform === 'X') {
-        handle = selectedAccountIndex === 0 ? '@satya_edits' : '@clipmatrix_x';
-      } else {
-        handle = selectedAccountIndex === 0 ? '@satya.matrix' : '@clipmatrix_fb';
-      }
-    }
-
+    let handle = trimmed;
     if (!handle.startsWith('@') && !handle.startsWith('http')) {
       handle = `@${handle}`;
     }
@@ -238,17 +223,16 @@ function ClipperProfileInner() {
       const data = await res.json();
       if (res.ok) {
         setToastMsg(
-          `✅ Verified! Connected ${handle} — Admin now has active ${
-            verifyModalPlatform === 'YouTube' ? 'YouTube Studio' : 'Instagram Insights'
-          } Viewer Access!`
+          `✅ Verified! Connected ${handle} (${verifyModalPlatform})`
         );
         setVerifyModalPlatform(null);
+        setNewHandleInput('');
         fetchAccounts();
       } else {
         setToastMsg(`❌ ${data.error || 'Failed to connect account'}`);
       }
     } catch {
-      setToastMsg(`❌ Failed to connect account. Please try again.`);
+      setToastMsg('❌ Failed to connect account');
     } finally {
       setVerifying(false);
       setTimeout(() => setToastMsg(''), 6000);
@@ -328,6 +312,27 @@ function ClipperProfileInner() {
             const isYT = p.name === 'YouTube';
             const isIG = p.name === 'Instagram';
 
+            if (isYT || isIG) {
+              return (
+                <a
+                  key={p.name}
+                  href={isYT ? '/api/auth/youtube' : '/api/auth/instagram'}
+                  className="p-4 rounded-2xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/10 hover:border-cyan-400/50 hover:from-purple-500/10 hover:to-cyan-500/10 transition-all flex flex-col items-center justify-center gap-2.5 group cursor-pointer shadow-lg hover:shadow-[0_0_20px_rgba(6,182,212,0.2)] hover:-translate-y-0.5 relative text-center"
+                >
+                  <span className="absolute top-2 right-2 text-[9px] font-mono px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                    OAuth
+                  </span>
+                  <div className={`p-2.5 rounded-xl bg-white/[0.05] ${p.color} group-hover:scale-110 transition-transform shadow-inner`}>
+                    <IconComponent className="w-5 h-5" />
+                  </div>
+                  <span className="text-xs font-semibold text-slate-200 group-hover:text-white">{p.name}</span>
+                  <span className="text-[10px] text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity font-mono">
+                    {isYT ? 'Sign in with Google' : 'Log in with Meta'}
+                  </span>
+                </a>
+              );
+            }
+
             return (
               <button
                 key={p.name}
@@ -335,17 +340,12 @@ function ClipperProfileInner() {
                 onClick={() => handleOpenVerifyModal(p.name)}
                 className="p-4 rounded-2xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/10 hover:border-cyan-400/50 hover:from-purple-500/10 hover:to-cyan-500/10 transition-all flex flex-col items-center justify-center gap-2.5 group cursor-pointer shadow-lg hover:shadow-[0_0_20px_rgba(6,182,212,0.2)] hover:-translate-y-0.5 relative"
               >
-                {(isYT || isIG) && (
-                  <span className="absolute top-2 right-2 text-[9px] font-mono px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                    OAuth
-                  </span>
-                )}
                 <div className={`p-2.5 rounded-xl bg-white/[0.05] ${p.color} group-hover:scale-110 transition-transform shadow-inner`}>
                   <IconComponent className="w-5 h-5" />
                 </div>
                 <span className="text-xs font-semibold text-slate-200 group-hover:text-white">{p.name}</span>
                 <span className="text-[10px] text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity font-mono">
-                  {isYT ? 'Google OAuth' : isIG ? 'Meta OAuth' : '+ Link'}
+                  + Link
                 </span>
               </button>
             );
@@ -473,218 +473,27 @@ function ClipperProfileInner() {
               </div>
               <div>
                 <h3 className="text-base sm:text-lg font-bold text-white font-display">
-                  {verifyModalPlatform === 'YouTube'
-                    ? 'Sign in with Google'
-                    : verifyModalPlatform === 'Instagram'
-                    ? 'Log in with Meta'
-                    : `Connect ${verifyModalPlatform}`}
+                  Connect {verifyModalPlatform}
                 </h3>
                 <p className="text-xs text-slate-400">
-                  {verifyModalPlatform === 'YouTube'
-                    ? 'Connect YouTube Studio to grant ClipMatrix Admin analytics viewer access.'
-                    : verifyModalPlatform === 'Instagram'
-                    ? 'Connect Instagram Professional to grant ClipMatrix Admin insights viewer access.'
-                    : `Link your ${verifyModalPlatform} profile to ClipMatrix.`}
+                  Link your {verifyModalPlatform} profile to ClipMatrix.
                 </p>
               </div>
             </div>
 
-            {/* Account Selector Option */}
+            {/* Account Handle Input */}
             <div className="space-y-2">
               <label className="text-xs font-bold text-slate-300 block">
-                Choose an account to connect:
+                Enter your {verifyModalPlatform} handle:
               </label>
-
-              {verifyModalPlatform === 'YouTube' && (
-                <div className="space-y-2">
-                  <div
-                    onClick={() => {
-                      setSelectedAccountIndex(0);
-                      setUseCustomHandle(false);
-                    }}
-                    className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
-                      !useCustomHandle && selectedAccountIndex === 0
-                        ? 'bg-cyan-500/10 border-cyan-400/60 shadow-[0_0_15px_rgba(6,182,212,0.15)]'
-                        : 'bg-white/[0.02] border-white/10 hover:border-white/20'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-red-500 to-amber-500 flex items-center justify-center font-bold text-white text-xs">
-                        S
-                      </div>
-                      <div>
-                        <div className="text-xs font-bold text-white flex items-center gap-2">
-                          <span>Satya (Channel: @daxraps30)</span>
-                          <span className="text-[10px] font-mono text-cyan-400 bg-cyan-500/20 px-1.5 py-0.2 rounded">Primary</span>
-                        </div>
-                        <div className="text-[11px] text-slate-400 font-mono">satya.creators@gmail.com • 12.4K Subscribers</div>
-                      </div>
-                    </div>
-                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                      !useCustomHandle && selectedAccountIndex === 0 ? 'border-cyan-400 bg-cyan-400' : 'border-slate-500'
-                    }`}>
-                      {!useCustomHandle && selectedAccountIndex === 0 && <div className="w-1.5 h-1.5 bg-black rounded-full" />}
-                    </div>
-                  </div>
-
-                  <div
-                    onClick={() => {
-                      setSelectedAccountIndex(1);
-                      setUseCustomHandle(false);
-                    }}
-                    className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
-                      !useCustomHandle && selectedAccountIndex === 1
-                        ? 'bg-cyan-500/10 border-cyan-400/60 shadow-[0_0_15px_rgba(6,182,212,0.15)]'
-                        : 'bg-white/[0.02] border-white/10 hover:border-white/20'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 flex items-center justify-center font-bold text-white text-xs">
-                        D
-                      </div>
-                      <div>
-                        <div className="text-xs font-bold text-white">Dax Editz Studio (@DaxEditz30)</div>
-                        <div className="text-[11px] text-slate-400 font-mono">daxeditz.work@gmail.com • 48.2K Subscribers</div>
-                      </div>
-                    </div>
-                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                      !useCustomHandle && selectedAccountIndex === 1 ? 'border-cyan-400 bg-cyan-400' : 'border-slate-500'
-                    }`}>
-                      {!useCustomHandle && selectedAccountIndex === 1 && <div className="w-1.5 h-1.5 bg-black rounded-full" />}
-                    </div>
-                  </div>
-
-                  <div
-                    onClick={() => setUseCustomHandle(true)}
-                    className={`p-3 rounded-2xl border transition-all cursor-pointer space-y-2 ${
-                      useCustomHandle
-                        ? 'bg-cyan-500/10 border-cyan-400/60 shadow-[0_0_15px_rgba(6,182,212,0.15)]'
-                        : 'bg-white/[0.02] border-white/10 hover:border-white/20'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-slate-200">+ Use a different YouTube Channel / Account</span>
-                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                        useCustomHandle ? 'border-cyan-400 bg-cyan-400' : 'border-slate-500'
-                      }`}>
-                        {useCustomHandle && <div className="w-1.5 h-1.5 bg-black rounded-full" />}
-                      </div>
-                    </div>
-                    {useCustomHandle && (
-                      <input
-                        type="text"
-                        value={newHandleInput}
-                        onChange={(e) => setNewHandleInput(e.target.value)}
-                        placeholder="Enter Channel Handle e.g. @mychannel or URL"
-                        className="w-full px-3.5 py-2 rounded-xl bg-black/40 border border-white/15 text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
-                        autoFocus
-                      />
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {verifyModalPlatform === 'Instagram' && (
-                <div className="space-y-2">
-                  <div
-                    onClick={() => {
-                      setSelectedAccountIndex(0);
-                      setUseCustomHandle(false);
-                    }}
-                    className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
-                      !useCustomHandle && selectedAccountIndex === 0
-                        ? 'bg-pink-500/10 border-pink-400/60 shadow-[0_0_15px_rgba(236,72,153,0.15)]'
-                        : 'bg-white/[0.02] border-white/10 hover:border-white/20'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-pink-500 via-rose-500 to-amber-500 flex items-center justify-center font-bold text-white text-xs">
-                        S
-                      </div>
-                      <div>
-                        <div className="text-xs font-bold text-white flex items-center gap-2">
-                          <span>@satya.viralclips</span>
-                          <span className="text-[10px] font-mono text-pink-400 bg-pink-500/20 px-1.5 py-0.2 rounded">Creator</span>
-                        </div>
-                        <div className="text-[11px] text-slate-400 font-mono">28.5K Followers • 1.4M Monthly Reach</div>
-                      </div>
-                    </div>
-                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                      !useCustomHandle && selectedAccountIndex === 0 ? 'border-pink-400 bg-pink-400' : 'border-slate-500'
-                    }`}>
-                      {!useCustomHandle && selectedAccountIndex === 0 && <div className="w-1.5 h-1.5 bg-black rounded-full" />}
-                    </div>
-                  </div>
-
-                  <div
-                    onClick={() => {
-                      setSelectedAccountIndex(1);
-                      setUseCustomHandle(false);
-                    }}
-                    className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
-                      !useCustomHandle && selectedAccountIndex === 1
-                        ? 'bg-pink-500/10 border-pink-400/60 shadow-[0_0_15px_rgba(236,72,153,0.15)]'
-                        : 'bg-white/[0.02] border-white/10 hover:border-white/20'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center font-bold text-white text-xs">
-                        C
-                      </div>
-                      <div>
-                        <div className="text-xs font-bold text-white">@clipmatrix.reels</div>
-                        <div className="text-[11px] text-slate-400 font-mono">110K Followers • 4.8M Monthly Reach</div>
-                      </div>
-                    </div>
-                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                      !useCustomHandle && selectedAccountIndex === 1 ? 'border-pink-400 bg-pink-400' : 'border-slate-500'
-                    }`}>
-                      {!useCustomHandle && selectedAccountIndex === 1 && <div className="w-1.5 h-1.5 bg-black rounded-full" />}
-                    </div>
-                  </div>
-
-                  <div
-                    onClick={() => setUseCustomHandle(true)}
-                    className={`p-3 rounded-2xl border transition-all cursor-pointer space-y-2 ${
-                      useCustomHandle
-                        ? 'bg-pink-500/10 border-pink-400/60 shadow-[0_0_15px_rgba(236,72,153,0.15)]'
-                        : 'bg-white/[0.02] border-white/10 hover:border-white/20'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-slate-200">+ Use a different Instagram Account</span>
-                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                        useCustomHandle ? 'border-pink-400 bg-pink-400' : 'border-slate-500'
-                      }`}>
-                        {useCustomHandle && <div className="w-1.5 h-1.5 bg-black rounded-full" />}
-                      </div>
-                    </div>
-                    {useCustomHandle && (
-                      <input
-                        type="text"
-                        value={newHandleInput}
-                        onChange={(e) => setNewHandleInput(e.target.value)}
-                        placeholder="Enter Instagram Handle e.g. @myhandle"
-                        className="w-full px-3.5 py-2 rounded-xl bg-black/40 border border-white/15 text-white font-mono text-xs focus:outline-none focus:border-pink-400"
-                        autoFocus
-                      />
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {verifyModalPlatform !== 'YouTube' && verifyModalPlatform !== 'Instagram' && (
-                <div className="space-y-2">
-                  <input
-                    type="text"
-                    value={newHandleInput}
-                    onChange={(e) => setNewHandleInput(e.target.value)}
-                    placeholder={`Enter ${verifyModalPlatform} Handle e.g. @myhandle`}
-                    className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/10 text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
-                    autoFocus
-                  />
-                </div>
-              )}
+              <input
+                type="text"
+                value={newHandleInput}
+                onChange={(e) => setNewHandleInput(e.target.value)}
+                placeholder={`Enter ${verifyModalPlatform} Handle e.g. @myhandle`}
+                className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/10 text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
+                autoFocus
+              />
             </div>
 
             {/* Permissions Requested Section (Viewer Access TICKED by default) */}
