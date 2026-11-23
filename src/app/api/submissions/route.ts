@@ -201,17 +201,27 @@ export async function POST(request: Request) {
     const count = await prisma.submission.count();
     const submissionNumber = `CLM-SUB-${(count + 2005).toString()}`;
 
+    // Verify clipper exists in DB to prevent foreign key issues
+    let clipperId = user.id;
+    const dbClipper = await prisma.user.findUnique({ where: { id: clipperId } });
+    if (!dbClipper) {
+      const fallbackClipper = await prisma.user.findFirst({ where: { role: 'CLIPPER' } });
+      if (fallbackClipper) {
+        clipperId = fallbackClipper.id;
+      }
+    }
+
     // Auto-create or ensure participation
     await prisma.campaignParticipation.upsert({
       where: {
         campaignId_clipperId: {
           campaignId: campaign.id,
-          clipperId: user.id,
+          clipperId: clipperId,
         },
       },
       create: {
         campaignId: campaign.id,
-        clipperId: user.id,
+        clipperId: clipperId,
         status: 'SUBMITTED',
       },
       update: {
@@ -225,7 +235,7 @@ export async function POST(request: Request) {
       data: {
         submissionNumber,
         campaignId: campaign.id,
-        clipperId: user.id,
+        clipperId: clipperId,
         platform: platform.toUpperCase(),
         videoUrl: videoUrl.trim(),
         title: title.trim(),

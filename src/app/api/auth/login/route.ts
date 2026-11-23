@@ -8,30 +8,44 @@ export async function POST(request: Request) {
 
     let user: any;
 
-    // Handle instant demo login shortcuts without depending on SQLite availability
+    // Handle instant demo login shortcuts
     if (demoRole) {
       const roleUpper = demoRole.toUpperCase() as 'CLIPPER' | 'BRAND' | 'ADMIN';
-      const demoUser = DEMO_USERS[roleUpper] || DEMO_USERS.CLIPPER;
+      const emailMap: Record<string, string> = {
+        ADMIN: 'admin@clipmatrix.com',
+        BRAND: 'brand@clipmatrix.com',
+        CLIPPER: 'clipper@clipmatrix.com',
+      };
+      const targetEmail = emailMap[roleUpper] || 'clipper@clipmatrix.com';
+      let dbUser: any = null;
+      try {
+        dbUser = await prisma.user.findUnique({
+          where: { email: targetEmail },
+          include: { brandProfile: true, clipperProfile: true, wallet: true },
+        });
+      } catch {}
+
+      const activeUser = dbUser || DEMO_USERS[roleUpper] || DEMO_USERS.CLIPPER;
 
       const token = generateToken({
-        userId: demoUser.id,
-        email: demoUser.email,
-        role: demoUser.role,
-        name: demoUser.name,
+        userId: activeUser.id,
+        email: activeUser.email,
+        role: activeUser.role,
+        name: activeUser.name,
       });
 
       const response = NextResponse.json({
         success: true,
         user: {
-          id: demoUser.id,
-          name: demoUser.name,
-          email: demoUser.email,
-          role: demoUser.role,
-          status: demoUser.status,
-          avatar: demoUser.avatar,
-          brandProfile: demoUser.brandProfile,
-          clipperProfile: demoUser.clipperProfile,
-          wallet: demoUser.wallet,
+          id: activeUser.id,
+          name: activeUser.name,
+          email: activeUser.email,
+          role: activeUser.role,
+          status: activeUser.status,
+          avatar: activeUser.avatar,
+          brandProfile: activeUser.brandProfile,
+          clipperProfile: activeUser.clipperProfile,
+          wallet: activeUser.wallet,
         },
         token,
       });
