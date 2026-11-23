@@ -95,7 +95,7 @@ export default function ClipperEarningsPage() {
           <div className="text-3xl font-extrabold text-white font-display">
             {formatCurrency(wallet?.lifetimeEarned || 0)}
           </div>
-          <div className="text-xs text-cyan-400">100% Escrow Settled</div>
+          <div className="text-xs text-cyan-400">Campaign Payouts Settled</div>
         </div>
       </div>
 

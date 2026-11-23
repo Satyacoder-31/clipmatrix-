@@ -510,7 +510,7 @@ export default function SubmitClipPage() {
           <div className="rounded-3xl bg-gradient-to-b from-[#0f1322]/90 via-[#0a0d18]/95 to-[#060810] border border-white/[0.08] p-6 space-y-4 shadow-xl">
             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
               <span>CAMPAIGN TELEMETRY</span>
-              <span className="text-[10px] text-cyan-400 font-mono">100% ESCROW</span>
+              <span className="text-[10px] text-cyan-400 font-mono">DIRECT PAYOUT</span>
             </h3>
 
             <div className="space-y-3.5 text-xs">
@@ -528,7 +528,7 @@ export default function SubmitClipPage() {
               </div>
 
               <div className="flex justify-between items-center">
-                <span className="text-slate-400">Total Escrow Budget</span>
+                <span className="text-slate-400">Total Campaign Budget</span>
                 <span className="font-bold text-white font-mono">
                   ₹{totalBudget.toLocaleString()}
                 </span>

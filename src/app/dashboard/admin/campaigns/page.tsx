@@ -92,7 +92,7 @@ export default function AdminCampaignsPage() {
     return matchesStatus && matchesSearch;
   });
 
-  const totalEscrow = campaigns.reduce((sum, c) => sum + (c.totalBudget || 0), 0);
+  const totalBudget = campaigns.reduce((sum, c) => sum + (c.totalBudget || 0), 0);
   const activeCount = campaigns.filter((c) => c.status === 'ACTIVE').length;
   const totalVerifiedViews = campaigns.reduce((sum, c) => sum + (c.verifiedViews || 0), 0);
 
@@ -106,10 +106,10 @@ export default function AdminCampaignsPage() {
             <span>GLOBAL CAMPAIGN MANAGER</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white font-display">
-            Campaign Controls & Escrow Allocation
+            Campaign Controls & Budget Allocation
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Monitor all brand briefs, adjust escrow caps, toggle campaign visibility, and inspect live submissions.
+            Monitor all brand briefs, adjust campaign budgets, toggle campaign visibility, and inspect live submissions.
           </p>
         </div>
 
@@ -134,11 +134,11 @@ export default function AdminCampaignsPage() {
       {/* KPI Metric Overview */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <div className="p-5 rounded-2xl bg-[#0c1022] border border-white/[0.08] space-y-1">
-          <div className="text-[10px] font-mono uppercase text-slate-400">Total Escrow Vaulted</div>
+          <div className="text-[10px] font-mono uppercase text-slate-400">Total Campaign Budget</div>
           <div className="text-2xl font-black text-white font-display">
-            ₹{totalEscrow.toLocaleString('en-IN')}
+            ₹{totalBudget.toLocaleString('en-IN')}
           </div>
-          <div className="text-xs text-emerald-400 font-mono">100% Locked & Protected</div>
+          <div className="text-xs text-emerald-400 font-mono">Disbursed upon campaign conclusion</div>
         </div>
 
         <div className="p-5 rounded-2xl bg-[#0c1022] border border-white/[0.08] space-y-1">
@@ -235,7 +235,7 @@ export default function AdminCampaignsPage() {
                       </div>
                     </div>
                     <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
-                      <div className="text-[10px] text-slate-400">Remaining Escrow</div>
+                      <div className="text-[10px] text-slate-400">Remaining Budget</div>
                       <div className="font-bold text-emerald-400 font-mono mt-0.5">
                         ₹{camp.remainingBudget?.toLocaleString('en-IN')}
                       </div>
@@ -328,7 +328,7 @@ export default function AdminCampaignsPage() {
               </div>
 
               <div>
-                <label className="text-xs text-purple-300 font-mono">Total Escrow Budget (₹)</label>
+                <label className="text-xs text-purple-300 font-mono">Total Campaign Budget (₹)</label>
                 <input
                   type="number"
                   min="5000"

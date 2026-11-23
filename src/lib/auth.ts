@@ -20,6 +20,7 @@ export const DEMO_USERS = {
     role: 'CLIPPER' as const,
     status: 'ACTIVE',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+    phone: '+91 98765 43210',
     brandProfile: null,
     clipperProfile: {
       id: 'profile-clipper-demo',
@@ -61,6 +62,7 @@ export const DEMO_USERS = {
     role: 'BRAND' as const,
     status: 'ACTIVE',
     avatar: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150',
+    phone: null,
     brandProfile: {
       id: 'profile-brand-demo',
       userId: 'user-brand-demo',
@@ -93,6 +95,7 @@ export const DEMO_USERS = {
     role: 'ADMIN' as const,
     status: 'ACTIVE',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+    phone: null,
     brandProfile: null,
     clipperProfile: null,
     wallet: {

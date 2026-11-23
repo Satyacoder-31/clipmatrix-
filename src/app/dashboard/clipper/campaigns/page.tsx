@@ -217,7 +217,7 @@ export default function ClipperCampaignMarketplacePage() {
               <Lock className="w-8 h-8 text-cyan-300" />
             </div>
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-[10px] font-mono text-purple-300 mb-2 uppercase tracking-wider">
-              <span>VIP Tier Escrow</span>
+              <span>VIP Verified Budget</span>
             </div>
             <h3 className="text-lg font-extrabold text-white font-display mb-1">Confidential Brand Vault</h3>
             <p className="text-xs text-purple-200/70 max-w-xs mb-6 leading-relaxed">
@@ -375,7 +375,7 @@ export default function ClipperCampaignMarketplacePage() {
               <Lock className="w-8 h-8 text-cyan-300" />
             </div>
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-[10px] font-mono text-purple-300 mb-2 uppercase tracking-wider">
-              <span>VIP Tier Escrow</span>
+              <span>VIP Verified Budget</span>
             </div>
             <h3 className="text-lg font-extrabold text-white font-display mb-1">Creator Partner Exclusive</h3>
             <p className="text-xs text-purple-200/70 max-w-xs mb-6 leading-relaxed">

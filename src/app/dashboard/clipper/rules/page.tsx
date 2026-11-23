@@ -26,10 +26,10 @@ export default function ClipperRulesPage() {
             <span>CLIPPER PROTECTION PROTOCOL</span>
           </div>
           <h1 className="text-2xl sm:text-4xl font-extrabold text-white font-display">
-            Escrow Rules & Fraud Prevention Policy
+            Campaign Rules & Direct Payout Policy
           </h1>
           <p className="text-xs sm:text-sm text-purple-200/80 max-w-2xl leading-relaxed">
-            Every campaign on Clip Matrix has 100% upfront funds locked in smart escrow before you clip. Read these official rules to guarantee smooth payouts and protect your verified creator status.
+            Every campaign on Clip Matrix has dedicated brand budgets. All approved clips and view earnings from multiple accounts pool into your single user profile, paid directly via UPI or Bank transfer upon campaign conclusion.
           </p>
         </div>
       </div>
@@ -40,9 +40,9 @@ export default function ClipperRulesPage() {
           <div className="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-300">
             <Lock className="w-5 h-5 text-cyan-400" />
           </div>
-          <h3 className="text-base font-bold text-white font-display">100% Escrow Guarantee</h3>
+          <h3 className="text-base font-bold text-white font-display">Campaign-End Direct Payout</h3>
           <p className="text-xs text-slate-300 leading-relaxed">
-            Brands deposit full budgets upfront into escrow. Once your clip generates audited organic views, your earnings are guaranteed by the smart reserve.
+            Earnings from all your submitted clips are consolidated into your user profile and disbursed directly to your UPI ID or Bank Account when campaigns conclude.
           </p>
         </div>
 
@@ -76,7 +76,7 @@ export default function ClipperRulesPage() {
             <h2 className="text-lg font-bold text-white font-display">1. Video Submission & Tagging Requirements</h2>
           </div>
           <div className="text-xs sm:text-sm text-slate-300/90 leading-relaxed space-y-2.5">
-            <p>To qualify for CPM rewards and escrow release, your clip must satisfy all brief parameters:</p>
+            <p>To qualify for CPM rewards and approval, your clip must satisfy all brief parameters:</p>
             <ul className="list-disc list-inside space-y-1.5 pl-2 text-slate-300 text-xs">
               <li>Must be edited in 9:16 vertical orientation (1080x1920 minimum resolution).</li>
               <li>Must clearly tag the brand's official account handle in both the video caption and on-screen text as specified in the campaign brief.</li>
@@ -101,8 +101,8 @@ export default function ClipperRulesPage() {
             </p>
             <ul className="list-disc list-inside space-y-1.5 pl-2 text-slate-300 text-xs">
               <li>Verification begins within 2 hours of submitting the live video link in your dashboard.</li>
-              <li>Views are audited and credited for up to 14 days from initial submission or until the campaign escrow cap is reached.</li>
-              <li>Views from Tier 1 geographies (US, UK, CA, IN metros) receive standard 100% CPM valuation without dilution.</li>
+              <li>Views are audited and credited for up to 14 days from initial submission or until the campaign cap is reached.</li>
+              <li>You can link multiple YouTube and Instagram accounts; all approved clip rewards consolidate into your single user profile.</li>
             </ul>
           </div>
         </div>

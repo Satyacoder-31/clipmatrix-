@@ -47,9 +47,9 @@ export default function BrandBillingPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-white font-display">Billing & Escrow Treasury</h1>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-white font-display">Billing & Campaign Treasury</h1>
         <p className="text-xs sm:text-sm text-purple-200/70">
-          Manage corporate funds, allocate campaign escrow pools, and download GST tax invoices.
+          Manage corporate funds, fund campaign pools, and download GST tax invoices. Payouts are released directly to clippers upon campaign completion.
         </p>
       </div>
 
@@ -63,11 +63,11 @@ export default function BrandBillingPage() {
         </div>
 
         <div className="p-6 rounded-2xl bg-gradient-to-br from-[#1b1035] to-[#120a22] border border-purple-600/40 space-y-2">
-          <div className="text-xs text-purple-300 uppercase font-mono">Active Campaign Escrow</div>
+          <div className="text-xs text-purple-300 uppercase font-mono">Active Campaign Budget</div>
           <div className="text-3xl font-extrabold text-white font-display">
             {formatCurrency(wallet?.escrowBalance || 0)}
           </div>
-          <div className="text-xs text-purple-400">Locked for clipper payouts</div>
+          <div className="text-xs text-purple-400">Allocated for clippers (paid upon campaign conclusion)</div>
         </div>
 
         <div className="p-6 rounded-2xl bg-[#140c26] border border-purple-900/50 space-y-2">

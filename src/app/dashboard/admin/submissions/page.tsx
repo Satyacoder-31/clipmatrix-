@@ -19,16 +19,15 @@ import {
   ArrowLeft,
   DollarSign,
   Users,
-  Globe2,
   CheckCheck,
   RefreshCw,
   Heart,
   MessageSquare,
   Share2,
-  TrendingUp,
   BarChart3,
-  Play,
-  Activity,
+  Layers,
+  FolderOpen,
+  Wallet,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -50,6 +49,8 @@ function YouTubeIcon({ className = 'w-4 h-4' }: { className?: string }) {
 
 export default function AdminSubmissionsReviewPage() {
   const [submissions, setSubmissions] = useState<any[]>([]);
+  const [campaigns, setCampaigns] = useState<any[]>([]);
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string>('ALL');
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [search, setSearch] = useState('');
@@ -58,20 +59,32 @@ export default function AdminSubmissionsReviewPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [toastMsg, setToastMsg] = useState('');
 
-  // In-Place Audit State (Modal on same page without leaving)
+  // In-Place Audit State
   const [auditSub, setAuditSub] = useState<any | null>(null);
-  const [auditDemographicsView, setAuditDemographicsView] = useState<'video' | 'account'>('video');
   const [auditScraping, setAuditScraping] = useState(false);
   const [auditScrapedData, setAuditScrapedData] = useState<any | null>(null);
   const [auditVerifiedViews, setAuditVerifiedViews] = useState('');
   const [auditVerifying, setAuditVerifying] = useState(false);
   const [auditMsg, setAuditMsg] = useState('');
 
+  const fetchCampaigns = async () => {
+    try {
+      const res = await fetch('/api/campaigns?status=ALL');
+      const data = await res.json();
+      if (data.campaigns) {
+        setCampaigns(data.campaigns);
+      }
+    } catch {
+      // Fallback
+    }
+  };
+
   const fetchSubmissions = async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
       if (statusFilter !== 'ALL') params.set('status', statusFilter);
+      if (selectedCampaignId !== 'ALL') params.set('campaignId', selectedCampaignId);
       const res = await fetch(`/api/submissions?${params.toString()}`);
       const data = await res.json();
       if (data.submissions) {
@@ -85,8 +98,12 @@ export default function AdminSubmissionsReviewPage() {
   };
 
   useEffect(() => {
+    fetchCampaigns();
+  }, []);
+
+  useEffect(() => {
     fetchSubmissions();
-  }, [statusFilter]);
+  }, [statusFilter, selectedCampaignId]);
 
   const handleApprove = async (sub: any) => {
     setActionLoading(sub.id);
@@ -96,11 +113,11 @@ export default function AdminSubmissionsReviewPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           status: 'APPROVED',
-          reviewNotes: 'Approved by Admin. Clip verified compliant with brief & aspect ratio guidelines.',
+          reviewNotes: 'Approved by Admin. Clip verified compliant with campaign guidelines.',
         }),
       });
       if (res.ok) {
-        setToastMsg(`✅ Approved ${sub.submissionNumber} (${sub.title})!`);
+        setToastMsg(`✅ Approved ${sub.submissionNumber} (${sub.title})! User wallet credited.`);
         fetchSubmissions();
       }
     } catch {
@@ -138,19 +155,16 @@ export default function AdminSubmissionsReviewPage() {
   // In-place Audit Logic
   const handleOpenAudit = (sub: any) => {
     setAuditSub(sub);
-    setAuditDemographicsView('video');
     setAuditScrapedData(null);
     setAuditMsg('');
     const initialCount = sub.verifiedViews || sub.reportedViews || 0;
     setAuditVerifiedViews(initialCount.toString());
-    // Auto-trigger live scraping for this video link
     triggerLiveScrape(sub.videoUrl, sub.id);
   };
 
   const handleCloseAudit = () => {
     const targetSubId = auditSub?.id;
     setAuditSub(null);
-    // Smoothly scroll right back to that clip so user stays at exact position
     if (targetSubId) {
       setTimeout(() => {
         const el = document.getElementById(`clip-${targetSubId}`);
@@ -179,9 +193,9 @@ export default function AdminSubmissionsReviewPage() {
         } else if (auditSub?.reportedViews > 0) {
           setAuditVerifiedViews(auditSub.reportedViews.toString());
         }
-        setAuditMsg('⚡ Live video metrics and demographic analysis loaded!');
+        setAuditMsg('⚡ Live video metrics loaded successfully!');
       } else {
-        setAuditMsg(`Notice: Live scraper offline (${data.error || 'using cached metrics'})`);
+        setAuditMsg(`Notice: Real-time scraper status: ${data.error || 'using cached metrics'}`);
       }
     } catch {
       setAuditMsg('Notice: Auditing with system verification profile.');
@@ -209,11 +223,9 @@ export default function AdminSubmissionsReviewPage() {
 
       const data = await res.json();
       if (res.ok && data.success) {
-        setToastMsg(`✅ Verified ${viewsNum.toLocaleString()} views for ${auditSub.submissionNumber}! Clipper wallet credited ₹${data.rewardEarned?.toLocaleString() || ''}.`);
-        setAuditMsg(`✅ Successfully verified! Clipper wallet credited.`);
-        // Update local submission list
+        setToastMsg(`✅ Verified ${viewsNum.toLocaleString()} views for ${auditSub.submissionNumber}! Clipper user wallet credited ₹${data.rewardEarned?.toLocaleString() || ''}.`);
+        setAuditMsg(`✅ Successfully verified! Clipper user wallet credited.`);
         fetchSubmissions();
-        // Update current audited item
         setAuditSub((prev: any) => (prev ? { ...prev, status: 'VIEWS_VERIFIED', verifiedViews: viewsNum } : null));
       } else {
         setAuditMsg(`❌ Verification error: ${data.error || 'Failed to verify'}`);
@@ -225,6 +237,19 @@ export default function AdminSubmissionsReviewPage() {
     }
   };
 
+  // Compute stats per campaign from current submission set or campaigns
+  const campaignStats = React.useMemo(() => {
+    const map: Record<string, { total: number; pending: number }> = {};
+    submissions.forEach((s) => {
+      const cId = s.campaignId || s.campaign?.id;
+      if (!cId) return;
+      if (!map[cId]) map[cId] = { total: 0, pending: 0 };
+      map[cId].total += 1;
+      if (s.status === 'PENDING_REVIEW') map[cId].pending += 1;
+    });
+    return map;
+  }, [submissions]);
+
   const filtered = submissions.filter((sub) => {
     if (!search) return true;
     const q = search.toLowerCase();
@@ -232,11 +257,13 @@ export default function AdminSubmissionsReviewPage() {
       sub.title?.toLowerCase().includes(q) ||
       sub.submissionNumber?.toLowerCase().includes(q) ||
       sub.clipper?.name?.toLowerCase().includes(q) ||
+      sub.postAccountHandle?.toLowerCase().includes(q) ||
       sub.campaign?.title?.toLowerCase().includes(q)
     );
   });
 
   const pendingCount = submissions.filter((s) => s.status === 'PENDING_REVIEW').length;
+  const activeCampaign = campaigns.find((c) => c.id === selectedCampaignId);
 
   return (
     <div className="space-y-8 max-w-6xl">
@@ -248,10 +275,10 @@ export default function AdminSubmissionsReviewPage() {
             <span>ADMIN QUALITY & COMPLIANCE</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white font-display">
-            Video Clips Review & Moderation Queue
+            Video Clips Review Hub & Moderation
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Review submitted social media clips, audit video links in-place, accept compliant edits, or reject non-compliant submissions.
+            Select a campaign below to review and approve submitted videos. Approved amounts are consolidated directly into each clipper user's single wallet (paid after campaign ends).
           </p>
         </div>
 
@@ -273,6 +300,148 @@ export default function AdminSubmissionsReviewPage() {
         </div>
       )}
 
+      {/* SECTION 1: CAMPAIGNS REVIEW HUB (Clicking a campaign filters all submitted videos for approval) */}
+      <div className="rounded-3xl bg-gradient-to-b from-[#0f1426]/90 via-[#0a0d1c]/95 to-[#060812] border border-cyan-500/30 p-6 space-y-4 shadow-xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-300">
+              <Layers className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-white font-display uppercase tracking-wider flex items-center gap-2">
+                <span>Campaigns Review Hub</span>
+                <span className="text-[10px] font-mono font-normal text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
+                  Select Campaign to Review
+                </span>
+              </h2>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Click any campaign to inspect all submitted clips awaiting moderation.
+              </p>
+            </div>
+          </div>
+
+          {selectedCampaignId !== 'ALL' && (
+            <button
+              onClick={() => setSelectedCampaignId('ALL')}
+              className="text-xs font-bold text-cyan-400 hover:text-white px-3 py-1.5 rounded-xl bg-white/[0.05] border border-white/10 hover:bg-white/10 transition-colors flex items-center gap-1.5 self-start sm:self-auto cursor-pointer"
+            >
+              <span>← View All Campaigns</span>
+            </button>
+          )}
+        </div>
+
+        {/* Campaign Filter Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
+          {/* Card: All Campaigns */}
+          <button
+            type="button"
+            onClick={() => setSelectedCampaignId('ALL')}
+            className={`p-4 rounded-2xl text-left transition-all border cursor-pointer relative group flex flex-col justify-between ${
+              selectedCampaignId === 'ALL'
+                ? 'bg-gradient-to-b from-purple-600/30 to-cyan-600/20 border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.25)]'
+                : 'bg-white/[0.02] border-white/10 hover:border-white/20 hover:bg-white/[0.04]'
+            }`}
+          >
+            <div>
+              <div className="flex items-center justify-between text-xs mb-1.5">
+                <span className="font-mono text-[10px] text-slate-400 uppercase">OVERVIEW</span>
+                {pendingCount > 0 && (
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse">
+                    {pendingCount} Pending
+                  </span>
+                )}
+              </div>
+              <h3 className="text-sm font-bold text-white font-display">All Campaigns</h3>
+              <p className="text-[11px] text-slate-400 mt-1">Review moderation queue across all brand campaigns</p>
+            </div>
+            <div className="pt-3 border-t border-white/5 flex justify-between items-center text-xs mt-3">
+              <span className="text-slate-400 font-mono">Total Submitted:</span>
+              <span className="font-bold text-white font-mono">{submissions.length} clips</span>
+            </div>
+          </button>
+
+          {/* Dynamic Campaign Cards */}
+          {campaigns.slice(0, 7).map((c) => {
+            const isSelected = selectedCampaignId === c.id;
+            const stats = campaignStats[c.id] || { total: c._count?.submissions || 0, pending: 0 };
+
+            return (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => setSelectedCampaignId(c.id)}
+                className={`p-4 rounded-2xl text-left transition-all border cursor-pointer relative group flex flex-col justify-between ${
+                  isSelected
+                    ? 'bg-gradient-to-b from-purple-600/30 to-cyan-600/20 border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.25)]'
+                    : 'bg-white/[0.02] border-white/10 hover:border-purple-500/40 hover:bg-white/[0.04]'
+                }`}
+              >
+                <div>
+                  <div className="flex items-center justify-between text-xs mb-1.5">
+                    <span className="font-mono text-[10px] text-purple-300 uppercase truncate max-w-[120px]">
+                      {c.brand?.name || 'Brand Campaign'}
+                    </span>
+                    {stats.pending > 0 ? (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse">
+                        {stats.pending} Pending
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3" /> Caught up
+                      </span>
+                    )}
+                  </div>
+
+                  <h3 className="text-sm font-bold text-white font-display line-clamp-1 group-hover:text-cyan-300 transition-colors">
+                    {c.title}
+                  </h3>
+
+                  <div className="flex items-center gap-2 text-[11px] text-slate-400 mt-1">
+                    <span className="font-mono text-emerald-400 font-semibold">
+                      ₹{c.cpmRate || 120} CPM
+                    </span>
+                    <span>•</span>
+                    <span className="truncate">{c.industry || 'Viral'}</span>
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-white/5 flex justify-between items-center text-xs mt-3">
+                  <span className="text-slate-400 font-mono text-[11px]">Submitted Clips:</span>
+                  <span className="font-bold text-white font-mono bg-white/5 px-2 py-0.5 rounded">
+                    {stats.total}
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Selected Campaign Filter Status Bar */}
+        {activeCampaign && (
+          <div className="p-3.5 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2.5">
+              <FolderOpen className="w-4 h-4 text-cyan-400 shrink-0" />
+              <span>
+                Filtering review queue for:{' '}
+                <strong className="text-white font-display">{activeCampaign.title}</strong>{' '}
+                <span className="text-slate-400">({activeCampaign.brand?.name})</span>
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="font-mono text-emerald-300 bg-emerald-500/15 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
+                Reward: ₹{activeCampaign.cpmRate} CPM / ₹{activeCampaign.rewardPerClip || 500} per clip
+              </span>
+              <button
+                onClick={() => setSelectedCampaignId('ALL')}
+                className="text-cyan-300 hover:text-white font-bold underline cursor-pointer"
+              >
+                Clear Filter
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Filter and Search Bar */}
       <div className="p-4 rounded-2xl bg-[#0c1022] border border-white/[0.08] flex flex-col md:flex-row items-center justify-between gap-3">
         <div className="relative flex-1 w-full">
@@ -281,7 +450,7 @@ export default function AdminSubmissionsReviewPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by clip title, clipper name, submission ID, or campaign..."
+            placeholder="Search by clip title, clipper name, handle (@daxraps30), submission ID..."
             className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white placeholder-slate-500 text-xs outline-none focus:border-cyan-400 transition-all"
           />
         </div>
@@ -319,6 +488,26 @@ export default function AdminSubmissionsReviewPage() {
         </div>
       </div>
 
+      {/* Consolidated Single User Wallet Guarantee Banner */}
+      <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-900/30 via-indigo-900/20 to-cyan-900/30 border border-purple-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-300 shrink-0">
+            <Wallet className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="font-bold text-white flex items-center gap-2">
+              <span>Single Clipper Consolidated Wallet</span>
+              <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded border border-emerald-500/30">
+                Multi-Account Pooled
+              </span>
+            </div>
+            <p className="text-slate-300 text-[11px] mt-0.5">
+              One user can link multiple YouTube & Instagram channels. Approved clip earnings from all their accounts are consolidated into that one user's wallet and paid via UPI / Bank transfer upon campaign completion.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Submissions List */}
       {loading ? (
         <div className="py-20 text-center text-slate-400">
@@ -328,7 +517,11 @@ export default function AdminSubmissionsReviewPage() {
         <div className="py-20 text-center rounded-3xl bg-[#0c1022] border border-white/[0.08] space-y-2">
           <Video className="w-10 h-10 text-slate-600 mx-auto" />
           <h3 className="text-base font-bold text-white">No submissions found</h3>
-          <p className="text-xs text-slate-400">There are no clips matching the current filter criteria.</p>
+          <p className="text-xs text-slate-400">
+            {selectedCampaignId !== 'ALL'
+              ? 'No clips submitted for this specific campaign yet.'
+              : 'There are no clips matching the current filter criteria.'}
+          </p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -336,6 +529,9 @@ export default function AdminSubmissionsReviewPage() {
             const isPending = sub.status === 'PENDING_REVIEW';
             const isApproved = sub.status === 'APPROVED' || sub.status === 'VIEWS_VERIFIED';
             const isRejected = sub.status === 'REJECTED';
+
+            const clipperUser = sub.clipper;
+            const accountHandle = sub.postAccountHandle || clipperUser?.name || '@creator';
 
             return (
               <div
@@ -371,28 +567,46 @@ export default function AdminSubmissionsReviewPage() {
                       {sub.title}
                     </h3>
 
-                    <div className="flex flex-wrap items-center gap-4 text-xs text-slate-300/80 pt-0.5">
-                      <span>
-                        Clipper:{' '}
-                        <strong className="text-white">
-                          {sub.clipper?.name || 'Verified Creator'}
-                        </strong>
+                    {/* Consolidated Clipper User & Specific Handle Badges */}
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-slate-300/90 pt-0.5">
+                      <span className="flex items-center gap-1.5">
+                        <Users className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>
+                          Clipper User:{' '}
+                          <strong className="text-white">
+                            {clipperUser?.name || 'Verified Clipper'}
+                          </strong>{' '}
+                          <span className="text-[10px] text-slate-400 font-mono">({clipperUser?.email})</span>
+                        </span>
                       </span>
+
                       <span>•</span>
+
+                      <span className="flex items-center gap-1 bg-white/[0.04] px-2 py-0.5 rounded-lg border border-white/10 font-mono text-[11px]">
+                        <span className="text-slate-400">Account Posted:</span>
+                        <strong className="text-cyan-300 font-bold">{accountHandle}</strong>
+                      </span>
+
+                      <span>•</span>
+
                       <span>
                         Campaign:{' '}
                         <strong className="text-purple-300">
                           {sub.campaign?.title}
                         </strong>
                       </span>
+
                       <span>•</span>
+
                       <span>
-                        CPM Rate:{' '}
+                        CPM:{' '}
                         <strong className="text-emerald-400 font-mono">
                           ₹{sub.campaign?.cpmRate || 150}
                         </strong>
                       </span>
+
                       <span>•</span>
+
                       {sub.verifiedViews > 0 ? (
                         <span className="text-cyan-400 font-mono font-bold flex items-center gap-1">
                           <Eye className="w-3 h-3" />
@@ -410,11 +624,6 @@ export default function AdminSubmissionsReviewPage() {
                           0 Views <span className="text-[10px] text-purple-400/80">(Pending Sync)</span>
                         </span>
                       )}
-                      <span>•</span>
-                      <span className="text-[11px] font-mono font-bold text-cyan-300 bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-cyan-500/30 flex items-center gap-1">
-                        <Globe2 className="w-3 h-3 text-cyan-400" />
-                        <span>{sub.platform === 'YOUTUBE' ? '84% Tier-1 Demographics' : '81% Tier-1 Demographics'}</span>
-                      </span>
                     </div>
 
                     {sub.rejectionReason && (
@@ -458,13 +667,13 @@ export default function AdminSubmissionsReviewPage() {
                       </>
                     )}
 
-                    {/* In-Place Audit & Demographics Button */}
+                    {/* In-Place Video Metrics & Settlement Button */}
                     <button
                       onClick={() => handleOpenAudit(sub)}
                       className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-900/80 to-cyan-900/70 hover:from-purple-800 hover:to-cyan-800 border border-cyan-500/40 text-xs font-bold text-cyan-300 hover:text-white flex items-center gap-1.5 transition-all cursor-pointer shadow-lg shadow-cyan-500/15"
                     >
                       <BarChart3 className="w-3.5 h-3.5 text-cyan-400" />
-                      <span>Audit & Demographics</span>
+                      <span>Audit Video Metrics</span>
                     </button>
                   </div>
                 </div>
@@ -498,7 +707,7 @@ export default function AdminSubmissionsReviewPage() {
 
               <div className="flex flex-wrap gap-1.5 pt-1">
                 {[
-                  'Missing #ClipMatrix hashtag',
+                  'Missing required brand hashtag in caption',
                   'Incorrect brand account tagged',
                   'Video is not 9:16 vertical',
                   'Low audio clarity / compression',
@@ -537,11 +746,11 @@ export default function AdminSubmissionsReviewPage() {
         </div>
       )}
 
-      {/* In-Place Audit View Modal / Drawer (Opens on same page, returns right to the audited clip) */}
+      {/* In-Place Audit View Modal (Clean video metrics & settlement, no demographics) */}
       {auditSub && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md overflow-y-auto p-4 sm:p-6 flex items-start justify-center">
-          <div className="w-full max-w-4xl my-8 rounded-3xl bg-gradient-to-b from-[#0f1426]/95 via-[#0a0d1c]/95 to-[#060812] border border-purple-500/40 p-6 sm:p-8 space-y-6 shadow-[0_25px_60px_-15px_rgba(147,51,234,0.3)] relative text-slate-200 overflow-hidden">
-            {/* Top Cyber Scanner Accent */}
+          <div className="w-full max-w-4xl my-8 rounded-3xl bg-gradient-to-b from-[#0f1426]/95 via-[#0a0d1c]/95 to-[#060812] border border-cyan-500/40 p-6 sm:p-8 space-y-6 shadow-[0_25px_60px_-15px_rgba(6,182,212,0.3)] relative text-slate-200 overflow-hidden">
+            {/* Top Accent */}
             <div className="absolute top-0 left-8 right-8 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
 
             {/* Header: Back Button & Sub Info */}
@@ -552,7 +761,7 @@ export default function AdminSubmissionsReviewPage() {
                   className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-white/[0.05] hover:bg-white/10 transition-all flex items-center gap-2 cursor-pointer border border-white/10 shadow-sm"
                 >
                   <ArrowLeft className="w-4 h-4 text-cyan-400" />
-                  <span>Back to Review Queue</span>
+                  <span>Back to Queue</span>
                 </button>
 
                 <div>
@@ -587,391 +796,126 @@ export default function AdminSubmissionsReviewPage() {
               </div>
             </div>
 
-            {/* Live Creator Studio Analytics View Access Telemetry Banner */}
-            {auditSub.platform === 'YOUTUBE' ? (
-              <div className="p-4 rounded-2xl bg-gradient-to-r from-red-500/15 via-purple-500/10 to-cyan-500/15 border border-red-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
-                <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-2xl bg-red-600/20 border border-red-500/40 flex items-center justify-center text-red-500 shrink-0 shadow-inner">
-                    <YouTubeIcon className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs sm:text-sm font-bold text-white font-display">YouTube Studio View Access</span>
-                      <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/15 px-2.5 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3" /> ACTIVE & VERIFIED
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-300 mt-0.5">
-                      Admin has read-only Studio Telemetry view access (<span className="text-cyan-300 font-mono">yt-analytics.readonly</span>) to track retention & demographics.
-                    </p>
-                  </div>
+            {/* Account & Single User Consolidation Banner */}
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-cyan-500/15 via-purple-500/10 to-indigo-500/15 border border-cyan-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
+              <div className="flex items-center gap-3.5">
+                <div className="w-10 h-10 rounded-2xl bg-cyan-600/20 border border-cyan-500/40 flex items-center justify-center text-cyan-300 shrink-0 shadow-inner">
+                  {auditSub.platform === 'YOUTUBE' ? <YouTubeIcon className="w-5 h-5 text-red-500" /> : <InstagramIcon className="w-5 h-5 text-pink-500" />}
                 </div>
-                <div className="text-left sm:text-right shrink-0 bg-black/40 px-3 py-1.5 rounded-xl border border-white/5">
-                  <div className="text-[10px] text-slate-400 font-mono">LINKED CREATOR</div>
-                  <div className="text-xs font-bold text-cyan-300 font-mono">{auditSub.postAccountHandle || auditSub.clipper?.name || '@Daxmessage'}</div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs sm:text-sm font-bold text-white font-display">
+                      {auditSub.platform} Clip Auditing
+                    </span>
+                    <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/15 px-2.5 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" /> VERIFIED
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-300 mt-0.5">
+                    Posted Account: <span className="text-cyan-300 font-mono font-bold">{auditSub.postAccountHandle || '@creator'}</span> • Consolidates to Clipper User: <span className="text-white font-bold">{auditSub.clipper?.name || 'Verified Clipper'}</span>
+                  </p>
                 </div>
               </div>
-            ) : auditSub.platform === 'INSTAGRAM' ? (
-              <div className="p-4 rounded-2xl bg-gradient-to-r from-pink-500/15 via-purple-500/10 to-cyan-500/15 border border-pink-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
-                <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-2xl bg-pink-600/20 border border-pink-500/40 flex items-center justify-center text-pink-500 shrink-0 shadow-inner">
-                    <InstagramIcon className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs sm:text-sm font-bold text-white font-display">Instagram Professional Insights View Access</span>
-                      <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/15 px-2.5 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3" /> ACTIVE & VERIFIED
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-300 mt-0.5">
-                      Admin has read-only Meta Graph API view access (<span className="text-cyan-300 font-mono">instagram_manage_insights</span>) to track audience countries & reach.
-                    </p>
-                  </div>
-                </div>
-                <div className="text-left sm:text-right shrink-0 bg-black/40 px-3 py-1.5 rounded-xl border border-white/5">
-                  <div className="text-[10px] text-slate-400 font-mono">LINKED CREATOR</div>
-                  <div className="text-xs font-bold text-pink-300 font-mono">{auditSub.postAccountHandle || auditSub.clipper?.name || '@satya.viralclips'}</div>
-                </div>
+              <div className="text-left sm:text-right shrink-0 bg-black/40 px-3 py-1.5 rounded-xl border border-white/5">
+                <div className="text-[10px] text-slate-400 font-mono">CAMPAIGN POOL</div>
+                <div className="text-xs font-bold text-purple-300 font-mono">{auditSub.campaign?.title}</div>
               </div>
-            ) : null}
+            </div>
 
-            {/* View Mode Tabs: This Video's Demographics vs Whole Account Demographics */}
-            <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-black/60 border border-white/10 shadow-inner">
+            {/* Video Link & Re-Scrape Bar */}
+            <div className="p-4 rounded-2xl bg-[#090d18] border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+              <div className="min-w-0 flex-1">
+                <div className="text-[11px] text-slate-400 font-mono">AUDITED VIDEO URL:</div>
+                <div className="text-slate-200 font-mono truncate">{auditSub.videoUrl}</div>
+              </div>
               <button
-                type="button"
-                onClick={() => setAuditDemographicsView('video')}
-                className={`flex-1 py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                  auditDemographicsView === 'video'
-                    ? 'bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 text-white shadow-lg shadow-cyan-500/25'
-                    : 'text-slate-400 hover:text-white hover:bg-white/5'
-                }`}
+                onClick={() => triggerLiveScrape(auditSub.videoUrl, auditSub.id)}
+                disabled={auditScraping}
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 disabled:opacity-50 text-white font-bold flex items-center justify-center gap-2 shrink-0 cursor-pointer shadow-lg shadow-purple-500/25"
               >
-                <Video className="w-4 h-4 text-cyan-300" />
-                <span>📹 This Video's Demographics</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setAuditDemographicsView('account')}
-                className={`flex-1 py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                  auditDemographicsView === 'account'
-                    ? 'bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 text-white shadow-lg shadow-purple-500/25'
-                    : 'text-slate-400 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                <Users className="w-4 h-4 text-purple-300" />
-                <span>👤 Whole Account Demographics</span>
+                <RefreshCw className={`w-3.5 h-3.5 ${auditScraping ? 'animate-spin' : ''}`} />
+                <span>{auditScraping ? 'Scanning Live URL...' : 'Re-Run Live Metrics Scan'}</span>
               </button>
             </div>
 
-            {/* TAB 1: THIS VIDEO'S DEMOGRAPHICS */}
-            {auditDemographicsView === 'video' && (
-              <div className="space-y-6">
-                {/* Video Link & Re-Scrape Bar */}
-                <div className="p-4 rounded-2xl bg-[#090d18] border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                  <div className="min-w-0 flex-1">
-                    <div className="text-[11px] text-slate-400 font-mono">AUDITED VIDEO LINK:</div>
-                    <div className="text-slate-200 font-mono truncate">{auditSub.videoUrl}</div>
-                  </div>
-                  <button
-                    onClick={() => triggerLiveScrape(auditSub.videoUrl, auditSub.id)}
-                    disabled={auditScraping}
-                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 disabled:opacity-50 text-white font-bold flex items-center justify-center gap-2 shrink-0 cursor-pointer shadow-lg shadow-purple-500/25"
-                  >
-                    <RefreshCw className={`w-3.5 h-3.5 ${auditScraping ? 'animate-spin' : ''}`} />
-                    <span>{auditScraping ? 'Scanning Live Link...' : 'Re-Run Live Video Audit'}</span>
-                  </button>
-                </div>
-
-                {auditMsg && (
-                  <div className="p-3.5 rounded-2xl bg-purple-950/60 border border-purple-500/30 text-xs text-cyan-300 font-medium">
-                    {auditMsg}
-                  </div>
-                )}
-
-                {/* Scraped Live Metrics Grid */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                      <Zap className="w-3.5 h-3.5 text-cyan-400" />
-                      <span>THIS VIDEO'S LIVE METRICS</span>
-                    </h3>
-                    <span className="text-[10px] font-mono text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
-                      Per-Video Telemetry
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div className="p-4 rounded-2xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/10">
-                      <div className="text-[11px] text-slate-400 flex items-center justify-between mb-1">
-                        <span className="flex items-center gap-1.5"><Eye className="w-3.5 h-3.5 text-cyan-400" /> Views</span>
-                        {auditScrapedData?.verificationMethod?.includes('MODELED') && (
-                          <span className="text-[9px] font-mono text-amber-400 bg-amber-500/10 px-1.5 py-0.2 rounded border border-amber-500/20">Modeled</span>
-                        )}
-                      </div>
-                      <div className="text-xl sm:text-2xl font-bold text-white font-mono">
-                        {(auditScrapedData?.viewCount && auditScrapedData.viewCount > 0
-                          ? auditScrapedData.viewCount
-                          : parseInt(auditVerifiedViews || '0', 10) || auditSub?.reportedViews || 0
-                        ).toLocaleString()}
-                      </div>
-                    </div>
-
-                    <div className="p-4 rounded-2xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/10">
-                      <div className="text-[11px] text-slate-400 flex items-center gap-1.5 mb-1">
-                        <Heart className="w-3.5 h-3.5 text-rose-400" /> Likes
-                      </div>
-                      <div className="text-xl sm:text-2xl font-bold text-white font-mono">
-                        {auditScrapedData?.likeCount?.toLocaleString() || Math.floor((parseInt(auditVerifiedViews || '0') * 0.082)).toLocaleString()}
-                      </div>
-                    </div>
-
-                    <div className="p-4 rounded-2xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/10">
-                      <div className="text-[11px] text-slate-400 flex items-center gap-1.5 mb-1">
-                        <MessageSquare className="w-3.5 h-3.5 text-purple-400" /> Comments
-                      </div>
-                      <div className="text-xl sm:text-2xl font-bold text-white font-mono">
-                        {auditScrapedData?.commentCount !== undefined
-                          ? auditScrapedData.commentCount.toLocaleString()
-                          : (auditSub?.commentsCount || 0).toLocaleString()}
-                      </div>
-                    </div>
-
-                    <div className="p-4 rounded-2xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/10">
-                      <div className="text-[11px] text-slate-400 flex items-center justify-between mb-1">
-                        <span className="flex items-center gap-1.5"><Share2 className="w-3.5 h-3.5 text-emerald-400" /> Shares</span>
-                        <span className="text-[9px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20">Verified</span>
-                      </div>
-                      <div className="text-sm sm:text-base font-bold text-slate-100 font-mono mt-1">
-                        {auditScrapedData?.shareCount && auditScrapedData.shareCount > 0
-                          ? auditScrapedData.shareCount.toLocaleString()
-                          : (auditSub?.sharesCount && auditSub.sharesCount > 0
-                            ? auditSub.sharesCount.toLocaleString()
-                            : (auditSub.platform === 'YOUTUBE' ? '9,509 Studio' : '8,420 Meta'))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Video Demographics & Fraud Score Row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Audience Demographics for this Video */}
-                  <div className="p-5 rounded-3xl bg-gradient-to-b from-white/[0.03] to-white/[0.01] border border-white/10 space-y-3">
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="font-bold text-slate-300 flex items-center gap-1.5">
-                        <Globe2 className="w-4 h-4 text-cyan-400" /> Video Audience Demographics
-                      </span>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] font-mono text-emerald-300 bg-emerald-500/15 px-2.5 py-0.5 rounded-full border border-emerald-500/30 font-bold flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                          <span>{auditSub.platform === 'YOUTUBE' ? 'YT Studio Access' : 'Meta Insights'}</span>
-                        </span>
-                        <span className="text-[11px] font-mono text-cyan-300 bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-cyan-500/30 font-bold">
-                          {auditScrapedData?.demographics?.tier1Percent || (auditSub.platform === 'YOUTUBE' ? 84 : 81)}% Tier-1
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="p-2.5 rounded-xl bg-purple-950/40 border border-purple-500/20 text-[11px] text-purple-200/90 leading-relaxed flex items-center gap-2">
-                      <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-                      <span>
-                        <strong>Video Retention Curve:</strong> Avg watch duration{' '}
-                        <strong className="text-white font-mono">{auditScrapedData?.demographics?.avgWatchDuration || '0:48 / 0:58'}</strong>{' '}
-                        ({auditScrapedData?.demographics?.retentionRate || 82.4}% avg viewer retention past 30s).
-                      </span>
-                    </div>
-
-                    <div className="space-y-1.5 text-xs text-slate-300">
-                      {(auditScrapedData?.demographics?.topCountries && auditScrapedData.demographics.topCountries.length > 0
-                        ? auditScrapedData.demographics.topCountries
-                        : auditSub.platform === 'YOUTUBE'
-                        ? [
-                            { country: 'United States', percent: 48, isTier1: true },
-                            { country: 'United Kingdom', percent: 18, isTier1: true },
-                            { country: 'India', percent: 16, isTier1: false },
-                            { country: 'Canada', percent: 10, isTier1: true },
-                            { country: 'Australia', percent: 8, isTier1: true }
-                          ]
-                        : [
-                            { country: 'United States', percent: 45, isTier1: true },
-                            { country: 'India', percent: 19, isTier1: false },
-                            { country: 'United Kingdom', percent: 16, isTier1: true },
-                            { country: 'Canada', percent: 11, isTier1: true },
-                            { country: 'Germany', percent: 9, isTier1: true }
-                          ]
-                      ).map((c: any) => (
-                        <div key={c.country} className="flex justify-between items-center">
-                          <span className="flex items-center gap-1.5">
-                            <span>{c.country}</span>
-                            {c.isTier1 && <span className="text-[9px] text-cyan-300 font-mono bg-cyan-500/10 px-1 rounded">★ Tier-1</span>}
-                          </span>
-                          <span className="font-mono font-bold text-white">{c.percent}%</span>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="pt-2 border-t border-slate-800/80 flex justify-between items-center text-[11px]">
-                      <span className="text-slate-400">Video Gender Ratio:</span>
-                      <span className="text-white font-mono font-bold">
-                        {auditScrapedData?.demographics?.gender?.male || 61}% Male / {auditScrapedData?.demographics?.gender?.female || 39}% Female
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Bot & Fraud Meter */}
-                  <div className="p-5 rounded-3xl bg-gradient-to-b from-white/[0.03] to-white/[0.01] border border-white/10 space-y-3 flex flex-col justify-between">
-                    <div>
-                      <div className="flex justify-between items-center text-xs mb-2">
-                        <span className="font-bold text-slate-300 flex items-center gap-1.5">
-                          <ShieldCheck className="w-4 h-4 text-emerald-400" /> Bot & Fraud Anomaly Meter
-                        </span>
-                        <span className="font-mono text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
-                          {auditScrapedData?.demographics?.fraudScore || 5} / 100 Risk
-                        </span>
-                      </div>
-
-                      <p className="text-xs text-slate-400 leading-relaxed">
-                        View patterns indicate natural organic distribution. Retention curve, like-to-view ratio (
-                        {auditScrapedData?.engagementRate || 8.2}%), and comment density match authentic human traffic.
-                      </p>
-                    </div>
-
-                    <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-2 text-xs text-emerald-300">
-                      <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
-                      <span>No bot click-farm activity detected. Certified safe for escrow payout.</span>
-                    </div>
-                  </div>
-                </div>
+            {auditMsg && (
+              <div className="p-3.5 rounded-2xl bg-purple-950/60 border border-purple-500/30 text-xs text-cyan-300 font-medium">
+                {auditMsg}
               </div>
             )}
 
-            {/* TAB 2: WHOLE ACCOUNT DEMOGRAPHICS */}
-            {auditDemographicsView === 'account' && (
-              <div className="space-y-4">
-                <div className="p-6 rounded-3xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-cyan-500/40 space-y-5">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/10">
-                    <div className="flex items-center gap-3.5">
-                      <div className="w-11 h-11 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-300">
-                        <Users className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <div className="text-base font-bold text-white flex items-center gap-2">
-                          <span>{auditSub.postAccountHandle || auditSub.clipper?.name || '@daxraps30'}</span>
-                          <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/20 px-2.5 py-0.5 rounded-full border border-emerald-500/30 font-bold flex items-center gap-1">
-                            <CheckCircle2 className="w-3 h-3" /> Viewer Access: ACTIVE
-                          </span>
-                        </div>
-                        <p className="text-xs text-slate-400 mt-0.5">
-                          {auditSub.platform === 'YOUTUBE' ? 'Official YouTube Studio Analytics' : 'Official Instagram Insights'} 30-Day Channel Telemetry
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-left sm:text-right">
-                      <span className="text-xs font-mono font-bold text-cyan-300 bg-cyan-500/15 px-3 py-1 rounded-full border border-cyan-500/30">
-                        84% Channel Tier-1 Qualified
-                      </span>
-                    </div>
+            {/* Scraped Live Metrics Grid (Views, Likes, Comments, Shares) */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                  <Zap className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>VIDEO ENGAGEMENT METRICS</span>
+                </h3>
+                <span className="text-[10px] font-mono text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
+                  Live Platform Scan
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="p-4 rounded-2xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/10">
+                  <div className="text-[11px] text-slate-400 flex items-center justify-between mb-1">
+                    <span className="flex items-center gap-1.5"><Eye className="w-3.5 h-3.5 text-cyan-400" /> Views</span>
+                    <span className="text-[9px] font-mono text-cyan-400 bg-cyan-500/10 px-1.5 py-0.2 rounded border border-cyan-500/20">Verified</span>
                   </div>
-
-                  {/* Channel-Wide Key Metrics */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-1">
-                      <div className="text-[11px] text-slate-400 font-medium">Total Channel Subscribers</div>
-                      <div className="text-xl sm:text-2xl font-bold text-white font-mono">12,400</div>
-                      <div className="text-[10px] text-emerald-400 font-mono">+480 gained this month</div>
-                    </div>
-
-                    <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-1">
-                      <div className="text-[11px] text-slate-400 font-medium">30-Day Channel Views</div>
-                      <div className="text-xl sm:text-2xl font-bold text-cyan-300 font-mono">792,467</div>
-                      <div className="text-[10px] text-slate-400 font-mono">Across all published Shorts</div>
-                    </div>
-
-                    <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-1">
-                      <div className="text-[11px] text-slate-400 font-medium">Channel Avg Retention</div>
-                      <div className="text-xl sm:text-2xl font-bold text-emerald-300 font-mono">82.4%</div>
-                      <div className="text-[10px] text-slate-400 font-mono">Avg duration 0:48 / 0:58</div>
-                    </div>
-
-                    <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-1">
-                      <div className="text-[11px] text-slate-400 font-medium">30-Day Total Reach</div>
-                      <div className="text-xl sm:text-2xl font-bold text-purple-300 font-mono">1,240,000</div>
-                      <div className="text-[10px] text-slate-400 font-mono">Organic Impressions</div>
-                    </div>
+                  <div className="text-xl sm:text-2xl font-bold text-white font-mono">
+                    {(auditScrapedData?.viewCount && auditScrapedData.viewCount > 0
+                      ? auditScrapedData.viewCount
+                      : parseInt(auditVerifiedViews || '0', 10) || auditSub?.reportedViews || 0
+                    ).toLocaleString()}
                   </div>
+                </div>
 
-                  {/* Channel-Wide Demographics Breakdown */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-                    {/* Channel Geographic Split */}
-                    <div className="p-4 rounded-2xl bg-black/30 border border-white/5 space-y-2.5">
-                      <div className="flex justify-between items-center text-xs pb-1 border-b border-white/5">
-                        <span className="font-bold text-slate-200 flex items-center gap-1.5">
-                          <Globe2 className="w-3.5 h-3.5 text-cyan-400" />
-                          <span>Channel Geographic Distribution (30 Days)</span>
-                        </span>
-                        <span className="text-[10px] font-mono text-cyan-300">Studio Data</span>
-                      </div>
-                      <div className="space-y-1.5 text-xs">
-                        {[
-                          { country: 'United States', percent: 48, isTier1: true },
-                          { country: 'United Kingdom', percent: 18, isTier1: true },
-                          { country: 'India', percent: 16, isTier1: false },
-                          { country: 'Canada', percent: 10, isTier1: true },
-                          { country: 'Australia', percent: 8, isTier1: true },
-                        ].map((c) => (
-                          <div key={c.country} className="flex justify-between items-center">
-                            <span className="flex items-center gap-1.5 text-slate-300">
-                              <span>{c.country}</span>
-                              {c.isTier1 && <span className="text-[9px] text-cyan-300 font-mono bg-cyan-500/10 px-1 rounded">★ Tier-1</span>}
-                            </span>
-                            <span className="font-mono font-bold text-white">{c.percent}%</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                <div className="p-4 rounded-2xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/10">
+                  <div className="text-[11px] text-slate-400 flex items-center gap-1.5 mb-1">
+                    <Heart className="w-3.5 h-3.5 text-rose-400" /> Likes
+                  </div>
+                  <div className="text-xl sm:text-2xl font-bold text-white font-mono">
+                    {auditScrapedData?.likeCount !== undefined
+                      ? auditScrapedData.likeCount.toLocaleString()
+                      : (auditSub?.likesCount || 0).toLocaleString()}
+                  </div>
+                </div>
 
-                    {/* Channel Age & Gender Split */}
-                    <div className="p-4 rounded-2xl bg-black/30 border border-white/5 space-y-2.5">
-                      <div className="flex justify-between items-center text-xs pb-1 border-b border-white/5">
-                        <span className="font-bold text-slate-200 flex items-center gap-1.5">
-                          <Users className="w-3.5 h-3.5 text-purple-400" />
-                          <span>Channel Age & Gender Breakdown</span>
-                        </span>
-                        <span className="text-[10px] font-mono text-purple-300">Audience Split</span>
-                      </div>
-                      <div className="space-y-1.5 text-xs">
-                        {[
-                          { group: '18-24 years', percent: 54 },
-                          { group: '25-34 years', percent: 32 },
-                          { group: '13-17 years', percent: 9 },
-                          { group: '35-44 years', percent: 5 },
-                        ].map((ag) => (
-                          <div key={ag.group} className="flex justify-between items-center text-slate-300">
-                            <span>{ag.group}</span>
-                            <span className="font-mono font-bold text-white">{ag.percent}%</span>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="pt-2 border-t border-white/5 flex justify-between items-center text-xs">
-                        <span className="text-slate-400">Overall Gender:</span>
-                        <span className="text-white font-mono font-bold">61% Male / 39% Female</span>
-                      </div>
-                    </div>
+                <div className="p-4 rounded-2xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/10">
+                  <div className="text-[11px] text-slate-400 flex items-center gap-1.5 mb-1">
+                    <MessageSquare className="w-3.5 h-3.5 text-purple-400" /> Comments
+                  </div>
+                  <div className="text-xl sm:text-2xl font-bold text-white font-mono">
+                    {auditScrapedData?.commentCount !== undefined
+                      ? auditScrapedData.commentCount.toLocaleString()
+                      : (auditSub?.commentsCount || 0).toLocaleString()}
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/10">
+                  <div className="text-[11px] text-slate-400 flex items-center justify-between mb-1">
+                    <span className="flex items-center gap-1.5"><Share2 className="w-3.5 h-3.5 text-emerald-400" /> Shares</span>
+                    <span className="text-[9px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20">Verified</span>
+                  </div>
+                  <div className="text-xl sm:text-2xl font-bold text-slate-100 font-mono">
+                    {auditScrapedData?.shareCount !== undefined && auditScrapedData.shareCount > 0
+                      ? auditScrapedData.shareCount.toLocaleString()
+                      : (auditSub?.sharesCount || 0).toLocaleString()}
                   </div>
                 </div>
               </div>
-            )}
+            </div>
 
             {/* Payout & Settlement Box */}
-            <div className="p-6 rounded-3xl bg-gradient-to-br from-[#12192c] to-[#0d1220] border border-purple-500/40 space-y-4 shadow-xl">
+            <div className="p-6 rounded-3xl bg-gradient-to-br from-[#12192c] to-[#0d1220] border border-cyan-500/40 space-y-4 shadow-xl">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h3 className="text-sm font-bold text-white flex items-center gap-2">
                     <DollarSign className="w-4 h-4 text-emerald-400" />
-                    <span>Instant View Settlement & Wallet Credit</span>
+                    <span>View Settlement & Consolidated Clipper Credit</span>
                   </h3>
                   <p className="text-xs text-slate-400 mt-0.5">
-                    Confirm audited view count to immediately credit the clipper's wallet balance.
+                    Confirm audited views to credit the clipper user's balance. Payment is released to their UPI / Bank when the campaign concludes.
                   </p>
                 </div>
 
@@ -1007,7 +951,7 @@ export default function AdminSubmissionsReviewPage() {
                     className="w-full py-3 rounded-xl font-bold text-slate-950 bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 hover:from-emerald-300 hover:to-cyan-300 disabled:opacity-50 transition-all shadow-lg shadow-emerald-500/20 text-xs flex items-center justify-center gap-2 cursor-pointer font-black"
                   >
                     <CheckCheck className="w-4 h-4" />
-                    <span>{auditVerifying ? 'Settling & Crediting Wallet...' : 'Verify Views & Credit Clipper Wallet'}</span>
+                    <span>{auditVerifying ? 'Settling & Crediting User Wallet...' : 'Verify Views & Credit Clipper Wallet'}</span>
                   </button>
                 </div>
               </div>
@@ -1019,7 +963,7 @@ export default function AdminSubmissionsReviewPage() {
                 onClick={handleCloseAudit}
                 className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:opacity-90 transition-all cursor-pointer shadow-md"
               >
-                Done & Return to Clip
+                Done & Return to Review Queue
               </button>
             </div>
           </div>

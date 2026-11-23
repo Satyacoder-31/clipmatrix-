@@ -7,13 +7,18 @@ import {
   CheckCircle,
   Ban,
   BarChart3,
-  Globe2,
   Eye,
   X,
   CheckCircle2,
   Lock,
   TrendingUp,
   Share2,
+  Wallet,
+  Smartphone,
+  Building2,
+  Copy,
+  Check,
+  CreditCard,
 } from 'lucide-react';
 
 function InstagramIcon({ className = 'w-4 h-4' }: { className?: string }) {
@@ -36,7 +41,8 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [roleFilter, setRoleFilter] = useState('ALL');
   const [loading, setLoading] = useState(true);
-  const [demographicsUser, setDemographicsUser] = useState<any | null>(null);
+  const [payoutModalUser, setPayoutModalUser] = useState<any | null>(null);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   const fetchUsers = () => {
     setLoading(true);
@@ -63,13 +69,22 @@ export default function AdminUsersPage() {
     fetchUsers();
   };
 
+  const copyToClipboard = (text: string, fieldKey: string) => {
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    setCopiedField(fieldKey);
+    setTimeout(() => setCopiedField(null), 2500);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white font-display">User Directory & Studio Telemetry</h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white font-display">
+            User Directory & Creator Payout Info
+          </h1>
           <p className="text-xs sm:text-sm text-purple-200/70">
-            Audit user accounts, check YouTube Studio & Instagram Insights access, and track verified demographics.
+            Manage users, view linked creator channels, and inspect UPI & Bank details to disburse campaign payouts.
           </p>
         </div>
 
@@ -97,105 +112,122 @@ export default function AdminUsersPage() {
               <tr>
                 <th className="py-3.5 px-4">User</th>
                 <th className="py-3.5 px-4">Role</th>
-                <th className="py-3.5 px-4">Connected Studio Channels & View Access</th>
+                <th className="py-3.5 px-4">Connected Channels & Payment Details</th>
                 <th className="py-3.5 px-4">Wallet Balance</th>
                 <th className="py-3.5 px-4">Status</th>
                 <th className="py-3.5 px-4">Control</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-purple-900/30">
-              {users.map((u) => (
-                <tr key={u.id} className="hover:bg-purple-950/20 transition-colors">
-                  <td className="py-4 px-4">
-                    <div className="font-bold text-white">{u.name}</div>
-                    <div className="text-[10px] text-purple-400">{u.email}</div>
-                  </td>
-                  <td className="py-4 px-4">
-                    <span
-                      className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                        u.role === 'ADMIN'
-                          ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
-                          : u.role === 'BRAND'
-                          ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
-                          : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
-                      }`}
-                    >
-                      {u.role}
-                    </span>
-                  </td>
-                  <td className="py-4 px-4 text-purple-300 text-[11px]">
-                    {u.brandProfile ? (
-                      <span>{u.brandProfile.companyName} ({u.brandProfile.industry})</span>
-                    ) : u.clipperProfile ? (
-                      <div className="space-y-1.5">
-                        <div className="font-semibold text-white flex items-center gap-2">
-                          <span>{u.clipperProfile.instagramHandle || u.clipperProfile.youtubeHandle || '@daxraps30'}</span>
-                          <span className="text-[10px] font-mono text-cyan-400 font-normal">({u.clipperProfile.level})</span>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-1.5">
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-red-500/15 border border-red-500/30 text-red-300">
-                            <YouTubeIcon className="w-3 h-3" />
-                            <span>YT Studio: ACTIVE</span>
-                          </span>
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-pink-500/15 border border-pink-500/30 text-pink-300">
-                            <InstagramIcon className="w-3 h-3" />
-                            <span>IG Insights: ACTIVE</span>
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => setDemographicsUser(u)}
-                            className="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 transition-colors cursor-pointer flex items-center gap-1"
-                          >
-                            <BarChart3 className="w-3 h-3" />
-                            <span>Track Demographics</span>
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      'System Admin'
-                    )}
-                  </td>
-                  <td className="py-4 px-4 font-bold text-white font-mono">
-                    ₹{u.wallet?.balance?.toLocaleString('en-IN') || 0}
-                  </td>
-                  <td className="py-4 px-4">
-                    <span
-                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                        u.status === 'ACTIVE'
-                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
-                          : 'bg-rose-500/20 text-rose-400 border border-rose-500/40'
-                      }`}
-                    >
-                      {u.status}
-                    </span>
-                  </td>
-                  <td className="py-4 px-4">
-                    {u.role !== 'ADMIN' && (
-                      <button
-                        onClick={() => handleToggleStatus(u.id, u.status)}
-                        className={`px-2.5 py-1 rounded text-[11px] font-medium transition-colors cursor-pointer ${
-                          u.status === 'ACTIVE'
-                            ? 'text-rose-400 hover:bg-rose-950/40'
-                            : 'text-emerald-400 hover:bg-emerald-950/40'
+              {users.map((u) => {
+                const cp = u.clipperProfile;
+                const hasUpi = !!cp?.upiId;
+                const hasBank = !!(cp?.bankName && cp?.bankAccountNumber);
+
+                return (
+                  <tr key={u.id} className="hover:bg-purple-950/20 transition-colors">
+                    <td className="py-4 px-4">
+                      <div className="font-bold text-white">{u.name}</div>
+                      <div className="text-[10px] text-purple-400">{u.email}</div>
+                    </td>
+                    <td className="py-4 px-4">
+                      <span
+                        className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                          u.role === 'ADMIN'
+                            ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                            : u.role === 'BRAND'
+                            ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
+                            : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
                         }`}
                       >
-                        {u.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
+                        {u.role}
+                      </span>
+                    </td>
+                    <td className="py-4 px-4 text-purple-300 text-[11px]">
+                      {u.brandProfile ? (
+                        <span>{u.brandProfile.companyName} ({u.brandProfile.industry})</span>
+                      ) : cp ? (
+                        <div className="space-y-1.5">
+                          <div className="font-semibold text-white flex items-center gap-2">
+                            <span>{cp.instagramHandle || cp.youtubeHandle || '@daxraps30'}</span>
+                            <span className="text-[10px] font-mono text-cyan-400 font-normal">({cp.level})</span>
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            {hasUpi ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">
+                                <Smartphone className="w-3 h-3" />
+                                <span>UPI: {cp.upiId}</span>
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 border border-white/10 text-slate-400">
+                                <span>No UPI</span>
+                              </span>
+                            )}
+
+                            {hasBank ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-500/15 border border-cyan-500/30 text-cyan-300">
+                                <Building2 className="w-3 h-3" />
+                                <span>{cp.bankName}</span>
+                              </span>
+                            ) : null}
+
+                            <button
+                              type="button"
+                              onClick={() => setPayoutModalUser(u)}
+                              className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/40 text-purple-200 transition-colors cursor-pointer flex items-center gap-1 ml-1"
+                            >
+                              <Wallet className="w-3 h-3 text-cyan-300" />
+                              <span>View Payout Details</span>
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        'System Admin'
+                      )}
+                    </td>
+                    <td className="py-4 px-4 font-bold text-white font-mono">
+                      ₹{u.wallet?.balance?.toLocaleString('en-IN') || 0}
+                    </td>
+                    <td className="py-4 px-4">
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          u.status === 'ACTIVE'
+                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                            : 'bg-rose-500/20 text-rose-400 border border-rose-500/40'
+                        }`}
+                      >
+                        {u.status}
+                      </span>
+                    </td>
+                    <td className="py-4 px-4">
+                      {u.role !== 'ADMIN' && (
+                        <button
+                          onClick={() => handleToggleStatus(u.id, u.status)}
+                          className={`px-2.5 py-1 rounded text-[11px] font-medium transition-colors cursor-pointer ${
+                            u.status === 'ACTIVE'
+                              ? 'text-rose-400 hover:bg-rose-950/40'
+                              : 'text-emerald-400 hover:bg-emerald-950/40'
+                          }`}
+                        >
+                          {u.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* Admin Creator Studio Demographics Inspection Modal */}
-      {demographicsUser && (
+      {/* Admin Creator Payout Details Modal (UPI, Bank Details, Consolidated Channels) */}
+      {payoutModalUser && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="w-full max-w-2xl rounded-3xl bg-[#0e1428] border border-cyan-500/40 p-6 sm:p-8 space-y-6 shadow-2xl relative text-slate-200">
+          <div className="w-full max-w-xl rounded-3xl bg-[#0e1428] border border-cyan-500/40 p-6 sm:p-8 space-y-6 shadow-2xl relative text-slate-200">
             <button
-              onClick={() => setDemographicsUser(null)}
+              onClick={() => setPayoutModalUser(null)}
               className="absolute top-4 right-4 text-slate-400 hover:text-white p-1 cursor-pointer"
             >
               <X className="w-5 h-5" />
@@ -205,109 +237,135 @@ export default function AdminUsersPage() {
             <div className="flex items-center justify-between pb-4 border-b border-white/10">
               <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-300">
-                  <BarChart3 className="w-6 h-6" />
+                  <Wallet className="w-6 h-6" />
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-white font-display">
-                    Creator Studio Analytics & Demographics
+                    Clipper Payout & Bank Details
                   </h3>
                   <div className="text-xs text-cyan-300 font-mono">
-                    {demographicsUser.name} ({demographicsUser.email})
+                    {payoutModalUser.name} ({payoutModalUser.email})
                   </div>
                 </div>
               </div>
-              <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Admin View Access: ACTIVE</span>
+              <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                Wallet: ₹{payoutModalUser.wallet?.balance?.toLocaleString('en-IN') || 0}
               </span>
             </div>
 
-            {/* Dual Channel Access Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="p-4 rounded-2xl bg-red-950/20 border border-red-500/30 space-y-1">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold text-white flex items-center gap-1.5">
-                    <YouTubeIcon className="w-4 h-4 text-red-500" />
-                    <span>YouTube Studio</span>
-                  </span>
-                  <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded">VERIFIED</span>
-                </div>
-                <div className="text-xs font-mono text-cyan-300">{demographicsUser.clipperProfile?.youtubeHandle || '@daxraps30'}</div>
-                <div className="text-[10px] text-slate-400 font-mono">Scope: yt-analytics.readonly</div>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-pink-950/20 border border-pink-500/30 space-y-1">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold text-white flex items-center gap-1.5">
-                    <InstagramIcon className="w-4 h-4 text-pink-500" />
-                    <span>Instagram Insights</span>
-                  </span>
-                  <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded">VERIFIED</span>
-                </div>
-                <div className="text-xs font-mono text-pink-300">{demographicsUser.clipperProfile?.instagramHandle || '@satya.viralclips'}</div>
-                <div className="text-[10px] text-slate-400 font-mono">Scope: instagram_manage_insights</div>
-              </div>
+            {/* Consolidated Wallet Explanation */}
+            <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/5 text-xs text-slate-300">
+              <strong>Consolidated Single-User Payout:</strong> This clipper can post clips from multiple accounts. All approved earnings are consolidated into this single user's wallet. Release payout via the details below when campaigns conclude.
             </div>
 
-            {/* Live Tracked Demographics */}
-            <div className="space-y-3 p-5 rounded-2xl bg-white/[0.02] border border-white/5">
-              <div className="flex justify-between items-center text-xs">
+            {/* UPI Section */}
+            <div className="p-4 rounded-2xl bg-emerald-950/20 border border-emerald-500/30 space-y-2">
+              <div className="flex items-center justify-between text-xs">
                 <span className="font-bold text-white flex items-center gap-1.5">
-                  <Globe2 className="w-4 h-4 text-cyan-400" />
-                  <span>Audience Geographic Distribution (Live Studio Telemetry)</span>
+                  <Smartphone className="w-4 h-4 text-emerald-400" />
+                  <span>UPI ID (Primary Fast Transfer)</span>
                 </span>
-                <span className="px-2.5 py-0.5 rounded-full font-mono text-xs font-bold text-emerald-300 bg-emerald-500/20 border border-emerald-500/30">
-                  84% Tier-1 Qualified
+                <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">
+                  Direct Payment
                 </span>
               </div>
 
-              <div className="space-y-1.5 text-xs pt-1">
-                {[
-                  { country: 'United States', percent: 48, isTier1: true },
-                  { country: 'United Kingdom', percent: 18, isTier1: true },
-                  { country: 'India', percent: 16, isTier1: false },
-                  { country: 'Canada', percent: 10, isTier1: true },
-                  { country: 'Australia', percent: 8, isTier1: true },
-                ].map((c) => (
-                  <div key={c.country} className="flex justify-between items-center">
-                    <span className="flex items-center gap-1.5">
-                      <span>{c.country}</span>
-                      {c.isTier1 && <span className="text-[9px] text-cyan-300 font-mono font-bold bg-cyan-500/10 px-1.5 py-0.2 rounded">★ Tier-1</span>}
-                    </span>
-                    <span className="font-mono font-bold text-white">{c.percent}%</span>
+              {payoutModalUser.clipperProfile?.upiId ? (
+                <div className="flex items-center justify-between bg-black/40 p-3 rounded-xl border border-white/5">
+                  <span className="text-sm font-mono font-bold text-emerald-300">
+                    {payoutModalUser.clipperProfile.upiId}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard(payoutModalUser.clipperProfile.upiId, 'upi')}
+                    className="px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs font-mono flex items-center gap-1.5 cursor-pointer transition-colors"
+                  >
+                    {copiedField === 'upi' ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5" />
+                        <span>Copy UPI</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              ) : (
+                <div className="text-xs text-slate-400 italic">No UPI ID saved by clipper yet.</div>
+              )}
+            </div>
+
+            {/* Bank Transfer Details */}
+            <div className="p-4 rounded-2xl bg-cyan-950/20 border border-cyan-500/30 space-y-3">
+              <div className="flex items-center justify-between text-xs pb-1 border-b border-white/5">
+                <span className="font-bold text-white flex items-center gap-1.5">
+                  <Building2 className="w-4 h-4 text-cyan-400" />
+                  <span>Bank Account Details (NEFT / IMPS)</span>
+                </span>
+                {payoutModalUser.clipperProfile?.bankAccountNumber && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      copyToClipboard(
+                        `Bank: ${payoutModalUser.clipperProfile?.bankName}\nAcc: ${payoutModalUser.clipperProfile?.bankAccountNumber}\nIFSC: ${payoutModalUser.clipperProfile?.bankIfsc}\nHolder: ${payoutModalUser.name}`,
+                        'bank'
+                      )
+                    }
+                    className="px-2.5 py-1 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 text-[11px] font-mono flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    {copiedField === 'bank' ? <Check className="w-3 h-3 text-cyan-400" /> : <Copy className="w-3 h-3" />}
+                    <span>{copiedField === 'bank' ? 'Copied Details' : 'Copy All Bank Details'}</span>
+                  </button>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                <div className="bg-black/40 p-3 rounded-xl border border-white/5 space-y-0.5">
+                  <div className="text-[10px] text-slate-400 uppercase font-mono">Bank Name</div>
+                  <div className="font-bold text-white">{payoutModalUser.clipperProfile?.bankName || 'Not Provided'}</div>
+                </div>
+
+                <div className="bg-black/40 p-3 rounded-xl border border-white/5 space-y-0.5">
+                  <div className="text-[10px] text-slate-400 uppercase font-mono">Account Number</div>
+                  <div className="font-bold text-cyan-300 font-mono">
+                    {payoutModalUser.clipperProfile?.bankAccountNumber || 'Not Provided'}
                   </div>
-                ))}
+                </div>
+
+                <div className="bg-black/40 p-3 rounded-xl border border-white/5 space-y-0.5">
+                  <div className="text-[10px] text-slate-400 uppercase font-mono">IFSC Code</div>
+                  <div className="font-bold text-purple-300 font-mono">
+                    {payoutModalUser.clipperProfile?.bankIfsc || 'Not Provided'}
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Age, Gender & Retention Grid */}
-            <div className="grid grid-cols-3 gap-3 text-center text-xs">
-              <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/5">
-                <div className="text-[10px] text-slate-400 uppercase font-mono">Avg Retention</div>
-                <div className="text-lg font-bold text-cyan-300 font-mono mt-0.5">82.4%</div>
-                <div className="text-[10px] text-slate-500 mt-0.5">Hook Curve Stable</div>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/5">
-                <div className="text-[10px] text-slate-400 uppercase font-mono">Gender Ratio</div>
-                <div className="text-sm font-bold text-white font-mono mt-1">61% M / 39% F</div>
-                <div className="text-[10px] text-emerald-400 mt-0.5">Balanced Demo</div>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/5">
-                <div className="text-[10px] text-slate-400 uppercase font-mono">Core Age Group</div>
-                <div className="text-lg font-bold text-purple-300 font-mono mt-0.5">18–24 (54%)</div>
-                <div className="text-[10px] text-slate-500 mt-0.5">Gen-Z & Millennial</div>
+            {/* Connected Social Accounts */}
+            <div className="space-y-2 p-4 rounded-2xl bg-white/[0.02] border border-white/5 text-xs">
+              <div className="font-bold text-slate-300 mb-1">Connected Social Handles</div>
+              <div className="flex flex-wrap gap-2">
+                <span className="px-2.5 py-1 rounded-lg bg-red-500/10 border border-red-500/20 text-red-300 font-mono flex items-center gap-1">
+                  <YouTubeIcon className="w-3.5 h-3.5" />
+                  <span>{payoutModalUser.clipperProfile?.youtubeHandle || '@daxraps30'}</span>
+                </span>
+                <span className="px-2.5 py-1 rounded-lg bg-pink-500/10 border border-pink-500/20 text-pink-300 font-mono flex items-center gap-1">
+                  <InstagramIcon className="w-3.5 h-3.5" />
+                  <span>{payoutModalUser.clipperProfile?.instagramHandle || '@satya.viralclips'}</span>
+                </span>
               </div>
             </div>
 
             <div className="pt-2 flex justify-end">
               <button
                 type="button"
-                onClick={() => setDemographicsUser(null)}
-                className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-purple-600 to-cyan-500 hover:opacity-90 transition-all cursor-pointer shadow-md"
+                onClick={() => setPayoutModalUser(null)}
+                className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-white/10 hover:bg-white/20 transition-all cursor-pointer"
               >
-                Done
+                Close
               </button>
             </div>
           </div>

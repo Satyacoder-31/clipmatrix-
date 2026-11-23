@@ -14,9 +14,6 @@ import {
   Check,
   Save,
   Wallet,
-  BarChart3,
-  Globe2,
-  Users,
   Eye,
   Lock,
   ArrowRight,
@@ -26,30 +23,11 @@ import {
   AlertCircle,
   HelpCircle,
   Play,
+  CreditCard,
+  Building2,
+  Smartphone,
+  Layers,
 } from 'lucide-react';
-
-function GoogleIcon({ className = 'w-5 h-5' }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24">
-      <path
-        fill="#4285F4"
-        d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
-      />
-      <path
-        fill="#34A853"
-        d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.27 21.36 7.33 24 12 24z"
-      />
-      <path
-        fill="#FBBC05"
-        d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.03 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
-      />
-      <path
-        fill="#EA4335"
-        d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.27 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
-      />
-    </svg>
-  );
-}
 
 function InstagramIcon({ className = 'w-5 h-5' }: { className?: string }) {
   return (
@@ -97,19 +75,6 @@ interface ConnectedAccount {
   handle: string;
   verified: boolean;
   addedAt: string;
-  studioViewAccess?: boolean;
-  accessScope?: string;
-  adminAccessStatus?: 'ACTIVE' | 'PENDING' | 'REVOKED';
-  demographics?: {
-    tier1Percent: number;
-    topCountries: { country: string; percent: number; isTier1: boolean; code: string }[];
-    gender: { male: number; female: number };
-    ageGroups: { group: string; percent: number }[];
-    retentionRate: number;
-    avgWatchDuration: string;
-    sharesCount: number;
-    reachCount: number;
-  };
 }
 
 function ClipperProfileInner() {
@@ -119,46 +84,65 @@ function ClipperProfileInner() {
   const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccount[]>([]);
   const [loadingAccounts, setLoadingAccounts] = useState(true);
 
+  // Form states for Payment & Profile Details
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [upiId, setUpiId] = useState('');
+  const [bankName, setBankName] = useState('');
+  const [bankAccountNumber, setBankAccountNumber] = useState('');
+  const [bankIfsc, setBankIfsc] = useState('');
+  const [editingSoftware, setEditingSoftware] = useState('CapCut, Premiere Pro');
+  const [savingPayment, setSavingPayment] = useState(false);
+
+  // Modal state for linking other accounts
   const [verifyModalPlatform, setVerifyModalPlatform] = useState<string | null>(null);
   const [newHandleInput, setNewHandleInput] = useState('');
-  const [grantStudioViewAccess, setGrantStudioViewAccess] = useState(true);
   const [verifying, setVerifying] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
 
-  // Viewer Access states
-  const [viewerAccessTicked, setViewerAccessTicked] = useState(true);
-  const [publicMetricsTicked, setPublicMetricsTicked] = useState(true);
-
-  // Demographics preview modal state
-  const [inspectingAccount, setInspectingAccount] = useState<ConnectedAccount | null>(null);
-
-  const [upiId, setUpiId] = useState('satya@okaxis');
-  const [editingSoftware, setEditingSoftware] = useState('CapCut, Premiere Pro, After Effects');
-
   const platforms = [
     { name: 'Instagram', icon: InstagramIcon, color: 'text-pink-500', bg: 'hover:bg-pink-500/10' },
-    { name: 'TikTok', icon: TikTokIcon, color: 'text-cyan-400', bg: 'hover:bg-cyan-500/10' },
     { name: 'YouTube', icon: YouTubeIcon, color: 'text-red-500', bg: 'hover:bg-red-500/10' },
+    { name: 'TikTok', icon: TikTokIcon, color: 'text-cyan-400', bg: 'hover:bg-cyan-500/10' },
     { name: 'X', icon: XIcon, color: 'text-white', bg: 'hover:bg-white/10' },
     { name: 'Facebook', icon: FacebookIcon, color: 'text-blue-500', bg: 'hover:bg-blue-500/10' },
   ];
 
-  // Fetch connected accounts from API
-  const fetchAccounts = () => {
-    setLoadingAccounts(true);
-    fetch('/api/clipper/accounts')
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.accounts) {
-          setConnectedAccounts(data.accounts);
+  // Fetch connected accounts and user profile
+  const fetchProfileAndAccounts = async () => {
+    try {
+      setLoadingAccounts(true);
+      const [accRes, meRes] = await Promise.all([
+        fetch('/api/clipper/accounts'),
+        fetch('/api/auth/me'),
+      ]);
+
+      const accData = await accRes.json();
+      if (accData.accounts) {
+        setConnectedAccounts(accData.accounts);
+      }
+
+      const meData = await meRes.json();
+      if (meData.user) {
+        setName(meData.user.name || '');
+        setPhone(meData.user.phone || '');
+        if (meData.user.clipperProfile) {
+          setUpiId(meData.user.clipperProfile.upiId || '');
+          setBankName(meData.user.clipperProfile.bankName || '');
+          setBankAccountNumber(meData.user.clipperProfile.bankAccountNumber || '');
+          setBankIfsc(meData.user.clipperProfile.bankIfsc || '');
+          setEditingSoftware(meData.user.clipperProfile.editingSoftware || 'CapCut, Premiere Pro');
         }
-      })
-      .catch(() => {})
-      .finally(() => setLoadingAccounts(false));
+      }
+    } catch {
+      // Fallback
+    } finally {
+      setLoadingAccounts(false);
+    }
   };
 
   useEffect(() => {
-    fetchAccounts();
+    fetchProfileAndAccounts();
 
     // Check search params on return from OAuth if any
     const connected = searchParams.get('connected');
@@ -166,10 +150,10 @@ function ClipperProfileInner() {
     const error = searchParams.get('error');
 
     if (connected === 'youtube' && handle) {
-      setToastMsg(`✅ Verified! Connected ${handle} with official YouTube Studio Analytics view access granted to Admin.`);
+      setToastMsg(`✅ Verified! Connected ${handle} with official YouTube Channel access.`);
       setTimeout(() => setToastMsg(''), 6000);
     } else if (connected === 'instagram' && handle) {
-      setToastMsg(`✅ Verified! Connected ${handle} with official Instagram Professional Insights view access granted to Admin.`);
+      setToastMsg(`✅ Verified! Connected ${handle} with official Instagram Profile access.`);
       setTimeout(() => setToastMsg(''), 6000);
     } else if (error) {
       setToastMsg(`❌ Authentication notice: ${error}`);
@@ -178,7 +162,6 @@ function ClipperProfileInner() {
   }, [searchParams]);
 
   const handleOpenVerifyModal = (platName: string) => {
-    // Directly redirect to official Google / Meta OAuth consent flows
     if (platName === 'YouTube') {
       window.location.href = '/api/auth/youtube';
       return;
@@ -190,11 +173,8 @@ function ClipperProfileInner() {
 
     setVerifyModalPlatform(platName);
     setNewHandleInput('');
-    setViewerAccessTicked(true);
-    setPublicMetricsTicked(true);
   };
 
-  // Allow button handler: Connects account & grants Admin Studio / Insights viewer access
   const handleAllowAccess = async () => {
     if (!verifyModalPlatform) return;
     const trimmed = newHandleInput.trim();
@@ -216,18 +196,15 @@ function ClipperProfileInner() {
         body: JSON.stringify({
           platform: verifyModalPlatform,
           handle,
-          grantStudioViewAccess: viewerAccessTicked,
         }),
       });
 
       const data = await res.json();
       if (res.ok) {
-        setToastMsg(
-          `✅ Verified! Connected ${handle} (${verifyModalPlatform})`
-        );
+        setToastMsg(`✅ Verified! Connected ${handle} (${verifyModalPlatform})`);
         setVerifyModalPlatform(null);
         setNewHandleInput('');
-        fetchAccounts();
+        fetchProfileAndAccounts();
       } else {
         setToastMsg(`❌ ${data.error || 'Failed to connect account'}`);
       }
@@ -240,11 +217,11 @@ function ClipperProfileInner() {
   };
 
   const handleDeleteAccount = async (id: string, handle: string) => {
-    if (confirm(`Unlink and revoke admin view access for ${handle}?`)) {
+    if (confirm(`Unlink ${handle} from your profile?`)) {
       try {
         await fetch(`/api/clipper/accounts?id=${id}`, { method: 'DELETE' });
         setConnectedAccounts((prev) => prev.filter((a) => a.id !== id));
-        setToastMsg(`Revoked and removed ${handle}.`);
+        setToastMsg(`Unlinked ${handle}.`);
       } catch {
         setToastMsg('Failed to remove account.');
       } finally {
@@ -253,25 +230,55 @@ function ClipperProfileInner() {
     }
   };
 
-  const currentHost = typeof window !== 'undefined' ? window.location.origin : 'https://clipmatrix-production.up.railway.app';
-  const youtubeCallbackUri = `${currentHost}/api/auth/youtube/callback`;
-  const instagramCallbackUri = `${currentHost}/api/auth/instagram/callback`;
+  const handleSavePaymentDetails = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingPayment(true);
+    try {
+      const res = await fetch('/api/auth/me', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          phone,
+          upiId,
+          bankName,
+          bankAccountNumber,
+          bankIfsc,
+          editingSoftware,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setToastMsg('✅ Payout details and profile saved successfully!');
+      } else {
+        setToastMsg(`❌ ${data.error || 'Failed to save payout details'}`);
+      }
+    } catch {
+      setToastMsg('❌ Error saving payout details');
+    } finally {
+      setSavingPayment(false);
+      setTimeout(() => setToastMsg(''), 5000);
+    }
+  };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-12">
+    <div className="space-y-8 max-w-5xl mx-auto pb-16">
       {/* Page Header */}
       <div className="pb-4 border-b border-white/[0.08]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white font-display">Profile & Connected Accounts</h1>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white font-display">
+              Clipper Profile & Payout Settings
+            </h1>
             <p className="text-xs sm:text-sm text-slate-400 mt-1">
-              Connect your YouTube & Instagram channels via official Google & Meta OAuth so ClipMatrix Admin can track authentic viewer demographics.
+              Link multiple social media channels and enter your UPI / Bank transfer details. All approved clip rewards across all your accounts are consolidated into your single profile and paid out after campaigns end.
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <span className="px-3 py-1.5 rounded-full text-xs font-mono font-bold bg-purple-500/10 border border-purple-500/30 text-purple-300 flex items-center gap-1.5">
+            <span className="px-3 py-1.5 rounded-full text-xs font-mono font-bold bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 flex items-center gap-1.5">
               <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Admin Studio Access: Active</span>
+              <span>Direct Creator Payouts</span>
             </span>
           </div>
         </div>
@@ -289,19 +296,178 @@ function ClipperProfileInner() {
         </div>
       )}
 
-      {/* Top Section: Social Accounts / Add New Account */}
-      <div className="rounded-3xl bg-gradient-to-b from-[#0f1322]/90 via-[#0a0d18]/95 to-[#060810] border border-white/[0.08] p-6 space-y-4 shadow-xl relative overflow-hidden">
+      {/* SECTION 1: PAYMENT OPTION - UPI & BANK ACCOUNT DETAILS (Primary Requirement) */}
+      <div className="rounded-3xl bg-gradient-to-b from-[#12192e]/90 via-[#0d1324]/95 to-[#080c18] border border-cyan-500/30 p-6 sm:p-8 space-y-6 shadow-2xl relative overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/10">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-cyan-500/20 to-purple-500/20 border border-cyan-400/40 flex items-center justify-center text-cyan-300 shadow-inner">
+              <Wallet className="w-6 h-6" />
+            </div>
+            <div>
+              <h2 className="text-base sm:text-lg font-bold text-white font-display flex items-center gap-2">
+                <span>Payment & Bank Transfer Details</span>
+                <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/15 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
+                  REQUIRED FOR PAYOUTS
+                </span>
+              </h2>
+              <p className="text-xs text-slate-400 mt-0.5">
+                We disburse earnings directly to your UPI ID or Bank Account when each campaign ends.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Multi-Account Single Wallet Consolidation Guarantee Banner */}
+        <div className="p-4 rounded-2xl bg-cyan-500/[0.08] border border-cyan-500/30 flex items-start gap-3 text-xs text-slate-200">
+          <Sparkles className="w-5 h-5 text-cyan-400 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <div className="font-bold text-white">Consolidated Single-User Payout Guarantee:</div>
+            <p className="text-[11px] text-slate-300 leading-relaxed">
+              You can connect multiple accounts across YouTube, Instagram, and TikTok. Regardless of which account posts the video, all approved video amounts and view rewards are consolidated into <strong>this one user account</strong>. Payouts are made directly via your UPI or Bank details once campaigns end.
+            </p>
+          </div>
+        </div>
+
+        <form onSubmit={handleSavePaymentDetails} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* UPI ID Field */}
+            <div className="space-y-2 p-5 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-cyan-500/30 transition-all">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-white flex items-center gap-2">
+                  <Smartphone className="w-4 h-4 text-cyan-400" />
+                  <span>UPI ID (Primary Fast Payout)</span>
+                </label>
+                <span className="text-[10px] font-mono text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
+                  Recommended
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400">
+                Enter your Virtual Payment Address (e.g. Google Pay, PhonePe, Paytm).
+              </p>
+              <input
+                type="text"
+                value={upiId}
+                onChange={(e) => setUpiId(e.target.value)}
+                placeholder="e.g. yourname@okhdfcbank or 9876543210@paytm"
+                className="w-full px-4 py-3 rounded-xl bg-black/40 border border-slate-700 text-white font-mono text-xs focus:outline-none focus:border-cyan-400 transition-all"
+              />
+            </div>
+
+            {/* Account Holder Name */}
+            <div className="space-y-2 p-5 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-cyan-500/30 transition-all">
+              <label className="text-xs font-bold text-white flex items-center gap-2">
+                <User className="w-4 h-4 text-purple-400" />
+                <span>Account Holder Legal Name</span>
+              </label>
+              <p className="text-[11px] text-slate-400">
+                Full name as registered with your bank or UPI ID.
+              </p>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Satya Kumar"
+                className="w-full px-4 py-3 rounded-xl bg-black/40 border border-slate-700 text-white text-xs focus:outline-none focus:border-cyan-400 transition-all"
+              />
+            </div>
+          </div>
+
+          {/* Bank Account Details Grid */}
+          <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/10 space-y-4">
+            <div className="flex items-center gap-2 pb-2 border-b border-white/5">
+              <Building2 className="w-4 h-4 text-cyan-400" />
+              <h3 className="text-xs font-bold text-white uppercase tracking-wider font-mono">
+                Bank Account Details (NEFT / IMPS)
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-medium text-slate-300">Bank Name</label>
+                <input
+                  type="text"
+                  value={bankName}
+                  onChange={(e) => setBankName(e.target.value)}
+                  placeholder="e.g. HDFC Bank, SBI, ICICI"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-slate-700 text-white text-xs focus:outline-none focus:border-cyan-400"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-medium text-slate-300">Account Number</label>
+                <input
+                  type="text"
+                  value={bankAccountNumber}
+                  onChange={(e) => setBankAccountNumber(e.target.value)}
+                  placeholder="e.g. 50100234567890"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-slate-700 text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-medium text-slate-300">IFSC Code</label>
+                <input
+                  type="text"
+                  value={bankIfsc}
+                  onChange={(e) => setBankIfsc(e.target.value.toUpperCase())}
+                  placeholder="e.g. HDFC0001234"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-slate-700 text-white font-mono text-xs focus:outline-none focus:border-cyan-400 uppercase"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Additional Profile Info */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-300">Contact Phone Number</label>
+              <input
+                type="text"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="e.g. +91 98765 43210"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-slate-700 text-white text-xs focus:outline-none focus:border-cyan-400"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-300">Editing Tools / Software</label>
+              <input
+                type="text"
+                value={editingSoftware}
+                onChange={(e) => setEditingSoftware(e.target.value)}
+                placeholder="e.g. CapCut, Premiere Pro, After Effects"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-slate-700 text-white text-xs focus:outline-none focus:border-cyan-400"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-2">
+            <button
+              type="submit"
+              disabled={savingPayment}
+              className="px-6 py-3 rounded-xl font-bold text-slate-950 bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 hover:from-emerald-300 hover:to-cyan-300 disabled:opacity-50 transition-all shadow-lg shadow-emerald-500/20 text-xs flex items-center gap-2 cursor-pointer font-black"
+            >
+              <Save className="w-4 h-4" />
+              <span>{savingPayment ? 'Saving Payout Details...' : 'Save Payment & Profile Details'}</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {/* SECTION 2: CONNECT MULTIPLE SOCIAL CHANNELS */}
+      <div className="rounded-3xl bg-gradient-to-b from-[#0f1322]/90 via-[#0a0d18]/95 to-[#060810] border border-white/[0.08] p-6 space-y-4 shadow-xl">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <h2 className="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-white to-cyan-300 font-display uppercase tracking-wider">
-              Connect Creator Channel
+              Connect Multiple Social Channels
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">
-              Select YouTube or Instagram to redirect to the official Google or Meta consent screen and choose the account you want to grant view access to.
+              Link as many accounts as you use to post clips. All approved videos across all linked accounts credit to your single wallet above.
             </p>
           </div>
           <span className="text-xs font-mono font-bold text-cyan-400 bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/30 self-start sm:self-auto">
-            {connectedAccounts.length} Verified Channels
+            {connectedAccounts.length} Connected Accounts
           </span>
         </div>
 
@@ -327,7 +493,7 @@ function ClipperProfileInner() {
                   </div>
                   <span className="text-xs font-semibold text-slate-200 group-hover:text-white">{p.name}</span>
                   <span className="text-[10px] text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity font-mono">
-                    {isYT ? 'Sign in with Google' : 'Log in with Meta'}
+                    {isYT ? 'Connect Google' : 'Connect Meta'}
                   </span>
                 </a>
               );
@@ -345,7 +511,7 @@ function ClipperProfileInner() {
                 </div>
                 <span className="text-xs font-semibold text-slate-200 group-hover:text-white">{p.name}</span>
                 <span className="text-[10px] text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity font-mono">
-                  + Link
+                  + Add Handle
                 </span>
               </button>
             );
@@ -353,13 +519,13 @@ function ClipperProfileInner() {
         </div>
       </div>
 
-      {/* Bottom Section: Active Linked Creator Profiles */}
+      {/* SECTION 3: ACTIVE LINKED CHANNELS LIST */}
       <div className="rounded-3xl bg-gradient-to-b from-[#0f1322]/90 via-[#0a0d18]/95 to-[#060810] border border-white/[0.08] p-6 space-y-4 shadow-xl">
         <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
           <div>
-            <h2 className="text-base font-bold text-white font-display">Active Linked Channels & View Permissions</h2>
+            <h2 className="text-base font-bold text-white font-display">Active Linked Channels</h2>
             <p className="text-xs text-slate-400 mt-0.5">
-              Admin tracks live demographics (country split, age, gender) and retention directly via these connections.
+              These accounts are authorized to submit clips under your single profile.
             </p>
           </div>
         </div>
@@ -367,15 +533,13 @@ function ClipperProfileInner() {
         <div className="space-y-3">
           {connectedAccounts.length === 0 ? (
             <div className="py-12 text-center text-slate-400 text-xs">
-              No accounts linked yet. Click YouTube or Instagram above to connect your channel.
+              No accounts linked yet. Click YouTube or Instagram above to connect your first channel.
             </div>
           ) : (
             connectedAccounts.map((acc) => {
               const platformMeta = platforms.find((p) => p.name === acc.platform);
               const IconComp = platformMeta ? platformMeta.icon : YouTubeIcon;
               const iconColor = platformMeta ? platformMeta.color : 'text-red-500';
-              const isYT = acc.platform === 'YouTube';
-              const isIG = acc.platform === 'Instagram';
 
               return (
                 <div
@@ -392,48 +556,22 @@ function ClipperProfileInner() {
                         <span className="text-xs font-mono font-bold text-cyan-300 truncate">{acc.handle}</span>
                         <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono font-bold">
                           <Check className="w-3 h-3 stroke-[3]" />
-                          <span>Verified</span>
+                          <span>Connected</span>
                         </div>
                       </div>
 
-                      {/* Studio Analytics View Access Badge */}
-                      <div className="flex flex-wrap items-center gap-2 text-[11px]">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 font-mono">
-                          <Eye className="w-3 h-3 text-cyan-400" />
-                          <span>
-                            {isYT
-                              ? 'YT Studio Analytics: View Access Active'
-                              : isIG
-                              ? 'Instagram Insights: View Access Active'
-                              : 'Analytics View Access: Active'}
-                          </span>
-                        </span>
-
-                        <span className="text-slate-400">•</span>
-                        <span className="text-slate-400 text-[10px]">
-                          Admin Scopes: <span className="font-mono text-slate-300">{isYT ? 'yt-analytics.readonly' : isIG ? 'instagram_manage_insights' : 'public'}</span>
-                        </span>
+                      <div className="flex items-center gap-2 text-[11px] text-slate-400">
+                        <span>Earnings from this handle credit to your central profile</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2.5 self-end md:self-center shrink-0">
-                    {acc.demographics && (
-                      <button
-                        type="button"
-                        onClick={() => setInspectingAccount(acc)}
-                        className="px-3 py-1.5 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
-                      >
-                        <BarChart3 className="w-3.5 h-3.5 text-cyan-400" />
-                        <span>Inspect Shared Demographics</span>
-                      </button>
-                    )}
-
                     <button
                       type="button"
                       onClick={() => handleDeleteAccount(acc.id, acc.handle)}
                       className="p-2 rounded-xl text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer border border-transparent hover:border-rose-500/20"
-                      title="Unlink and revoke access"
+                      title="Unlink account"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -445,7 +583,7 @@ function ClipperProfileInner() {
         </div>
       </div>
 
-      {/* Account Login & Viewer Access Consent Modal */}
+      {/* Manual Link Modal for TikTok / X / Facebook */}
       {verifyModalPlatform && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
           <div className="w-full max-w-lg rounded-3xl bg-[#0c1022] border border-cyan-500/40 p-6 sm:p-7 space-y-5 shadow-2xl relative">
@@ -456,14 +594,9 @@ function ClipperProfileInner() {
               <X className="w-5 h-5" />
             </button>
 
-            {/* Header: Platform Branding */}
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center shadow-inner">
-                {verifyModalPlatform === 'YouTube' ? (
-                  <YouTubeIcon className="w-7 h-7 text-red-500" />
-                ) : verifyModalPlatform === 'Instagram' ? (
-                  <InstagramIcon className="w-7 h-7 text-pink-500" />
-                ) : verifyModalPlatform === 'TikTok' ? (
+                {verifyModalPlatform === 'TikTok' ? (
                   <TikTokIcon className="w-6 h-6 text-cyan-400" />
                 ) : verifyModalPlatform === 'X' ? (
                   <XIcon className="w-6 h-6 text-white" />
@@ -473,15 +606,14 @@ function ClipperProfileInner() {
               </div>
               <div>
                 <h3 className="text-base sm:text-lg font-bold text-white font-display">
-                  Connect {verifyModalPlatform}
+                  Connect {verifyModalPlatform} Account
                 </h3>
                 <p className="text-xs text-slate-400">
-                  Link your {verifyModalPlatform} profile to ClipMatrix.
+                  Link your handle to submit clips and accumulate earnings into your single profile.
                 </p>
               </div>
             </div>
 
-            {/* Account Handle Input */}
             <div className="space-y-2">
               <label className="text-xs font-bold text-slate-300 block">
                 Enter your {verifyModalPlatform} handle:
@@ -490,95 +622,12 @@ function ClipperProfileInner() {
                 type="text"
                 value={newHandleInput}
                 onChange={(e) => setNewHandleInput(e.target.value)}
-                placeholder={`Enter ${verifyModalPlatform} Handle e.g. @myhandle`}
+                placeholder={`e.g. @yourcreatorname`}
                 className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/10 text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
                 autoFocus
               />
             </div>
 
-            {/* Permissions Requested Section (Viewer Access TICKED by default) */}
-            <div className="space-y-2 pt-1">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-200">
-                  Permissions requested by ClipMatrix Admin:
-                </span>
-                <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-1 font-bold">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>Viewer Access Ticked</span>
-                </span>
-              </div>
-
-              {/* Ticked Permission 1: Studio / Insights Viewer Access */}
-              <label className="flex items-start gap-3 p-3.5 rounded-2xl bg-emerald-500/[0.08] border border-emerald-500/30 cursor-pointer transition-all hover:bg-emerald-500/[0.12]">
-                <input
-                  type="checkbox"
-                  checked={viewerAccessTicked}
-                  onChange={(e) => setViewerAccessTicked(e.target.checked)}
-                  className="mt-1 w-4 h-4 rounded text-emerald-500 focus:ring-0 bg-slate-900 border-white/20 cursor-pointer"
-                />
-                <div className="space-y-1 flex-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                      <Eye className="w-3.5 h-3.5 text-emerald-400" />
-                      <span>
-                        {verifyModalPlatform === 'YouTube'
-                          ? 'YouTube Studio Analytics (Viewer Access)'
-                          : verifyModalPlatform === 'Instagram'
-                          ? 'Instagram Professional Insights (Viewer Access)'
-                          : `${verifyModalPlatform} Performance Viewer Access`}
-                      </span>
-                    </span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
-                      Ticked (Read-Only)
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-300 leading-relaxed">
-                    {verifyModalPlatform === 'YouTube'
-                      ? 'Grants ClipMatrix Admin read-only viewer access to check authentic viewer retention curves, average watch duration, and Tier-1 audience demographics (US/UK/CA/AU/IN) to calculate eligible view payouts.'
-                      : verifyModalPlatform === 'Instagram'
-                      ? 'Grants ClipMatrix Admin read-only viewer access to inspect verified reach, authentic impressions, country distribution, and audience demographics to calculate eligible payouts.'
-                      : 'Grants ClipMatrix Admin read-only viewer access to check verified audience reach and video performance.'}
-                  </p>
-                </div>
-              </label>
-
-              {/* Ticked Permission 2: Profile Performance */}
-              <label className="flex items-start gap-3 p-3 rounded-2xl bg-white/[0.03] border border-white/10 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={publicMetricsTicked}
-                  onChange={(e) => setPublicMetricsTicked(e.target.checked)}
-                  className="mt-0.5 w-4 h-4 rounded text-cyan-500 focus:ring-0 bg-slate-900 border-white/20 cursor-pointer"
-                />
-                <div className="space-y-0.5 flex-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-slate-200">
-                      {verifyModalPlatform === 'YouTube'
-                        ? 'YouTube Channel Details & Video Metrics'
-                        : verifyModalPlatform === 'Instagram'
-                        ? 'Instagram Public Profile & Reel Metrics'
-                        : `${verifyModalPlatform} Public Metrics`}
-                    </span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/10 text-slate-300">
-                      Read-only
-                    </span>
-                  </div>
-                  <p className="text-[10px] text-slate-400">
-                    Allows ClipMatrix Admin to verify channel ownership, video upload timestamp, and public engagement (views, likes, comments).
-                  </p>
-                </div>
-              </label>
-
-              {/* Read-Only Safety Guarantee Note */}
-              <div className="p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center gap-2 text-[10px] text-purple-200">
-                <ShieldCheck className="w-4 h-4 text-cyan-400 shrink-0" />
-                <span>
-                  <strong>100% Read-Only Safety:</strong> Admin only receives viewer access. Admin will <em>NEVER</em> have permission to upload, edit, delete, post, or manage your account.
-                </span>
-              </div>
-            </div>
-
-            {/* Action Buttons: Cancel and Allow */}
             <div className="flex items-center justify-end gap-3 pt-2">
               <button
                 type="button"
@@ -592,159 +641,9 @@ function ClipperProfileInner() {
                 type="button"
                 onClick={handleAllowAccess}
                 disabled={verifying}
-                className={`px-7 py-3 rounded-2xl font-bold text-xs flex items-center gap-2.5 transition-all shadow-xl cursor-pointer disabled:opacity-50 ${
-                  verifyModalPlatform === 'YouTube'
-                    ? 'bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 hover:opacity-95 text-white shadow-red-500/25'
-                    : verifyModalPlatform === 'Instagram'
-                    ? 'bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:opacity-95 text-white shadow-pink-500/25'
-                    : 'bg-gradient-to-r from-purple-600 to-cyan-500 hover:opacity-90 text-white shadow-cyan-500/20'
-                }`}
+                className="px-6 py-2.5 rounded-xl font-bold text-xs bg-gradient-to-r from-purple-600 to-cyan-500 hover:opacity-90 text-white transition-all cursor-pointer disabled:opacity-50"
               >
-                {verifying ? (
-                  <>
-                    <span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                    <span>Granting Admin Viewer Access...</span>
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>Allow Viewer Access</span>
-                    <ArrowRight className="w-3.5 h-3.5 ml-1" />
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Inspect Shared Demographics Modal */}
-      {inspectingAccount && inspectingAccount.demographics && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="w-full max-w-xl rounded-3xl bg-[#0c1022] border border-purple-500/40 p-6 sm:p-8 space-y-5 shadow-2xl relative">
-            <button
-              onClick={() => setInspectingAccount(null)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white p-1 cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="flex items-center justify-between pb-3 border-b border-white/10">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-300">
-                  <BarChart3 className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-white font-display">
-                    Shared {inspectingAccount.platform} Studio Demographics
-                  </h3>
-                  <div className="text-xs text-cyan-300 font-mono">
-                    {inspectingAccount.handle} • Admin View Access: ACTIVE
-                  </div>
-                </div>
-              </div>
-              <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                Live Studio Sync
-              </span>
-            </div>
-
-            <p className="text-xs text-slate-300 leading-relaxed">
-              These are the exact verified creator metrics shared with the ClipMatrix Admin to calculate your CPM payouts and verify audience quality:
-            </p>
-
-            {/* Metrics Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center">
-              <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5">
-                <div className="text-[10px] text-slate-400">Tier-1 Traffic</div>
-                <div className="text-base font-bold text-emerald-400 font-mono mt-0.5">
-                  {inspectingAccount.demographics.tier1Percent}%
-                </div>
-              </div>
-              <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5">
-                <div className="text-[10px] text-slate-400">Avg Retention</div>
-                <div className="text-base font-bold text-cyan-300 font-mono mt-0.5">
-                  {inspectingAccount.demographics.retentionRate}%
-                </div>
-              </div>
-              <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5">
-                <div className="text-[10px] text-slate-400">Private Shares</div>
-                <div className="text-base font-bold text-purple-300 font-mono mt-0.5">
-                  {inspectingAccount.demographics.sharesCount.toLocaleString()}
-                </div>
-              </div>
-              <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5">
-                <div className="text-[10px] text-slate-400">Total Reach</div>
-                <div className="text-base font-bold text-white font-mono mt-0.5">
-                  {inspectingAccount.demographics.reachCount.toLocaleString()}
-                </div>
-              </div>
-            </div>
-
-            {/* Geographic Breakdown */}
-            <div className="space-y-2 p-4 rounded-2xl bg-white/[0.02] border border-white/5">
-              <div className="text-xs font-bold text-white flex items-center justify-between">
-                <span className="flex items-center gap-1.5">
-                  <Globe2 className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Geographic Distribution (Studio Telemetry)</span>
-                </span>
-                <span className="text-[10px] font-mono text-emerald-400">
-                  {inspectingAccount.demographics.tier1Percent}% Tier-1 Qualified
-                </span>
-              </div>
-              <div className="space-y-1.5 pt-1">
-                {inspectingAccount.demographics.topCountries.map((c) => (
-                  <div key={c.country} className="flex justify-between items-center text-xs">
-                    <span className="text-slate-300 flex items-center gap-1.5">
-                      <span>{c.country}</span>
-                      {c.isTier1 && <span className="text-[9px] text-cyan-300 font-mono font-bold bg-cyan-500/10 px-1 rounded">★ Tier-1</span>}
-                    </span>
-                    <span className="font-mono font-bold text-white">{c.percent}%</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Age & Gender */}
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
-                <span className="font-bold text-slate-300 flex items-center gap-1.5">
-                  <Users className="w-3.5 h-3.5 text-purple-400" /> Age Brackets
-                </span>
-                <div className="space-y-1 font-mono text-[11px] text-slate-300">
-                  {inspectingAccount.demographics.ageGroups.map((ag) => (
-                    <div key={ag.group} className="flex justify-between">
-                      <span>{ag.group}:</span>
-                      <span className="text-white font-bold">{ag.percent}%</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5 flex flex-col justify-between">
-                <span className="font-bold text-slate-300">Gender Ratio</span>
-                <div className="space-y-2">
-                  <div className="flex justify-between font-mono text-[11px]">
-                    <span className="text-cyan-300">♂ Male</span>
-                    <span className="text-white font-bold">{inspectingAccount.demographics.gender.male}%</span>
-                  </div>
-                  <div className="flex justify-between font-mono text-[11px]">
-                    <span className="text-pink-300">♀ Female</span>
-                    <span className="text-white font-bold">{inspectingAccount.demographics.gender.female}%</span>
-                  </div>
-                </div>
-                <div className="text-[10px] text-slate-400 font-mono">
-                  Avg Duration: {inspectingAccount.demographics.avgWatchDuration}
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-2 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setInspectingAccount(null)}
-                className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-white/10 hover:bg-white/20 transition-all cursor-pointer"
-              >
-                Close Preview
+                {verifying ? 'Connecting...' : 'Connect Account'}
               </button>
             </div>
           </div>

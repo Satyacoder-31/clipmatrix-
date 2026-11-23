@@ -139,20 +139,6 @@ export async function POST(request: Request) {
           });
         }
 
-        // Deduct from Brand Escrow
-        await tx.wallet.upsert({
-          where: { userId: campaign.brandId },
-          create: {
-            userId: campaign.brandId,
-            balance: 0,
-            escrowBalance: 0,
-            lifetimeEarned: 0,
-          },
-          update: {
-            escrowBalance: { decrement: Math.max(0, rewardDelta) },
-          },
-        });
-
         // Notify Clipper
         await tx.notification.create({
           data: {

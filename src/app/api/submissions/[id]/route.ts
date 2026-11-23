@@ -12,7 +12,7 @@ export async function GET(
       include: {
         campaign: true,
         clipper: {
-          include: { clipperProfile: true },
+          include: { clipperProfile: true, wallet: true },
         },
         viewSnapshots: {
           orderBy: { timestamp: 'desc' },
@@ -40,11 +40,11 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { status, reviewNotes, rejectionReason } = await request.json();
+    const { status, reviewNotes, rejectionReason, verifiedViews, rewardAmount } = await request.json();
 
     const submission = await prisma.submission.findUnique({
       where: { id: params.id },
-      include: { campaign: true, clipper: true },
+      include: { campaign: true, clipper: { include: { wallet: true } } },
     });
 
     if (!submission) {
@@ -56,14 +56,73 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    const updated = await prisma.submission.update({
-      where: { id: params.id },
-      data: {
-        ...(status ? { status } : {}),
-        ...(reviewNotes !== undefined ? { reviewNotes } : {}),
-        ...(rejectionReason !== undefined ? { rejectionReason } : {}),
-        reviewedAt: new Date(),
-      },
+    // Calculate reward to credit to the clipper user if approved
+    let creditedReward = 0;
+    if (status === 'APPROVED' || status === 'VIEWS_VERIFIED') {
+      if (typeof rewardAmount === 'number' && rewardAmount > 0) {
+        creditedReward = rewardAmount;
+      } else if (submission.campaign.rewardPerClip > 0) {
+        creditedReward = submission.campaign.rewardPerClip;
+      } else if (submission.campaign.cpmRate > 0) {
+        const vCount = typeof verifiedViews === 'number' ? verifiedViews : (submission.verifiedViews || submission.reportedViews || 0);
+        creditedReward = Math.floor((vCount / 1000) * submission.campaign.cpmRate);
+      }
+    }
+
+    const updated = await prisma.$transaction(async (tx) => {
+      // 1. Update submission
+      const sub = await tx.submission.update({
+        where: { id: params.id },
+        data: {
+          ...(status ? { status } : {}),
+          ...(reviewNotes !== undefined ? { reviewNotes } : {}),
+          ...(rejectionReason !== undefined ? { rejectionReason } : {}),
+          ...(typeof verifiedViews === 'number' ? { verifiedViews } : {}),
+          ...(creditedReward > 0 ? { rewardEarned: creditedReward, isPaid: true } : {}),
+          reviewedAt: new Date(),
+        },
+      });
+
+      // 2. Credit to user's central wallet (all accounts merge to this one user)
+      if (creditedReward > 0 && submission.rewardEarned === 0) {
+        await tx.wallet.upsert({
+          where: { userId: submission.clipperId },
+          create: {
+            userId: submission.clipperId,
+            balance: creditedReward,
+            lifetimeEarned: creditedReward,
+          },
+          update: {
+            balance: { increment: creditedReward },
+            lifetimeEarned: { increment: creditedReward },
+          },
+        });
+
+        const wallet = await tx.wallet.findUnique({ where: { userId: submission.clipperId } });
+        if (wallet) {
+          await tx.transaction.create({
+            data: {
+              walletId: wallet.id,
+              userId: submission.clipperId,
+              amount: creditedReward,
+              type: 'REWARD_CREDIT',
+              status: 'COMPLETED',
+              description: `Approved reward for clip ${submission.submissionNumber} (${submission.campaign.title})`,
+              referenceId: submission.id,
+            },
+          });
+        }
+
+        // Decrement campaign remaining budget
+        await tx.campaign.update({
+          where: { id: submission.campaignId },
+          data: {
+            remainingBudget: { decrement: creditedReward },
+          },
+        });
+      }
+
+      return sub;
     });
 
     // Notify clipper about status update
@@ -71,7 +130,9 @@ export async function PATCH(
     if (status === 'REJECTED' && rejectionReason) {
       message = `Your submission was rejected: "${rejectionReason}". Please review guidelines and submit an update.`;
     } else if (status === 'APPROVED') {
-      message = `Congratulations! Your clip was approved by the brand. View tracking is now active.`;
+      message = creditedReward > 0
+        ? `Congratulations! Your clip was approved. ₹${creditedReward.toLocaleString('en-IN')} has been added to your balance!`
+        : `Congratulations! Your clip was approved by the brand. View tracking is now active.`;
     }
 
     await prisma.notification.create({
@@ -84,8 +145,9 @@ export async function PATCH(
       },
     });
 
-    return NextResponse.json({ success: true, submission: updated });
+    return NextResponse.json({ success: true, submission: updated, creditedReward });
   } catch (error) {
+    console.error('Failed to update submission:', error);
     return NextResponse.json({ error: 'Failed to update submission' }, { status: 500 });
   }
 }
