@@ -120,8 +120,47 @@ function calculateDemographics(
     engagementRate: parseFloat(engagementRate.toFixed(2)),
     fraudScore: Math.min(100, fraudScore),
     fraudFlags,
-    source: 'AUDIENCE_INTELLIGENCE',
+    source: 'BEHAVIORAL_MODEL',
+    isModeledEstimate: true,
+    oauthRequiredNotice:
+      'Viewer demographics (countries, age, gender) and share counts are private to the creator channel. Connect YouTube account via OAuth viewing permissions for verified YouTube Studio analytics.',
   };
+}
+
+/**
+ * Extracts exact comment count from YouTube's Innertube response
+ */
+function extractExactComments(nextData: any): number {
+  if (!nextData) return 0;
+
+  // 1. Check engagement-panel-comments-section
+  const panels = nextData.engagementPanels || [];
+  for (const p of panels) {
+    const list = p.engagementPanelSectionListRenderer;
+    if (list?.panelIdentifier === 'engagement-panel-comments-section' || list?.panelIdentifier?.includes('comment')) {
+      const header = list.header?.engagementPanelTitleHeaderRenderer;
+      const countRun = header?.contextualInfo?.runs?.[0]?.text;
+      if (countRun) {
+        const parsed = parseInt(countRun.replace(/,/g, ''), 10);
+        if (!isNaN(parsed) && parsed >= 0) return parsed;
+      }
+    }
+  }
+
+  // 2. Check comments regex in JSON
+  const str = JSON.stringify(nextData);
+  const m1 = str.match(
+    /"engagementPanelTitleHeaderRenderer":\{"title":\{"runs":\[\{"text":"Comments"\}\]\},"contextualInfo":\{"runs":\[\{"text":"([\d,]+)"/i
+  );
+  if (m1) return parseInt(m1[1].replace(/,/g, ''), 10);
+
+  const m2 =
+    str.match(/"commentsCount":\{"runs":\[\{"text":"([\d,]+)"/i) ||
+    str.match(/"commentCount":\{"simpleText":"([\d,]+)"/i) ||
+    str.match(/"accessibilityText":"([\d,]+)\s+Comments"/i);
+  if (m2) return parseInt(m2[1].replace(/,/g, ''), 10);
+
+  return 0;
 }
 
 /**
@@ -156,6 +195,7 @@ export async function scrapeYouTubeVideo(url: string): Promise<ScrapedVideoStats
 
         const demographics = calculateDemographics(viewCount, likeCount, commentCount, title);
         demographics.source = 'OFFICIAL_API';
+        demographics.isModeledEstimate = false;
 
         return {
           platform: 'YOUTUBE',
@@ -172,7 +212,8 @@ export async function scrapeYouTubeVideo(url: string): Promise<ScrapedVideoStats
           viewCount,
           likeCount,
           commentCount,
-          shareCount: Math.floor(viewCount * 0.012),
+          shareCount: 0,
+          sharesIsPrivateToCreator: true,
           demographics,
           verificationMethod: 'YOUTUBE_DATA_API_V3',
           scrapedAt: new Date().toISOString(),
@@ -242,7 +283,7 @@ export async function scrapeYouTubeVideo(url: string): Promise<ScrapedVideoStats
       }
     }
 
-    // Extract likes, comments, and views from Innertube next payload
+    // Extract likes, exact comments, and views from Innertube next payload
     if (nextPromise.status === 'fulfilled' && nextPromise.value) {
       const str = JSON.stringify(nextPromise.value);
       const factoidLike = str.match(
@@ -264,15 +305,8 @@ export async function scrapeYouTubeVideo(url: string): Promise<ScrapedVideoStats
         if (viewFactoid) viewCount = parseCompactNumber(viewFactoid[1]);
       }
 
-      const commentMatch =
-        str.match(/"commentsCount":\{"runs":\[\{"text":"([\d,]+)"/i) ||
-        str.match(/"commentCount":\{"simpleText":"([\d,]+)"/i) ||
-        str.match(/"accessibilityText":"([\d,]+)\s+Comments"/i);
-      if (commentMatch) {
-        commentCount = parseInt(commentMatch[1].replace(/,/g, ''), 10);
-      } else if (likeCount > 0) {
-        commentCount = Math.max(1, Math.floor(likeCount * 0.05));
-      }
+      // Extract exact comment count
+      commentCount = extractExactComments(nextPromise.value);
     }
 
     // Fallback title / author from oEmbed if needed
@@ -298,17 +332,16 @@ export async function scrapeYouTubeVideo(url: string): Promise<ScrapedVideoStats
       authorName,
       thumbnailUrl,
       publishedAt: new Date().toISOString(),
-      viewCount, // 100% authentic live views (e.g. 792467)
-      likeCount,
-      commentCount,
-      shareCount: Math.floor(viewCount * 0.012),
+      viewCount, // 100% authentic live views (792,467)
+      likeCount, // 100% authentic live likes (15,000)
+      commentCount, // 100% authentic live comments (319)
+      shareCount: 0, // YouTube does not publish share counts publicly (requires OAuth viewing permission)
+      sharesIsPrivateToCreator: true,
       demographics,
       verificationMethod: 'YOUTUBE_PUBLIC_METADATA_ENGINE',
       scrapedAt: new Date().toISOString(),
     };
   } catch (err: any) {
-    // If request failed completely (e.g. video removed, private, or network error),
-    // report actual 0 views with UNVERIFIED status, NEVER fake numbers.
     return {
       platform: 'YOUTUBE',
       videoId,
@@ -322,27 +355,19 @@ export async function scrapeYouTubeVideo(url: string): Promise<ScrapedVideoStats
       likeCount: 0,
       commentCount: 0,
       shareCount: 0,
+      sharesIsPrivateToCreator: true,
       demographics: {
-        topCountries: [
-          { country: 'United States', code: 'US', percent: 45, isTier1: true },
-          { country: 'India', code: 'IN', percent: 30, isTier1: false },
-          { country: 'United Kingdom', code: 'GB', percent: 15, isTier1: true },
-          { country: 'Canada', code: 'CA', percent: 10, isTier1: true },
-        ],
-        tier1Percent: 70,
-        cpmMultiplier: 1.2,
+        topCountries: [],
+        tier1Percent: 0,
+        cpmMultiplier: 1.0,
         gender: { male: 50, female: 50 },
-        ageGroups: [
-          { group: '18-24', percent: 50 },
-          { group: '25-34', percent: 35 },
-          { group: '13-17', percent: 10 },
-          { group: '35-44', percent: 5 },
-        ],
+        ageGroups: [],
         estimatedRetentionRate: 0,
         engagementRate: 0,
         fraudScore: 10,
         fraudFlags: ['Live sync temporarily offline - manual verification required'],
-        source: 'AUDIENCE_INTELLIGENCE',
+        source: 'BEHAVIORAL_MODEL',
+        isModeledEstimate: true,
       },
       verificationMethod: 'ZERO_DATA_UNVERIFIED',
       scrapedAt: new Date().toISOString(),

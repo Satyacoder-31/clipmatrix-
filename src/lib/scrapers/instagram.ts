@@ -95,7 +95,10 @@ function calculateInstagramDemographics(
     engagementRate: parseFloat(engagementRate.toFixed(2)),
     fraudScore: Math.min(100, fraudScore),
     fraudFlags,
-    source: 'AUDIENCE_INTELLIGENCE',
+    source: 'BEHAVIORAL_MODEL',
+    isModeledEstimate: true,
+    oauthRequiredNotice:
+      'Instagram Insights (audience countries, age, gender, reach, shares) are private creator metrics. Connect Instagram account via Meta Graph API viewing permissions for official verified Insights.',
   };
 }
 
@@ -133,6 +136,7 @@ export async function scrapeInstagramReel(url: string): Promise<ScrapedVideoStat
 
         const demographics = calculateInstagramDemographics(viewCount, likeCount, commentCount, caption);
         demographics.source = 'OFFICIAL_API';
+        demographics.isModeledEstimate = false;
 
         return {
           platform: 'INSTAGRAM',
@@ -146,7 +150,8 @@ export async function scrapeInstagramReel(url: string): Promise<ScrapedVideoStat
           viewCount,
           likeCount,
           commentCount,
-          shareCount: Math.floor(viewCount * 0.024),
+          shareCount: 0,
+          sharesIsPrivateToCreator: true,
           demographics,
           verificationMethod: 'RAPIDAPI_INSTAGRAM_RESIDENTIAL',
           scrapedAt: new Date().toISOString(),
@@ -186,55 +191,63 @@ export async function scrapeInstagramReel(url: string): Promise<ScrapedVideoStat
       if (commentsPart) commentCount = parseShorthand(commentsPart[1]);
     }
 
-    // Infer views from play_count or engagement multiplier
+    // Check play_count if present in public payload
     const playCountMatch = html.match(/"play_count":(\d+)/) || html.match(/"video_play_count":(\d+)/);
     let viewCount = playCountMatch ? parseInt(playCountMatch[1], 10) : 0;
 
-    if (viewCount === 0 && likeCount > 0) {
-      // Statistical standard for Instagram Reels: views ≈ 12x to 15x likes
-      viewCount = Math.round(likeCount * 13.8);
-    } else if (viewCount === 0) {
-      viewCount = 38500;
-      likeCount = 2840;
-      commentCount = 112;
-    }
+    // Check video title
+    const ogTitleMatch = html.match(/<meta\s+property="og:title"\s+content="([^"]+)"/i);
+    const title = ogTitleMatch ? ogTitleMatch[1] : `Instagram Reel (${shortcode})`;
 
-    const demographics = calculateInstagramDemographics(viewCount, likeCount, commentCount, '');
+    const demographics = calculateInstagramDemographics(viewCount, likeCount, commentCount, title);
 
     return {
       platform: 'INSTAGRAM',
       videoId: shortcode,
       originalUrl: url,
-      title: `Instagram Reel (${shortcode})`,
+      title,
       authorHandle: '@reels_creator',
-      authorName: 'Reels Creator',
+      authorName: 'Instagram Creator',
       thumbnailUrl: '',
       publishedAt: new Date().toISOString(),
       viewCount,
       likeCount,
       commentCount,
-      shareCount: Math.floor(viewCount * 0.021),
+      shareCount: 0,
+      sharesIsPrivateToCreator: true,
       demographics,
       verificationMethod: 'INSTAGRAM_PUBLIC_OG_ENGINE',
       scrapedAt: new Date().toISOString(),
     };
   } catch {
-    const fallbackViews = 52400;
     return {
       platform: 'INSTAGRAM',
       videoId: shortcode,
       originalUrl: url,
       title: `Instagram Reel (${shortcode})`,
       authorHandle: '@reels_creator',
-      authorName: 'Reels Creator',
+      authorName: 'Instagram Creator',
       thumbnailUrl: '',
       publishedAt: new Date().toISOString(),
-      viewCount: fallbackViews,
-      likeCount: Math.floor(fallbackViews * 0.076),
-      commentCount: Math.floor(fallbackViews * 0.005),
-      shareCount: Math.floor(fallbackViews * 0.02),
-      demographics: calculateInstagramDemographics(fallbackViews, 3980, 260, ''),
-      verificationMethod: 'SIMULATED_AUDIT_FALLBACK',
+      viewCount: 0,
+      likeCount: 0,
+      commentCount: 0,
+      shareCount: 0,
+      sharesIsPrivateToCreator: true,
+      demographics: {
+        topCountries: [],
+        tier1Percent: 0,
+        cpmMultiplier: 1.0,
+        gender: { male: 50, female: 50 },
+        ageGroups: [],
+        estimatedRetentionRate: 0,
+        engagementRate: 0,
+        fraudScore: 10,
+        fraudFlags: ['Instagram public sync restricted - connect account for official metrics'],
+        source: 'BEHAVIORAL_MODEL',
+        isModeledEstimate: true,
+      },
+      verificationMethod: 'ZERO_DATA_UNVERIFIED',
       scrapedAt: new Date().toISOString(),
     };
   }

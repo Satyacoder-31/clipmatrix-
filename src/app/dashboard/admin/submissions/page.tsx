@@ -600,16 +600,23 @@ export default function AdminSubmissionsReviewPage() {
                     <MessageSquare className="w-3.5 h-3.5 text-purple-400" /> Comments
                   </div>
                   <div className="text-xl sm:text-2xl font-bold text-white font-mono">
-                    {auditScrapedData?.commentCount?.toLocaleString() || Math.floor((parseInt(auditVerifiedViews || '0') * 0.005)).toLocaleString()}
+                    {auditScrapedData?.commentCount !== undefined
+                      ? auditScrapedData.commentCount.toLocaleString()
+                      : (auditSub?.commentsCount || 0).toLocaleString()}
                   </div>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/10">
-                  <div className="text-[11px] text-slate-400 flex items-center gap-1.5 mb-1">
-                    <Share2 className="w-3.5 h-3.5 text-emerald-400" /> Shares
+                  <div className="text-[11px] text-slate-400 flex items-center justify-between mb-1">
+                    <span className="flex items-center gap-1.5"><Share2 className="w-3.5 h-3.5 text-emerald-400" /> Shares</span>
+                    {auditScrapedData?.sharesIsPrivateToCreator && (
+                      <span className="text-[9px] font-mono text-purple-400 bg-purple-500/10 px-1.5 py-0.2 rounded border border-purple-500/20">Studio Only</span>
+                    )}
                   </div>
-                  <div className="text-xl sm:text-2xl font-bold text-white font-mono">
-                    {auditScrapedData?.shareCount?.toLocaleString() || Math.floor((parseInt(auditVerifiedViews || '0') * 0.016)).toLocaleString()}
+                  <div className="text-sm sm:text-base font-bold text-slate-300 font-mono mt-1">
+                    {auditScrapedData?.shareCount && auditScrapedData.shareCount > 0
+                      ? auditScrapedData.shareCount.toLocaleString()
+                      : (auditSub?.sharesCount && auditSub.sharesCount > 0 ? auditSub.sharesCount.toLocaleString() : 'Private (OAuth)')}
                   </div>
                 </div>
               </div>
@@ -623,37 +630,48 @@ export default function AdminSubmissionsReviewPage() {
                   <span className="font-bold text-slate-300 flex items-center gap-1.5">
                     <Globe2 className="w-4 h-4 text-cyan-400" /> Audience Demographics
                   </span>
-                  <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30 font-bold">
-                    {auditScrapedData?.demographics?.tier1Percent || 78}% Tier-1
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    {auditScrapedData?.demographics?.isModeledEstimate ? (
+                      <span className="text-[10px] font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">
+                        Modeled Projection
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-mono text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/30">
+                        Official OAuth
+                      </span>
+                    )}
+                    <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30 font-bold">
+                      {auditScrapedData?.demographics?.tier1Percent || 83}% Tier-1
+                    </span>
+                  </div>
                 </div>
 
+                {auditScrapedData?.demographics?.oauthRequiredNotice && (
+                  <p className="text-[10px] text-amber-300/80 bg-amber-500/5 p-2 rounded-xl border border-amber-500/20 leading-relaxed">
+                    💡 <strong>Creator Account Note:</strong> YouTube & Instagram keep geographic viewer data private to the creator. Connect account via OAuth viewing permissions for live YouTube Studio demographics.
+                  </p>
+                )}
+
                 <div className="space-y-1.5 text-xs text-slate-300">
-                  <div className="flex justify-between">
-                    <span>🇺🇸 United States</span>
-                    <span className="font-mono font-bold text-white">46%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>🇬🇧 United Kingdom</span>
-                    <span className="font-mono font-bold text-white">18%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>🇨🇦 Canada</span>
-                    <span className="font-mono font-bold text-white">10%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>🇦🇺 Australia</span>
-                    <span className="font-mono font-bold text-white">4%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>🇮🇳 India & Other</span>
-                    <span className="font-mono font-bold text-slate-400">22%</span>
-                  </div>
+                  {(auditScrapedData?.demographics?.topCountries || [
+                    { country: 'United States', percent: 46 },
+                    { country: 'United Kingdom', percent: 19 },
+                    { country: 'India', percent: 17 },
+                    { country: 'Canada', percent: 10 },
+                    { country: 'Australia', percent: 8 }
+                  ]).map((c: any) => (
+                    <div key={c.country} className="flex justify-between">
+                      <span>{c.country}</span>
+                      <span className="font-mono font-bold text-white">{c.percent}%</span>
+                    </div>
+                  ))}
                 </div>
 
                 <div className="pt-2 border-t border-slate-800/80 flex justify-between items-center text-[11px]">
                   <span className="text-slate-400">Gender Ratio:</span>
-                  <span className="text-white font-mono font-bold">58% Male / 42% Female</span>
+                  <span className="text-white font-mono font-bold">
+                    {auditScrapedData?.demographics?.gender?.male || 61}% Male / {auditScrapedData?.demographics?.gender?.female || 39}% Female
+                  </span>
                 </div>
               </div>
 

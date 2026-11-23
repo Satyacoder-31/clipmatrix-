@@ -21,6 +21,8 @@ export interface AudienceDemographics {
   fraudScore: number; // 0 - 100 (0 = authentic, 100 = suspected bots)
   fraudFlags: string[];
   source: 'OFFICIAL_API' | 'AUDIENCE_INTELLIGENCE' | 'BEHAVIORAL_MODEL';
+  isModeledEstimate?: boolean;
+  oauthRequiredNotice?: string;
 }
 
 export interface ScrapedVideoStats {
@@ -37,6 +39,7 @@ export interface ScrapedVideoStats {
   likeCount: number;
   commentCount: number;
   shareCount: number;
+  sharesIsPrivateToCreator?: boolean;
   demographics: AudienceDemographics;
   verificationMethod: string;
   scrapedAt: string;
