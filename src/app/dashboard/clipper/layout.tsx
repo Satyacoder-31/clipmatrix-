@@ -13,24 +13,45 @@ export default function ClipperLayout({ children }: { children: React.ReactNode 
   const router = useRouter();
 
   useEffect(() => {
-    fetch('/api/auth/me')
-      .then((res) => res.json())
-      .then((data) => {
+    const syncClipperSession = async () => {
+      try {
+        const res = await fetch('/api/auth/me');
+        const data = await res.json();
         if (!data.authenticated) {
           router.push('/auth/login');
-        } else {
-          setUser(data.user);
+          return;
         }
-      })
-      .catch(() => {
+
+        // If the active session is not a CLIPPER (e.g. left over from visiting admin panel),
+        // automatically switch session to CLIPPER so all APIs and views strictly show clipper data
+        if (data.user.role !== 'CLIPPER') {
+          const switchRes = await fetch('/api/auth/switch-role', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role: 'CLIPPER' }),
+          });
+          const switchData = await switchRes.json();
+          if (switchData.user) {
+            setUser(switchData.user);
+            router.refresh();
+            return;
+          }
+        }
+
+        setUser(data.user);
+      } catch {
         // Fallback for offline / demo mode
         setUser({
-          name: 'Satyaaaa',
+          name: 'Aarav Sharma (Elite Clipper)',
           role: 'CLIPPER',
           email: 'clipper@clipmatrix.com',
         });
-      })
-      .finally(() => setLoading(false));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    syncClipperSession();
   }, [router]);
 
   if (loading) {

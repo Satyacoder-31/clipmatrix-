@@ -13,23 +13,43 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
 
   useEffect(() => {
-    fetch('/api/auth/me')
-      .then((res) => res.json())
-      .then((data) => {
-        if (!data.authenticated || data.user.role !== 'ADMIN') {
+    const syncAdminSession = async () => {
+      try {
+        const res = await fetch('/api/auth/me');
+        const data = await res.json();
+        if (!data.authenticated) {
           router.push('/auth/login');
-        } else {
-          setUser(data.user);
+          return;
         }
-      })
-      .catch(() => {
+
+        // If authenticated as non-ADMIN, switch to ADMIN persona for admin management suite
+        if (data.user.role !== 'ADMIN') {
+          const switchRes = await fetch('/api/auth/switch-role', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role: 'ADMIN' }),
+          });
+          const switchData = await switchRes.json();
+          if (switchData.user) {
+            setUser(switchData.user);
+            router.refresh();
+            return;
+          }
+        }
+
+        setUser(data.user);
+      } catch {
         setUser({
           name: 'ClipMatrix Super Admin',
           role: 'ADMIN',
           email: 'admin@clipmatrix.com',
         });
-      })
-      .finally(() => setLoading(false));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    syncAdminSession();
   }, [router]);
 
   if (loading) {

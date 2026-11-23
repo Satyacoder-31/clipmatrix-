@@ -104,10 +104,44 @@ export default function DashboardSidebar({
     },
   ];
 
-  const displayName = user?.name || (role === 'CLIPPER' ? 'Aarav Sharma' : role === 'BRAND' ? 'Aether AI Labs' : 'Super Admin');
+  const isClipperWorkspace = role === 'CLIPPER';
+  const isBrandWorkspace = role === 'BRAND';
+  const isAdminWorkspace = role === 'ADMIN';
+
+  const displayName = isClipperWorkspace
+    ? (user?.role === 'CLIPPER' && user?.name ? user.name : 'Aarav Sharma')
+    : isBrandWorkspace
+    ? (user?.role === 'BRAND' && user?.name ? user.name : 'Aether AI Labs')
+    : (user?.role === 'ADMIN' && user?.name ? user.name : 'ClipMatrix Super Admin');
+
   const initial = displayName.trim().charAt(0).toUpperCase();
-  const displayRole = user?.role || role;
-  const balance = user?.wallet?.balance || (role === 'CLIPPER' ? 14200 : role === 'BRAND' ? 45000 : 950000);
+  const displayRole = role; // Strictly matches the active dashboard workspace
+  const balance =
+    (role === user?.role && user?.wallet?.balance !== undefined)
+      ? user.wallet.balance
+      : isClipperWorkspace
+      ? 186
+      : isBrandWorkspace
+      ? 45000
+      : 25000;
+
+  const handleSwitchPersona = async (targetRole: 'CLIPPER' | 'ADMIN' | 'BRAND') => {
+    try {
+      await fetch('/api/auth/switch-role', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: targetRole }),
+      });
+      const targetUrl =
+        targetRole === 'ADMIN'
+          ? '/dashboard/admin'
+          : targetRole === 'BRAND'
+          ? '/dashboard/brand'
+          : '/dashboard/clipper';
+      router.push(targetUrl);
+      router.refresh();
+    } catch {}
+  };
 
   return (
     <aside
@@ -276,6 +310,33 @@ export default function DashboardSidebar({
             </div>
           </div>
         </div>
+
+        {/* 1-Click Role Switcher */}
+        {role === 'CLIPPER' ? (
+          <button
+            type="button"
+            onClick={() => handleSwitchPersona('ADMIN')}
+            className="w-full py-2 px-3 rounded-xl border border-purple-500/30 hover:border-cyan-400/50 bg-[#160b36]/60 hover:bg-[#1f104d] text-xs font-mono font-semibold text-cyan-300 hover:text-white flex items-center justify-between transition-all cursor-pointer group"
+          >
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-3.5 h-3.5 text-cyan-400 group-hover:scale-110 transition-transform" />
+              <span>Switch to Admin Panel</span>
+            </div>
+            <ArrowUpRight className="w-3 h-3 text-slate-400 group-hover:text-cyan-300 transition-colors" />
+          </button>
+        ) : role === 'ADMIN' ? (
+          <button
+            type="button"
+            onClick={() => handleSwitchPersona('CLIPPER')}
+            className="w-full py-2 px-3 rounded-xl border border-cyan-500/30 hover:border-cyan-400/50 bg-[#0b1b36]/60 hover:bg-[#10274d] text-xs font-mono font-semibold text-cyan-300 hover:text-white flex items-center justify-between transition-all cursor-pointer group"
+          >
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-3.5 h-3.5 text-cyan-400 group-hover:scale-110 transition-transform" />
+              <span>Switch to Clipper View</span>
+            </div>
+            <ArrowUpRight className="w-3 h-3 text-slate-400 group-hover:text-cyan-300 transition-colors" />
+          </button>
+        ) : null}
 
         {/* Dual Actions: Go to Main Page & Logout */}
         <div className="space-y-1.5">
