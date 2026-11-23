@@ -11,6 +11,9 @@ export interface ConnectedAccountItem {
   studioViewAccess: boolean;
   accessScope: string;
   adminAccessStatus: 'ACTIVE' | 'PENDING' | 'REVOKED';
+  subscriberCount?: number;
+  totalViews?: number;
+  avatarUrl?: string;
   demographics: {
     tier1Percent: number;
     topCountries: { country: string; percent: number; isTier1: boolean; code: string }[];
@@ -228,7 +231,12 @@ export async function POST(request: Request) {
       studioViewAccess: grantStudioViewAccess !== false,
       accessScope,
       adminAccessStatus: grantStudioViewAccess !== false ? 'ACTIVE' : 'PENDING',
-      demographics: {
+      subscriberCount: typeof body.subscriberCount === 'number' ? body.subscriberCount : undefined,
+      totalViews: typeof body.totalViews === 'number' ? body.totalViews : undefined,
+      avatarUrl: body.avatarUrl || undefined,
+      demographics: body.demographics && Array.isArray(body.demographics.topCountries) && body.demographics.topCountries.length > 0
+        ? body.demographics
+        : {
         tier1Percent: isYouTube ? 84 : 81,
         topCountries: isYouTube
           ? [
