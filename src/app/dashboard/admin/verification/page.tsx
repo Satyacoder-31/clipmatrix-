@@ -86,7 +86,11 @@ export default function AdminVerificationPage() {
       } else {
         const stats: ScrapedVideoStats = data.stats;
         setScrapedData(stats);
-        setVerifiedViews(stats.viewCount.toString());
+        if (stats.viewCount > 0) {
+          setVerifiedViews(stats.viewCount.toString());
+        } else if (selectedSub?.reportedViews > 0) {
+          setVerifiedViews(selectedSub.reportedViews.toString());
+        }
         setMethod(stats.verificationMethod);
         setNotes(
           `Scraped live via ${stats.verificationMethod}. Tier-1 Audience: ${stats.demographics.tier1Percent}%. Fraud Score: ${stats.demographics.fraudScore}/100.`

@@ -80,11 +80,18 @@ export default function ClipperSubmissionsPage() {
                       </td>
                       <td className="py-3.5 px-4 font-bold text-white">
                         {sub.verifiedViews > 0 ? (
-                          <span className="text-cyan-400 flex items-center gap-1">
+                          <span className="text-cyan-400 flex items-center gap-1 font-mono">
                             <Eye className="w-3 h-3" /> {sub.verifiedViews.toLocaleString()}
                           </span>
+                        ) : sub.reportedViews > 0 ? (
+                          <span className="text-white/90 flex items-center gap-1 font-mono">
+                            <Eye className="w-3 h-3 text-purple-400" /> {sub.reportedViews.toLocaleString()}
+                            <span className="text-[9px] text-amber-400 font-normal ml-1 bg-amber-400/10 px-1.5 py-0.5 rounded border border-amber-400/20">Reported</span>
+                          </span>
                         ) : (
-                          <span className="text-purple-400/60 font-mono">Sync Pending</span>
+                          <span className="text-purple-400/60 font-mono text-xs flex items-center gap-1">
+                            <Eye className="w-3 h-3 text-purple-500/40" /> 0 (Syncing)
+                          </span>
                         )}
                       </td>
                       <td className="py-3.5 px-4 font-bold text-emerald-400">

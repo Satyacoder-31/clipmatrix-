@@ -195,11 +195,22 @@ export async function scrapeInstagramReel(url: string): Promise<ScrapedVideoStat
     const playCountMatch = html.match(/"play_count":(\d+)/) || html.match(/"video_play_count":(\d+)/);
     let viewCount = playCountMatch ? parseInt(playCountMatch[1], 10) : 0;
 
+    // Instagram hides public play counts on unauthenticated web browsers.
+    // If likes exist, model realistic view count based on industry like-to-view ratio benchmark (~6.5% engagement rate)
+    let isModeledViews = false;
+    if (viewCount === 0 && likeCount > 0) {
+      viewCount = Math.round(likeCount * 15.3);
+      isModeledViews = true;
+    }
+
     // Check video title
     const ogTitleMatch = html.match(/<meta\s+property="og:title"\s+content="([^"]+)"/i);
     const title = ogTitleMatch ? ogTitleMatch[1] : `Instagram Reel (${shortcode})`;
 
     const demographics = calculateInstagramDemographics(viewCount, likeCount, commentCount, title);
+    if (isModeledViews) {
+      demographics.isModeledEstimate = true;
+    }
 
     return {
       platform: 'INSTAGRAM',
@@ -216,7 +227,7 @@ export async function scrapeInstagramReel(url: string): Promise<ScrapedVideoStat
       shareCount: 0,
       sharesIsPrivateToCreator: true,
       demographics,
-      verificationMethod: 'INSTAGRAM_PUBLIC_OG_ENGINE',
+      verificationMethod: isModeledViews ? 'INSTAGRAM_ENGAGEMENT_MODELED' : 'INSTAGRAM_PUBLIC_OG_ENGINE',
       scrapedAt: new Date().toISOString(),
     };
   } catch {

@@ -18,6 +18,7 @@ import {
   BarChart3,
   ShieldCheck,
   Zap,
+  Eye,
 } from 'lucide-react';
 
 // Platform SVG Icons
@@ -49,6 +50,7 @@ export default function SubmitClipPage() {
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [selectedCampaignId, setSelectedCampaignId] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
+  const [initialViews, setInitialViews] = useState('');
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<'submissions' | 'stats' | 'leaderboard'>('submissions');
@@ -147,6 +149,7 @@ export default function SubmitClipPage() {
         body: JSON.stringify({
           campaignId: selectedCampaignId || currentCampaign.id,
           videoUrl: videoUrl.trim(),
+          initialViews: initialViews ? parseInt(initialViews, 10) : undefined,
         }),
       });
 
@@ -159,6 +162,7 @@ export default function SubmitClipPage() {
           message: `Content URL submitted successfully! (ID: ${data.submission.submissionNumber})`,
         });
         setVideoUrl('');
+        setInitialViews('');
         fetchMySubmissions(selectedCampaignId || currentCampaign.id);
       }
     } catch {
@@ -277,6 +281,24 @@ export default function SubmitClipPage() {
                 </button>
               </div>
 
+              {/* Optional view count helper when Instagram Reel is detected */}
+              {detected === 'Instagram' && (
+                <div className="mt-3 flex items-center gap-3 bg-purple-950/40 border border-purple-500/20 rounded-2xl px-4 py-2.5 text-left transition-all">
+                  <Eye className="w-4 h-4 text-cyan-400 shrink-0" />
+                  <div className="flex-1 text-xs text-slate-300">
+                    <span className="font-semibold text-white">Instagram Views:</span> Current view count from your app (optional):
+                  </div>
+                  <input
+                    type="number"
+                    min="0"
+                    value={initialViews}
+                    onChange={(e) => setInitialViews(e.target.value)}
+                    placeholder="e.g. 50000"
+                    className="w-28 px-3 py-1.5 rounded-xl bg-black/60 border border-white/10 text-white text-xs font-mono focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+              )}
+
               {feedback && (
                 <div
                   className={`mt-4 p-3 rounded-2xl text-xs font-medium flex items-center justify-center gap-2 ${
@@ -378,7 +400,23 @@ export default function SubmitClipPage() {
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-4">
+                          {/* Views display */}
+                          <div className="text-right">
+                            <div className="text-xs font-bold text-white flex items-center justify-end gap-1 font-mono">
+                              <Eye className="w-3.5 h-3.5 text-cyan-400" />
+                              <span>
+                                {((sub.verifiedViews && sub.verifiedViews > 0)
+                                  ? sub.verifiedViews
+                                  : (sub.reportedViews || 0)
+                                ).toLocaleString()}
+                              </span>
+                            </div>
+                            <div className="text-[10px] text-slate-400 font-mono">
+                              {sub.verifiedViews > 0 ? 'Verified Views' : sub.reportedViews > 0 ? 'Reported Views' : 'Sync Pending'}
+                            </div>
+                          </div>
+
                           <span
                             className={`px-3 py-1 rounded-full text-[11px] font-mono font-bold ${
                               sub.status === 'VIEWS_VERIFIED'

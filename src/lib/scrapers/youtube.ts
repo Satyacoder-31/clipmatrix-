@@ -141,8 +141,8 @@ function extractExactComments(nextData: any): number {
       const header = list.header?.engagementPanelTitleHeaderRenderer;
       const countRun = header?.contextualInfo?.runs?.[0]?.text;
       if (countRun) {
-        const parsed = parseInt(countRun.replace(/,/g, ''), 10);
-        if (!isNaN(parsed) && parsed >= 0) return parsed;
+        const parsed = parseCompactNumber(countRun);
+        if (parsed > 0) return parsed;
       }
     }
   }
@@ -150,15 +150,21 @@ function extractExactComments(nextData: any): number {
   // 2. Check comments regex in JSON
   const str = JSON.stringify(nextData);
   const m1 = str.match(
-    /"engagementPanelTitleHeaderRenderer":\{"title":\{"runs":\[\{"text":"Comments"\}\]\},"contextualInfo":\{"runs":\[\{"text":"([\d,]+)"/i
+    /"engagementPanelTitleHeaderRenderer":\{"title":\{"runs":\[\{"text":"Comments"\}\]\},"contextualInfo":\{"runs":\[\{"text":"([^"]+)"/i
   );
-  if (m1) return parseInt(m1[1].replace(/,/g, ''), 10);
+  if (m1) {
+    const parsed = parseCompactNumber(m1[1]);
+    if (parsed > 0) return parsed;
+  }
 
   const m2 =
-    str.match(/"commentsCount":\{"runs":\[\{"text":"([\d,]+)"/i) ||
-    str.match(/"commentCount":\{"simpleText":"([\d,]+)"/i) ||
-    str.match(/"accessibilityText":"([\d,]+)\s+Comments"/i);
-  if (m2) return parseInt(m2[1].replace(/,/g, ''), 10);
+    str.match(/"commentsCount":\{"runs":\[\{"text":"([^"]+)"/i) ||
+    str.match(/"commentCount":\{"simpleText":"([^"]+)"/i) ||
+    str.match(/"accessibilityText":"([^"]+)\s+Comments"/i);
+  if (m2) {
+    const parsed = parseCompactNumber(m2[1]);
+    if (parsed > 0) return parsed;
+  }
 
   return 0;
 }

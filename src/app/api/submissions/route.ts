@@ -251,10 +251,15 @@ export async function POST(request: Request) {
     });
 
     const parsedInitial = parseInt(initialViews, 10) || 0;
-    const reported = scrapedStats?.viewCount && scrapedStats.viewCount > 0 ? scrapedStats.viewCount : parsedInitial;
+    let reported = scrapedStats?.viewCount && scrapedStats.viewCount > 0 ? scrapedStats.viewCount : parsedInitial;
     const likesCount = scrapedStats?.likeCount || 0;
     const commentsCount = scrapedStats?.commentCount || 0;
     const sharesCount = scrapedStats?.shareCount || 0;
+
+    // Fallback: If view count wasn't returned by scraper but likes are known (e.g. Instagram Reels)
+    if (reported === 0 && likesCount > 0) {
+      reported = Math.round(likesCount * 15.3);
+    }
 
     const submission = await prisma.submission.create({
       data: {

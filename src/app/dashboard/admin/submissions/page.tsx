@@ -120,7 +120,7 @@ export default function AdminSubmissionsReviewPage() {
     setAuditSub(sub);
     setAuditScrapedData(null);
     setAuditMsg('');
-    const initialCount = sub.verifiedViews || sub.reportedViews || 120500;
+    const initialCount = sub.verifiedViews || sub.reportedViews || 0;
     setAuditVerifiedViews(initialCount.toString());
     // Auto-trigger live scraping for this video link
     triggerLiveScrape(sub.videoUrl, sub.id);
@@ -153,7 +153,11 @@ export default function AdminSubmissionsReviewPage() {
       const data = await res.json();
       if (res.ok && data.stats) {
         setAuditScrapedData(data.stats);
-        setAuditVerifiedViews(data.stats.viewCount.toString());
+        if (data.stats.viewCount > 0) {
+          setAuditVerifiedViews(data.stats.viewCount.toString());
+        } else if (auditSub?.reportedViews > 0) {
+          setAuditVerifiedViews(auditSub.reportedViews.toString());
+        }
         setAuditMsg('⚡ Live video metrics and demographic analysis loaded!');
       } else {
         setAuditMsg(`Notice: Live scraper offline (${data.error || 'using cached metrics'})`);
@@ -367,13 +371,23 @@ export default function AdminSubmissionsReviewPage() {
                           ₹{sub.campaign?.cpmRate || 150}
                         </strong>
                       </span>
-                      {sub.verifiedViews > 0 && (
-                        <>
-                          <span>•</span>
-                          <span className="text-cyan-400 font-mono font-bold">
-                            {sub.verifiedViews.toLocaleString()} Verified Views
-                          </span>
-                        </>
+                      <span>•</span>
+                      {sub.verifiedViews > 0 ? (
+                        <span className="text-cyan-400 font-mono font-bold flex items-center gap-1">
+                          <Eye className="w-3 h-3" />
+                          {sub.verifiedViews.toLocaleString()} Verified Views
+                        </span>
+                      ) : sub.reportedViews > 0 ? (
+                        <span className="text-purple-300 font-mono font-semibold flex items-center gap-1">
+                          <Eye className="w-3 h-3 text-cyan-400" />
+                          {sub.reportedViews.toLocaleString()} Reported Views
+                          <span className="text-[10px] text-amber-400 font-normal ml-1 bg-amber-400/10 px-1.5 py-0.2 rounded border border-amber-400/20">Audit Pending</span>
+                        </span>
+                      ) : (
+                        <span className="text-slate-400 font-mono text-xs flex items-center gap-1">
+                          <Eye className="w-3 h-3 text-slate-500" />
+                          0 Views <span className="text-[10px] text-purple-400/80">(Pending Sync)</span>
+                        </span>
                       )}
                     </div>
 
@@ -578,11 +592,17 @@ export default function AdminSubmissionsReviewPage() {
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div className="p-4 rounded-2xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/10">
-                  <div className="text-[11px] text-slate-400 flex items-center gap-1.5 mb-1">
-                    <Eye className="w-3.5 h-3.5 text-cyan-400" /> Views
+                  <div className="text-[11px] text-slate-400 flex items-center justify-between mb-1">
+                    <span className="flex items-center gap-1.5"><Eye className="w-3.5 h-3.5 text-cyan-400" /> Views</span>
+                    {auditScrapedData?.verificationMethod?.includes('MODELED') && (
+                      <span className="text-[9px] font-mono text-amber-400 bg-amber-500/10 px-1.5 py-0.2 rounded border border-amber-500/20">Modeled</span>
+                    )}
                   </div>
                   <div className="text-xl sm:text-2xl font-bold text-white font-mono">
-                    {auditScrapedData?.viewCount?.toLocaleString() || parseInt(auditVerifiedViews || '0').toLocaleString()}
+                    {(auditScrapedData?.viewCount && auditScrapedData.viewCount > 0
+                      ? auditScrapedData.viewCount
+                      : parseInt(auditVerifiedViews || '0', 10) || auditSub?.reportedViews || 0
+                    ).toLocaleString()}
                   </div>
                 </div>
 

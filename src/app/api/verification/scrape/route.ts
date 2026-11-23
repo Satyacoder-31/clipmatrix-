@@ -32,7 +32,7 @@ export async function POST(request: Request) {
         await prisma.submission.update({
           where: { id: submissionId },
           data: {
-            reportedViews: stats.viewCount,
+            ...(stats.viewCount > 0 ? { reportedViews: stats.viewCount } : {}),
             likesCount: stats.likeCount,
             commentsCount: stats.commentCount,
             sharesCount: stats.shareCount,
