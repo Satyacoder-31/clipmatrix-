@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
+import { scrapeVideoMetrics } from '@/lib/scrapers';
 
 export async function GET(request: Request) {
   try {
@@ -192,9 +193,29 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
     }
 
-    // Auto-generate title if omitted (streamlined submission)
-    if (!title || !title.trim()) {
-      title = `${campaign.title} Clip (${platform.toUpperCase()})`;
+    // Attempt real-time metadata & statistics enrichment via scraper
+    let scrapedStats: any = null;
+    try {
+      scrapedStats = await scrapeVideoMetrics(cleanUrl);
+    } catch {
+      // Scraper fallback if video link is restricted or offline
+    }
+
+    // Auto-fill title, thumbnail, and author handle if not explicitly provided
+    if (scrapedStats) {
+      if (!title || !title.trim()) {
+        title = scrapedStats.title || `${campaign.title} Clip (${platform.toUpperCase()})`;
+      }
+      if (!thumbnailUrl && scrapedStats.thumbnailUrl) {
+        thumbnailUrl = scrapedStats.thumbnailUrl;
+      }
+      if (!postAccountHandle && scrapedStats.authorHandle) {
+        postAccountHandle = scrapedStats.authorHandle;
+      }
+    } else {
+      if (!title || !title.trim()) {
+        title = `${campaign.title} Clip (${platform.toUpperCase()})`;
+      }
     }
 
     // Generate unique submission number
@@ -229,7 +250,11 @@ export async function POST(request: Request) {
       },
     });
 
-    const reported = parseInt(initialViews) || 0;
+    const parsedInitial = parseInt(initialViews, 10) || 0;
+    const reported = scrapedStats?.viewCount && scrapedStats.viewCount > 0 ? scrapedStats.viewCount : parsedInitial;
+    const likesCount = scrapedStats?.likeCount || 0;
+    const commentsCount = scrapedStats?.commentCount || 0;
+    const sharesCount = scrapedStats?.shareCount || 0;
 
     const submission = await prisma.submission.create({
       data: {
@@ -244,9 +269,34 @@ export async function POST(request: Request) {
         thumbnailUrl: thumbnailUrl || campaign.thumbnailUrl,
         submissionNotes: submissionNotes || '',
         reportedViews: reported,
+        likesCount,
+        commentsCount,
+        sharesCount,
         status: 'PENDING_REVIEW',
+        reviewNotes: scrapedStats
+          ? `Auto-audited on submission via ${scrapedStats.verificationMethod}. Live views: ${reported.toLocaleString()}.`
+          : undefined,
       },
     });
+
+    // Create initial view snapshot if scraped stats are available
+    if (reported > 0) {
+      try {
+        await prisma.viewSnapshot.create({
+          data: {
+            submissionId: submission.id,
+            viewCount: reported,
+            likes: likesCount,
+            comments: commentsCount,
+            shares: sharesCount,
+            verifiedBy: scrapedStats?.verificationMethod || 'REALTIME_SCRAPER',
+            notes: 'Initial metrics snapshot upon submission creation',
+          },
+        });
+      } catch {
+        // Non-fatal if snapshot fails
+      }
+    }
 
     // Notify brand
     await prisma.notification.create({
