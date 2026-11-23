@@ -500,13 +500,16 @@ export default function AdminSubmissionsReviewPage() {
       {/* In-Place Audit View Modal / Drawer (Opens on same page, returns right to the audited clip) */}
       {auditSub && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md overflow-y-auto p-4 sm:p-6 flex items-start justify-center">
-          <div className="w-full max-w-4xl my-8 rounded-3xl bg-[#090d16] border border-purple-500/40 p-6 sm:p-8 space-y-6 shadow-2xl relative text-slate-200">
+          <div className="w-full max-w-4xl my-8 rounded-3xl bg-gradient-to-b from-[#0f1426]/95 via-[#0a0d1c]/95 to-[#060812] border border-purple-500/40 p-6 sm:p-8 space-y-6 shadow-[0_25px_60px_-15px_rgba(147,51,234,0.3)] relative text-slate-200 overflow-hidden">
+            {/* Top Cyber Scanner Accent */}
+            <div className="absolute top-0 left-8 right-8 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
+
             {/* Header: Back Button & Sub Info */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleCloseAudit}
-                  className="px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-white/10 hover:bg-white/20 transition-all flex items-center gap-2 cursor-pointer border border-white/10"
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-white/[0.05] hover:bg-white/10 transition-all flex items-center gap-2 cursor-pointer border border-white/10 shadow-sm"
                 >
                   <ArrowLeft className="w-4 h-4 text-cyan-400" />
                   <span>Back to Review Queue</span>
@@ -514,7 +517,7 @@ export default function AdminSubmissionsReviewPage() {
 
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs font-bold text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/30">
+                    <span className="font-mono text-xs font-bold text-cyan-400 bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-cyan-500/30">
                       {auditSub.submissionNumber}
                     </span>
                     <span className="text-xs text-purple-300 font-bold">{auditSub.platform}</span>
@@ -530,14 +533,14 @@ export default function AdminSubmissionsReviewPage() {
                   href={auditSub.videoUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-medium text-cyan-300 flex items-center gap-1.5 border border-white/10"
+                  className="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-medium text-cyan-300 flex items-center gap-1.5 border border-white/10 transition-colors"
                 >
                   <span>Open Video URL</span>
                   <ExternalLink className="w-3.5 h-3.5" />
                 </a>
                 <button
                   onClick={handleCloseAudit}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 cursor-pointer"
+                  className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 cursor-pointer transition-colors"
                 >
                   ✕
                 </button>
@@ -545,15 +548,15 @@ export default function AdminSubmissionsReviewPage() {
             </div>
 
             {/* Video Link & Re-Scrape Bar */}
-            <div className="p-4 rounded-2xl bg-[#0e1322] border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div className="p-4 rounded-2xl bg-[#090d18] border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
               <div className="min-w-0 flex-1">
-                <div className="text-[11px] text-slate-400 font-mono">LIVE VIDEO LINK:</div>
+                <div className="text-[11px] text-slate-400 font-mono">AUDITED VIDEO LINK:</div>
                 <div className="text-slate-200 font-mono truncate">{auditSub.videoUrl}</div>
               </div>
               <button
                 onClick={() => triggerLiveScrape(auditSub.videoUrl, auditSub.id)}
                 disabled={auditScraping}
-                className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white font-bold flex items-center justify-center gap-1.5 shrink-0 cursor-pointer shadow-md shadow-purple-500/20"
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 disabled:opacity-50 text-white font-bold flex items-center justify-center gap-2 shrink-0 cursor-pointer shadow-lg shadow-purple-500/25"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${auditScraping ? 'animate-spin' : ''}`} />
                 <span>{auditScraping ? 'Scanning Live Link...' : 'Re-Run Live Audit'}</span>
@@ -561,7 +564,7 @@ export default function AdminSubmissionsReviewPage() {
             </div>
 
             {auditMsg && (
-              <div className="p-3 rounded-xl bg-purple-950/60 border border-purple-500/30 text-xs text-cyan-300 font-medium">
+              <div className="p-3.5 rounded-2xl bg-purple-950/60 border border-purple-500/30 text-xs text-cyan-300 font-medium">
                 {auditMsg}
               </div>
             )}
@@ -570,11 +573,11 @@ export default function AdminSubmissionsReviewPage() {
             <div className="space-y-4">
               <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
                 <Zap className="w-3.5 h-3.5 text-cyan-400" />
-                <span>REAL-TIME AUDITED METRICS</span>
+                <span>REAL-TIME AUDITED TELEMETRY</span>
               </h3>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="p-4 rounded-2xl bg-[#0e1322] border border-slate-800">
+                <div className="p-4 rounded-2xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/10">
                   <div className="text-[11px] text-slate-400 flex items-center gap-1.5 mb-1">
                     <Eye className="w-3.5 h-3.5 text-cyan-400" /> Views
                   </div>
@@ -583,7 +586,7 @@ export default function AdminSubmissionsReviewPage() {
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-[#0e1322] border border-slate-800">
+                <div className="p-4 rounded-2xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/10">
                   <div className="text-[11px] text-slate-400 flex items-center gap-1.5 mb-1">
                     <Heart className="w-3.5 h-3.5 text-rose-400" /> Likes
                   </div>
@@ -592,7 +595,7 @@ export default function AdminSubmissionsReviewPage() {
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-[#0e1322] border border-slate-800">
+                <div className="p-4 rounded-2xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/10">
                   <div className="text-[11px] text-slate-400 flex items-center gap-1.5 mb-1">
                     <MessageSquare className="w-3.5 h-3.5 text-purple-400" /> Comments
                   </div>
@@ -601,7 +604,7 @@ export default function AdminSubmissionsReviewPage() {
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-[#0e1322] border border-slate-800">
+                <div className="p-4 rounded-2xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/10">
                   <div className="text-[11px] text-slate-400 flex items-center gap-1.5 mb-1">
                     <Share2 className="w-3.5 h-3.5 text-emerald-400" /> Shares
                   </div>
@@ -615,7 +618,7 @@ export default function AdminSubmissionsReviewPage() {
             {/* Demographics & Fraud Score Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Audience Demographics */}
-              <div className="p-5 rounded-2xl bg-[#0e1322] border border-slate-800 space-y-3">
+              <div className="p-5 rounded-3xl bg-gradient-to-b from-white/[0.03] to-white/[0.01] border border-white/10 space-y-3">
                 <div className="flex justify-between items-center text-xs">
                   <span className="font-bold text-slate-300 flex items-center gap-1.5">
                     <Globe2 className="w-4 h-4 text-cyan-400" /> Audience Demographics
@@ -655,13 +658,13 @@ export default function AdminSubmissionsReviewPage() {
               </div>
 
               {/* Bot & Fraud Meter */}
-              <div className="p-5 rounded-2xl bg-[#0e1322] border border-slate-800 space-y-3 flex flex-col justify-between">
+              <div className="p-5 rounded-3xl bg-gradient-to-b from-white/[0.03] to-white/[0.01] border border-white/10 space-y-3 flex flex-col justify-between">
                 <div>
                   <div className="flex justify-between items-center text-xs mb-2">
                     <span className="font-bold text-slate-300 flex items-center gap-1.5">
                       <ShieldCheck className="w-4 h-4 text-emerald-400" /> Bot & Fraud Anomaly Meter
                     </span>
-                    <span className="font-mono text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">
+                    <span className="font-mono text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
                       {auditScrapedData?.demographics?.fraudScore || 5} / 100 Risk
                     </span>
                   </div>
@@ -672,7 +675,7 @@ export default function AdminSubmissionsReviewPage() {
                   </p>
                 </div>
 
-                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-2 text-xs text-emerald-300">
+                <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-2 text-xs text-emerald-300">
                   <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
                   <span>No bot click-farm activity detected. Certified safe for escrow payout.</span>
                 </div>
@@ -680,7 +683,7 @@ export default function AdminSubmissionsReviewPage() {
             </div>
 
             {/* Payout & Settlement Box */}
-            <div className="p-6 rounded-2xl bg-gradient-to-br from-[#12192c] to-[#0d1220] border border-purple-500/40 space-y-4">
+            <div className="p-6 rounded-3xl bg-gradient-to-br from-[#12192c] to-[#0d1220] border border-purple-500/40 space-y-4 shadow-xl">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h3 className="text-sm font-bold text-white flex items-center gap-2">
@@ -694,7 +697,7 @@ export default function AdminSubmissionsReviewPage() {
 
                 <div className="text-right">
                   <div className="text-xs text-slate-400">Estimated Clipper Payout</div>
-                  <div className="text-2xl font-extrabold text-emerald-400 font-mono">
+                  <div className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-300 font-mono">
                     ₹
                     {(
                       ((parseInt(auditVerifiedViews || '0', 10) / 1000) *
@@ -713,7 +716,7 @@ export default function AdminSubmissionsReviewPage() {
                     type="number"
                     value={auditVerifiedViews}
                     onChange={(e) => setAuditVerifiedViews(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-[#07090e] border border-slate-700 text-white font-mono text-sm focus:outline-none focus:border-cyan-400"
+                    className="w-full px-4 py-2.5 rounded-xl bg-black/40 border border-slate-700 text-white font-mono text-sm focus:outline-none focus:border-cyan-400"
                   />
                 </div>
 
@@ -721,7 +724,7 @@ export default function AdminSubmissionsReviewPage() {
                   <button
                     onClick={handleVerifyViewsAndCredit}
                     disabled={auditVerifying || !auditVerifiedViews}
-                    className="w-full py-3 rounded-xl font-bold text-white bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 disabled:opacity-50 transition-all shadow-lg shadow-emerald-500/20 text-xs flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full py-3 rounded-xl font-bold text-slate-950 bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 hover:from-emerald-300 hover:to-cyan-300 disabled:opacity-50 transition-all shadow-lg shadow-emerald-500/20 text-xs flex items-center justify-center gap-2 cursor-pointer font-black"
                   >
                     <CheckCheck className="w-4 h-4" />
                     <span>{auditVerifying ? 'Settling & Crediting Wallet...' : 'Verify Views & Credit Clipper Wallet'}</span>
@@ -734,7 +737,7 @@ export default function AdminSubmissionsReviewPage() {
             <div className="flex justify-end gap-3 pt-2 border-t border-white/10">
               <button
                 onClick={handleCloseAudit}
-                className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-white/10 hover:bg-white/20 transition-all cursor-pointer"
+                className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:opacity-90 transition-all cursor-pointer shadow-md"
               >
                 Done & Return to Clip
               </button>

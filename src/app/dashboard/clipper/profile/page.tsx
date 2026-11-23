@@ -150,16 +150,21 @@ export default function ClipperProfilePage() {
         </div>
       )}
 
-      {/* Top Section: Social Accounts / Add New Account matching Image 2 */}
-      <div className="rounded-3xl bg-[#0c1022] border border-white/[0.08] p-6 space-y-4 shadow-xl">
-        <div>
-          <h2 className="text-sm font-bold text-white font-display uppercase tracking-wider text-slate-400">
-            Social Accounts
-          </h2>
-          <p className="text-xs text-slate-400 mt-0.5">Add New Account</p>
+      {/* Top Section: Social Accounts / Add New Account */}
+      <div className="rounded-3xl bg-gradient-to-b from-[#0f1322]/90 via-[#0a0d18]/95 to-[#060810] border border-white/[0.08] p-6 space-y-4 shadow-xl relative overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h2 className="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-white to-cyan-300 font-display uppercase tracking-wider">
+              Connected Social Channels
+            </h2>
+            <p className="text-xs text-slate-400 mt-0.5">Link and verify accounts to receive automated view verification & CPM payouts.</p>
+          </div>
+          <span className="text-xs font-mono font-bold text-cyan-400 bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/30 self-start sm:self-auto">
+            {connectedAccounts.length} Verified Channels
+          </span>
         </div>
 
-        {/* 5 Social Platform Tiles matching Image 2 */}
+        {/* 5 Social Platform Tiles */}
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-2">
           {platforms.map((p) => {
             const IconComponent = p.icon;
@@ -168,25 +173,24 @@ export default function ClipperProfilePage() {
                 key={p.name}
                 type="button"
                 onClick={() => handleOpenVerifyModal(p.name)}
-                className={`p-4 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-cyan-400/50 ${p.bg} transition-all flex flex-col items-center justify-center gap-2.5 group cursor-pointer`}
+                className="p-4 rounded-2xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/10 hover:border-cyan-400/50 hover:from-purple-500/10 hover:to-cyan-500/10 transition-all flex flex-col items-center justify-center gap-2.5 group cursor-pointer shadow-lg hover:shadow-[0_0_20px_rgba(6,182,212,0.2)] hover:-translate-y-0.5"
               >
-                <div className={`p-2 rounded-xl bg-white/[0.04] ${p.color} group-hover:scale-110 transition-transform`}>
+                <div className={`p-2.5 rounded-xl bg-white/[0.05] ${p.color} group-hover:scale-110 transition-transform shadow-inner`}>
                   <IconComponent className="w-5 h-5" />
                 </div>
                 <span className="text-xs font-semibold text-slate-200 group-hover:text-white">{p.name}</span>
+                <span className="text-[10px] text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity font-mono">+ Link</span>
               </button>
             );
           })}
         </div>
       </div>
 
-      {/* Bottom Section: Connected Accounts matching Image 2 */}
-      <div className="rounded-3xl bg-[#0c1022] border border-white/[0.08] p-6 space-y-4 shadow-xl">
+      {/* Bottom Section: Connected Accounts */}
+      <div className="rounded-3xl bg-gradient-to-b from-[#0f1322]/90 via-[#0a0d18]/95 to-[#060810] border border-white/[0.08] p-6 space-y-4 shadow-xl">
         <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
-          <h2 className="text-base font-bold text-white font-display">Connected Accounts</h2>
-          <span className="text-xs font-mono text-cyan-400 font-bold">
-            {connectedAccounts.length} Verified Channels
-          </span>
+          <h2 className="text-base font-bold text-white font-display">Active Linked Creator Profiles</h2>
+          <span className="text-xs text-slate-400">All submissions under these channels are automatically tracked</span>
         </div>
 
         <div className="space-y-2.5">
@@ -203,15 +207,15 @@ export default function ClipperProfilePage() {
               return (
                 <div
                   key={acc.id}
-                  className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] hover:border-white/15 transition-all flex items-center justify-between gap-4"
+                  className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] hover:border-purple-500/30 transition-all flex items-center justify-between gap-4"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className={`p-2 rounded-xl bg-white/[0.04] ${iconColor} shrink-0`}>
+                    <div className={`p-2.5 rounded-xl bg-white/[0.04] ${iconColor} shrink-0`}>
                       <IconComp className="w-4 h-4" />
                     </div>
                     <div className="min-w-0">
                       <div className="text-xs font-bold text-white font-display">{acc.platform}</div>
-                      <div className="text-xs text-slate-400 font-mono truncate">{acc.handle}</div>
+                      <div className="text-xs text-cyan-300 font-mono truncate">{acc.handle}</div>
                     </div>
                   </div>
 
@@ -325,7 +329,7 @@ export default function ClipperProfilePage() {
                 <button
                   type="submit"
                   disabled={verifying}
-                  className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-[#00B887] hover:bg-[#009E74] transition-all shadow-md shadow-emerald-500/20 flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 transition-all shadow-lg shadow-purple-500/25 flex items-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   {verifying ? (
                     <>

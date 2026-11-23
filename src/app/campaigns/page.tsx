@@ -147,18 +147,22 @@ export default function MarketplacePage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {/* Private Campaign Card (First Slot) matching Image 1 */}
-          <div className="rounded-3xl bg-[#0f1429] border border-purple-500/20 p-6 flex flex-col items-center justify-center text-center relative overflow-hidden min-h-[340px] shadow-2xl group hover:border-purple-500/40 transition-all">
-            <div className="w-14 h-14 rounded-2xl bg-purple-950/60 border border-purple-600/40 flex items-center justify-center text-purple-400 mb-4 shadow-[0_0_20px_rgba(168,85,247,0.3)] group-hover:scale-105 transition-transform">
-              <Lock className="w-7 h-7" />
+          {/* Private Campaign Vault Card 1 */}
+          <div className="rounded-3xl bg-gradient-to-b from-[#110e26]/90 via-[#0a0818]/95 to-[#060410] border border-purple-500/30 p-6 flex flex-col items-center justify-center text-center relative overflow-hidden min-h-[380px] shadow-2xl group hover:border-purple-400/60 transition-all">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(168,85,247,0.15),transparent_70%)] pointer-events-none" />
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-600/20 to-indigo-600/10 border border-purple-500/40 flex items-center justify-center text-purple-300 mb-4 shadow-[0_0_25px_rgba(168,85,247,0.35)] group-hover:scale-110 transition-transform">
+              <Lock className="w-8 h-8 text-cyan-300" />
             </div>
-            <h3 className="text-base font-bold text-white font-display mb-1">Private Campaign</h3>
-            <p className="text-xs text-purple-200/60 max-w-xs mb-6 leading-relaxed">
-              Enter the access code or join Clip Matrix Exclusive for confidential high-payout briefs.
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-[10px] font-mono text-purple-300 mb-2 uppercase tracking-wider">
+              <span>VIP Tier Escrow</span>
+            </div>
+            <h3 className="text-lg font-extrabold text-white font-display mb-1">Confidential Brand Vault</h3>
+            <p className="text-xs text-purple-200/70 max-w-xs mb-6 leading-relaxed">
+              High-CPM invite-only brand brief. Enter access key or unlock via Clip Matrix Creator Tier.
             </p>
             <button
               onClick={() => setAccessCodeModal(true)}
-              className="px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-fuchsia-600 hover:opacity-90 transition-all shadow-lg shadow-purple-600/30 cursor-pointer"
+              className="px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:opacity-95 transition-all shadow-lg shadow-purple-600/30 cursor-pointer"
             >
               Enter Access Code
             </button>
@@ -176,96 +180,99 @@ export default function MarketplacePage() {
             const viewsPercent = Math.min(100, Math.round((verifiedViews / targetViews) * 100));
 
             const platformsList = (camp.allowedPlatforms || 'INSTAGRAM,YOUTUBE,TIKTOK').toUpperCase();
-            const budgetBarColor =
-              budgetPercent >= 85 ? 'bg-rose-500' : budgetPercent >= 50 ? 'bg-amber-400' : 'bg-emerald-400';
 
             return (
               <div
                 key={camp.id}
-                className="rounded-3xl bg-[#0c1022] border border-white/[0.08] hover:border-purple-500/40 p-5 flex flex-col justify-between transition-all group shadow-xl hover:shadow-2xl hover:shadow-purple-950/40"
+                className="rounded-3xl bg-gradient-to-b from-[#0f1322]/90 via-[#090d18]/95 to-[#060810] border border-white/[0.08] hover:border-purple-500/50 p-6 flex flex-col justify-between transition-all duration-300 group shadow-xl hover:shadow-[0_20px_45px_-15px_rgba(124,58,237,0.3)] hover:-translate-y-1 relative overflow-hidden"
               >
+                {/* Subtle cyber top accent line */}
+                <div className="absolute top-0 left-6 right-6 h-[1px] bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
                 {/* Header: Avatar + Title + Active Badges */}
                 <div className="space-y-4">
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-3.5">
                     <img
                       src={
                         camp.thumbnailUrl ||
                         'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'
                       }
                       alt={camp.title}
-                      className="w-11 h-11 rounded-full object-cover border border-white/10 shrink-0"
+                      className="w-12 h-12 rounded-2xl object-cover ring-2 ring-purple-500/30 group-hover:ring-cyan-400/60 transition-all shrink-0 shadow-[0_0_15px_rgba(168,85,247,0.25)]"
                     />
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors font-display truncate">
+                      <h3 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors font-display truncate">
                         {camp.title}
                       </h3>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono font-bold">
-                          {camp.status || 'ACTIVE'}
+                      <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono font-bold flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                          <span>{camp.status || 'ACTIVE'}</span>
                         </span>
-                        <span className="px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 text-[10px] font-mono flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-                          <span>Avg review: 8.8h</span>
+                        <span className="px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20 text-[10px] font-mono">
+                          Review: 8.8h
                         </span>
                       </div>
                     </div>
                   </div>
 
                   {/* CPM Rate & Platform Icons Bar */}
-                  <div className="p-3 rounded-2xl bg-[#121730] border border-white/[0.06] flex items-center justify-between">
-                    <div className="text-base font-extrabold text-white font-display flex items-baseline gap-1">
-                      <span>₹{camp.cpmRate || 120}</span>
-                      <span className="text-xs text-purple-300/80 font-mono font-normal">CPM</span>
+                  <div className="p-3.5 rounded-2xl bg-white/[0.03] backdrop-blur-md border border-white/[0.06] flex items-center justify-between">
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-300 font-display">
+                        ₹{camp.cpmRate || 120}
+                      </span>
+                      <span className="text-[11px] text-purple-300 font-mono">/ 1K CPM</span>
                     </div>
 
-                    <div className="flex items-center gap-2 text-slate-400">
+                    <div className="flex items-center gap-1.5 text-slate-400">
                       {platformsList.includes('INSTAGRAM') && (
-                        <div className="p-1.5 rounded-lg bg-pink-500/10 text-pink-400" title="Instagram Reels">
+                        <div className="p-1.5 rounded-xl bg-pink-500/10 text-pink-400 border border-pink-500/20" title="Instagram Reels">
                           <InstagramIcon className="w-3.5 h-3.5" />
                         </div>
                       )}
                       {platformsList.includes('TIKTOK') && (
-                        <div className="p-1.5 rounded-lg bg-cyan-500/10 text-cyan-300" title="TikTok">
+                        <div className="p-1.5 rounded-xl bg-cyan-500/10 text-cyan-300 border border-cyan-500/20" title="TikTok">
                           <TikTokIcon className="w-3.5 h-3.5" />
                         </div>
                       )}
                       {platformsList.includes('YOUTUBE') && (
-                        <div className="p-1.5 rounded-lg bg-red-500/10 text-red-400" title="YouTube Shorts">
+                        <div className="p-1.5 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20" title="YouTube Shorts">
                           <YouTubeIcon className="w-3.5 h-3.5" />
                         </div>
                       )}
                     </div>
                   </div>
 
-                  {/* Dual Progress Bars matching Image 1 */}
+                  {/* Dual Telemetry Progress Meters */}
                   <div className="space-y-3.5 pt-1">
-                    {/* Budget Progress Bar */}
+                    {/* Budget Progress Meter */}
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between text-[11px] font-mono">
-                        <span className="text-slate-400 font-semibold">
-                          ₹{(usedBudget / 1000).toFixed(1)}K OF ₹{(totalBudget / 1000).toFixed(1)}K USED
+                        <span className="text-slate-400">
+                          BUDGET: <strong className="text-white">₹{(usedBudget / 1000).toFixed(1)}K</strong> / ₹{(totalBudget / 1000).toFixed(1)}K
                         </span>
-                        <span className="text-slate-300 font-bold">{budgetPercent}%</span>
+                        <span className="text-amber-400 font-bold">{budgetPercent}%</span>
                       </div>
-                      <div className="h-2 w-full rounded-full bg-white/[0.06] overflow-hidden">
+                      <div className="h-2 w-full rounded-full bg-white/[0.04] p-0.5 border border-white/5 overflow-hidden">
                         <div
-                          className={`h-full rounded-full transition-all duration-500 ${budgetBarColor}`}
+                          className="h-full rounded-full bg-gradient-to-r from-amber-500 via-orange-400 to-emerald-400 transition-all duration-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]"
                           style={{ width: `${budgetPercent}%` }}
                         />
                       </div>
                     </div>
 
-                    {/* Views Progress Bar */}
+                    {/* Views Progress Meter */}
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between text-[11px] font-mono">
-                        <span className="text-slate-400 font-semibold">
-                          {(verifiedViews / 1000000).toFixed(1)}M / {(targetViews / 1000000).toFixed(1)}M VIEWS
+                        <span className="text-slate-400">
+                          VIEWS: <strong className="text-white">{(verifiedViews / 1000000).toFixed(1)}M</strong> / {(targetViews / 1000000).toFixed(1)}M
                         </span>
-                        <span className="text-slate-300 font-bold">{viewsPercent}%</span>
+                        <span className="text-cyan-400 font-bold">{viewsPercent}%</span>
                       </div>
-                      <div className="h-2 w-full rounded-full bg-white/[0.06] overflow-hidden">
+                      <div className="h-2 w-full rounded-full bg-white/[0.04] p-0.5 border border-white/5 overflow-hidden">
                         <div
-                          className="h-full rounded-full bg-gradient-to-r from-rose-500 to-red-500 transition-all duration-500"
+                          className="h-full rounded-full bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-400 transition-all duration-500 shadow-[0_0_8px_rgba(6,182,212,0.4)]"
                           style={{ width: `${viewsPercent}%` }}
                         />
                       </div>
@@ -273,14 +280,14 @@ export default function MarketplacePage() {
                   </div>
                 </div>
 
-                {/* Bottom Action Buttons matching Image 1 */}
-                <div className="pt-5 flex items-center gap-2">
+                {/* Bottom Action Row */}
+                <div className="pt-6 flex items-center gap-2.5">
                   <a
                     href="https://discord.gg/clipmatrix"
                     target="_blank"
                     rel="noreferrer"
-                    className="px-3.5 py-2.5 rounded-xl bg-[#1b1735] hover:bg-[#252046] border border-purple-500/30 text-xs font-semibold text-purple-200 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
-                    title="Community Discord channel"
+                    className="px-4 py-2.5 rounded-xl bg-white/[0.03] hover:bg-[#5865F2]/20 border border-white/10 hover:border-[#5865F2]/50 text-xs font-semibold text-slate-300 hover:text-white transition-all flex items-center gap-2 cursor-pointer shrink-0"
+                    title="Community Discord Channel"
                   >
                     <DiscordIcon className="w-3.5 h-3.5 text-[#5865F2]" />
                     <span className="hidden sm:inline">Discord</span>
@@ -288,7 +295,7 @@ export default function MarketplacePage() {
 
                   <Link
                     href={`/campaigns/${camp.id}`}
-                    className="flex-1 py-2.5 rounded-xl text-center text-xs font-bold text-white bg-[#00B887] hover:bg-[#009E74] transition-all shadow-md shadow-emerald-500/25 flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="flex-1 py-2.5 rounded-xl text-center text-xs font-bold text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 transition-all shadow-md shadow-purple-500/25 group-hover:shadow-[0_0_20px_rgba(6,182,212,0.35)] flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <span>+ Join Campaign</span>
                   </Link>

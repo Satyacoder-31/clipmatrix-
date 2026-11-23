@@ -16,8 +16,8 @@ import {
   HelpCircle,
   Trophy,
   BarChart3,
-  ListFilter,
-  Sparkles,
+  ShieldCheck,
+  Zap,
 } from 'lucide-react';
 
 // Platform SVG Icons
@@ -112,7 +112,7 @@ export default function SubmitClipPage() {
     id: selectedCampaignId || 'camp-default',
     title: 'Brendan Backstrom Clipping #10',
     description: 'Brendan Backstrom Clipping #10',
-    cpmRate: 120, // ₹120 or $1
+    cpmRate: 120,
     totalBudget: 10000,
     remainingBudget: 2915,
     targetViews: 10000000,
@@ -175,9 +175,9 @@ export default function SubmitClipPage() {
         {/* Back Button */}
         <Link
           href="/dashboard/clipper/campaigns"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#00B887] hover:bg-[#009E74] transition-all shadow-md shadow-emerald-500/20 mb-6 cursor-pointer"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 transition-all mb-6 cursor-pointer group"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4 text-cyan-400 group-hover:-translate-x-0.5 transition-transform" />
           <span>Back to Campaigns</span>
         </Link>
 
@@ -192,7 +192,7 @@ export default function SubmitClipPage() {
                 <select
                   value={selectedCampaignId}
                   onChange={(e) => setSelectedCampaignId(e.target.value)}
-                  className="bg-[#121722] border border-slate-700/60 text-xs text-slate-300 rounded-lg px-2.5 py-1 outline-none focus:border-emerald-500"
+                  className="bg-[#0f1322] border border-slate-700/60 text-xs text-slate-300 rounded-xl px-3 py-1.5 outline-none focus:border-cyan-400"
                 >
                   {campaigns.map((c) => (
                     <option key={c.id} value={c.id}>
@@ -206,19 +206,19 @@ export default function SubmitClipPage() {
               {currentCampaign.description || currentCampaign.title}
             </p>
 
-            {/* Meta Row: TBD - Rate - Submissions */}
-            <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400 mt-3 font-medium">
-              <span className="flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                <span>TBD</span>
+            {/* Meta Row */}
+            <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400 mt-3 font-medium">
+              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.03] border border-white/10">
+                <Calendar className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Active Campaign</span>
               </span>
-              <span className="flex items-center gap-1.5">
-                <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono font-bold">
+                <DollarSign className="w-3.5 h-3.5" />
                 <span>₹{currentCampaign.cpmRate || 120} CPM</span>
               </span>
-              <span className="flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5 text-slate-400" />
-                <span>{mySubmissions.length} total submissions</span>
+              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.03] border border-white/10 font-mono">
+                <Users className="w-3.5 h-3.5 text-purple-400" />
+                <span>{mySubmissions.length} My Clips</span>
               </span>
             </div>
           </div>
@@ -226,8 +226,9 @@ export default function SubmitClipPage() {
 
         {/* Submissions Pill Badge */}
         <div className="mt-4">
-          <span className="inline-block px-3.5 py-1.5 rounded-lg text-xs font-bold text-white bg-[#00B887]">
-            Submissions
+          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-mono font-bold text-cyan-300 bg-cyan-500/10 border border-cyan-500/30">
+            <Zap className="w-3.5 h-3.5" />
+            <span>INSTANT CLIP DISPATCH</span>
           </span>
         </div>
       </div>
@@ -237,28 +238,30 @@ export default function SubmitClipPage() {
         {/* Left Column (8 cols): Single URL Submission Card & Tabs */}
         <div className="lg:col-span-8 space-y-8">
           {/* Submit Your Content Card */}
-          <div className="rounded-2xl bg-[#121722] border border-slate-800/80 p-8 sm:p-10 text-center shadow-xl">
+          <div className="rounded-3xl bg-gradient-to-b from-[#0f1322]/90 via-[#0a0d18]/95 to-[#060810] border border-purple-500/30 p-8 sm:p-10 text-center shadow-2xl relative overflow-hidden">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(168,85,247,0.1),transparent_70%)] pointer-events-none" />
+
             <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 font-display">
               Submit Your Content
             </h2>
             <p className="text-xs sm:text-sm text-slate-400 mb-6">
-              Paste your content URL below. We'll automatically detect the platform.
+              Paste your content URL below. We'll automatically detect the platform and verify views.
             </p>
 
             {/* Single Input Form - No other video information requested */}
             <form onSubmit={handleSubmit} className="max-w-2xl mx-auto">
-              <div className="flex flex-col sm:flex-row items-center gap-2">
+              <div className="flex flex-col sm:flex-row items-center gap-2.5">
                 <div className="relative flex-1 w-full">
                   <input
                     type="url"
                     required
                     value={videoUrl}
                     onChange={(e) => setVideoUrl(e.target.value)}
-                    placeholder="https://www.instagram.com/p/..."
-                    className="w-full px-4 py-3 rounded-xl bg-[#090d14] border border-slate-700/70 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-[#00B887] transition-all"
+                    placeholder="https://www.instagram.com/reel/... or https://youtube.com/shorts/..."
+                    className="w-full px-5 py-3.5 rounded-2xl bg-black/40 border border-white/10 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 transition-all shadow-inner"
                   />
                   {detected && (
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">
+                    <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-cyan-300 bg-cyan-500/15 px-2.5 py-1 rounded-lg border border-cyan-500/30 font-mono">
                       {detected} Detected
                     </span>
                   )}
@@ -267,16 +270,16 @@ export default function SubmitClipPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-white bg-[#00B887] hover:bg-[#009E74] transition-all shadow-md shadow-emerald-500/20 flex items-center justify-center gap-2 text-sm disabled:opacity-50 shrink-0 cursor-pointer"
+                  className="w-full sm:w-auto px-7 py-3.5 rounded-2xl font-bold text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 transition-all shadow-lg shadow-purple-500/25 flex items-center justify-center gap-2 text-sm disabled:opacity-50 shrink-0 cursor-pointer"
                 >
                   <Send className="w-4 h-4" />
-                  <span>{submitting ? 'Submitting...' : 'Submit'}</span>
+                  <span>{submitting ? 'Submitting...' : 'Submit Clip'}</span>
                 </button>
               </div>
 
               {feedback && (
                 <div
-                  className={`mt-4 p-3 rounded-xl text-xs font-medium flex items-center justify-center gap-2 ${
+                  className={`mt-4 p-3 rounded-2xl text-xs font-medium flex items-center justify-center gap-2 ${
                     feedback.type === 'success'
                       ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
                       : 'bg-rose-500/10 border border-rose-500/30 text-rose-400'
@@ -304,7 +307,7 @@ export default function SubmitClipPage() {
               >
                 <span>My Submissions</span>
                 {activeTab === 'submissions' && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00B887]" />
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-500 to-cyan-400" />
                 )}
               </button>
 
@@ -318,7 +321,7 @@ export default function SubmitClipPage() {
               >
                 <span>My Stats</span>
                 {activeTab === 'stats' && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00B887]" />
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-500 to-cyan-400" />
                 )}
               </button>
 
@@ -332,7 +335,7 @@ export default function SubmitClipPage() {
               >
                 <span>Leaderboard</span>
                 {activeTab === 'leaderboard' && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00B887]" />
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-500 to-cyan-400" />
                 )}
               </button>
             </div>
@@ -341,9 +344,9 @@ export default function SubmitClipPage() {
             {activeTab === 'submissions' && (
               <div>
                 {mySubmissions.length === 0 ? (
-                  <div className="py-16 text-center rounded-2xl bg-[#0d111a] border border-slate-800/60 flex flex-col items-center justify-center">
-                    <div className="w-14 h-14 rounded-2xl bg-slate-800/60 flex items-center justify-center text-slate-500 mb-3">
-                      <Video className="w-7 h-7" />
+                  <div className="py-16 text-center rounded-3xl bg-[#090d18] border border-white/[0.06] flex flex-col items-center justify-center">
+                    <div className="w-14 h-14 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 mb-3">
+                      <Video className="w-7 h-7 text-purple-400" />
                     </div>
                     <p className="text-xs text-slate-400">
                       No submissions yet. Paste your content link above to submit your first clip.
@@ -354,15 +357,15 @@ export default function SubmitClipPage() {
                     {mySubmissions.map((sub) => (
                       <div
                         key={sub.id}
-                        className="p-4 rounded-xl bg-[#121722] border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-slate-700 transition-all"
+                        className="p-4 rounded-2xl bg-gradient-to-b from-[#0f1322]/80 to-[#070912] border border-white/[0.08] hover:border-purple-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all"
                       >
                         <div className="space-y-1">
                           <div className="flex items-center gap-2 text-xs">
-                            <span className="font-mono font-bold text-emerald-400">
+                            <span className="font-mono font-bold text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/30">
                               {sub.submissionNumber}
                             </span>
                             <span className="text-slate-500">•</span>
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-white/5 text-slate-300">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-white/5 text-purple-300">
                               {sub.platform}
                             </span>
                             <span className="text-slate-500">•</span>
@@ -377,7 +380,7 @@ export default function SubmitClipPage() {
 
                         <div className="flex items-center gap-3">
                           <span
-                            className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${
+                            className={`px-3 py-1 rounded-full text-[11px] font-mono font-bold ${
                               sub.status === 'VIEWS_VERIFIED'
                                 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
                                 : sub.status === 'APPROVED'
@@ -400,7 +403,7 @@ export default function SubmitClipPage() {
                             href={sub.videoUrl}
                             target="_blank"
                             rel="noreferrer"
-                            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
+                            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
                           >
                             <ExternalLink className="w-3.5 h-3.5" />
                           </a>
@@ -415,21 +418,21 @@ export default function SubmitClipPage() {
             {/* Tab: My Stats */}
             {activeTab === 'stats' && (
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="p-5 rounded-2xl bg-[#121722] border border-slate-800">
+                <div className="p-5 rounded-3xl bg-gradient-to-b from-[#0f1322] to-[#070912] border border-white/[0.08]">
                   <div className="text-xs text-slate-400 mb-1">Total Views Generated</div>
                   <div className="text-2xl font-bold text-white font-display">
                     {mySubmissions.reduce((acc, s) => acc + (s.verifiedViews || 0), 0).toLocaleString()}
                   </div>
                 </div>
-                <div className="p-5 rounded-2xl bg-[#121722] border border-slate-800">
+                <div className="p-5 rounded-3xl bg-gradient-to-b from-[#0f1322] to-[#070912] border border-white/[0.08]">
                   <div className="text-xs text-slate-400 mb-1">Total Earned</div>
                   <div className="text-2xl font-bold text-emerald-400 font-display">
                     ₹{mySubmissions.reduce((acc, s) => acc + (s.rewardEarned || 0), 0).toLocaleString()}
                   </div>
                 </div>
-                <div className="p-5 rounded-2xl bg-[#121722] border border-slate-800">
+                <div className="p-5 rounded-3xl bg-gradient-to-b from-[#0f1322] to-[#070912] border border-white/[0.08]">
                   <div className="text-xs text-slate-400 mb-1">Approved Clips</div>
-                  <div className="text-2xl font-bold text-white font-display">
+                  <div className="text-2xl font-bold text-cyan-300 font-display">
                     {mySubmissions.filter((s) => s.status === 'APPROVED' || s.status === 'VIEWS_VERIFIED').length}
                   </div>
                 </div>
@@ -438,7 +441,7 @@ export default function SubmitClipPage() {
 
             {/* Tab: Leaderboard */}
             {activeTab === 'leaderboard' && (
-              <div className="rounded-2xl bg-[#121722] border border-slate-800 p-4 space-y-2">
+              <div className="rounded-3xl bg-gradient-to-b from-[#0f1322] to-[#070912] border border-white/[0.08] p-5 space-y-2">
                 {[
                   { rank: 1, name: 'Aarav Sharma', views: '4.2M views', earnings: '₹5,040' },
                   { rank: 2, name: 'Ananya Joshi', views: '2.8M views', earnings: '₹3,360' },
@@ -446,10 +449,10 @@ export default function SubmitClipPage() {
                 ].map((clipper) => (
                   <div
                     key={clipper.rank}
-                    className="flex items-center justify-between p-3 rounded-xl bg-[#090d14] text-xs"
+                    className="flex items-center justify-between p-3.5 rounded-2xl bg-black/30 border border-white/5 text-xs"
                   >
                     <div className="flex items-center gap-3">
-                      <span className="font-bold text-emerald-400 w-5">#{clipper.rank}</span>
+                      <span className="font-bold text-cyan-400 w-5">#{clipper.rank}</span>
                       <span className="font-semibold text-white">{clipper.name}</span>
                     </div>
                     <div className="flex items-center gap-4">
@@ -466,45 +469,49 @@ export default function SubmitClipPage() {
         {/* Right Sidebar (4 cols): CAMPAIGN DETAILS & SUPPORTED PLATFORMS */}
         <div className="lg:col-span-4 space-y-6">
           {/* Card: CAMPAIGN DETAILS */}
-          <div className="rounded-2xl bg-[#121722] border border-slate-800/80 p-6 space-y-4">
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-              CAMPAIGN DETAILS
+          <div className="rounded-3xl bg-gradient-to-b from-[#0f1322]/90 via-[#0a0d18]/95 to-[#060810] border border-white/[0.08] p-6 space-y-4 shadow-xl">
+            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+              <span>CAMPAIGN TELEMETRY</span>
+              <span className="text-[10px] text-cyan-400 font-mono">100% ESCROW</span>
             </h3>
 
-            <div className="space-y-3 text-xs">
+            <div className="space-y-3.5 text-xs">
               <div className="flex justify-between items-center">
-                <span className="text-slate-400">Status</span>
-                <span className="font-semibold text-[#00B887]">Active</span>
+                <span className="text-slate-400">Pool Status</span>
+                <span className="font-semibold text-emerald-400 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>Active Pool</span>
+                </span>
               </div>
 
               <div className="flex justify-between items-center">
-                <span className="text-slate-400">CPM Rate</span>
-                <span className="font-semibold text-white">₹{currentCampaign.cpmRate || 120}</span>
+                <span className="text-slate-400">Base CPM Rate</span>
+                <span className="font-bold text-white font-mono">₹{currentCampaign.cpmRate || 120}</span>
               </div>
 
               <div className="flex justify-between items-center">
-                <span className="text-slate-400">Total Budget</span>
-                <span className="font-semibold text-white">
+                <span className="text-slate-400">Total Escrow Budget</span>
+                <span className="font-bold text-white font-mono">
                   ₹{totalBudget.toLocaleString()}
                 </span>
               </div>
 
               <div className="flex justify-between items-center">
-                <span className="text-slate-400">Avg Review Time</span>
-                <span className="font-semibold text-[#00B887]">{currentCampaign.avgReview || '8.8h'}</span>
+                <span className="text-slate-400">Avg Audit Turnaround</span>
+                <span className="font-semibold text-purple-300 font-mono">{currentCampaign.avgReview || '8.8h'}</span>
               </div>
 
               {/* Progress 1: Budget Used */}
-              <div className="pt-1 space-y-1.5">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-slate-400">Budget Used</span>
-                  <span className="font-bold text-[#00B887]">
+              <div className="pt-2 space-y-1.5">
+                <div className="flex justify-between items-center text-xs font-mono">
+                  <span className="text-slate-400">Budget Spent</span>
+                  <span className="font-bold text-amber-400">
                     ₹{usedBudget.toLocaleString()} ({budgetUsedPercent}%)
                   </span>
                 </div>
-                <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                <div className="w-full h-2 bg-white/[0.04] p-0.5 border border-white/5 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-[#00B887] rounded-full transition-all duration-500"
+                    className="h-full bg-gradient-to-r from-amber-500 via-orange-400 to-emerald-400 rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]"
                     style={{ width: `${budgetUsedPercent}%` }}
                   />
                 </div>
@@ -512,23 +519,23 @@ export default function SubmitClipPage() {
 
               {/* Progress 2: View Progress */}
               <div className="pt-1 space-y-1.5">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-slate-400">View Progress</span>
-                  <span className="font-bold text-[#38bdf8]">
+                <div className="flex justify-between items-center text-xs font-mono">
+                  <span className="text-slate-400">Views Delivered</span>
+                  <span className="font-bold text-cyan-400">
                     {verifiedViews.toLocaleString()} / {targetViews.toLocaleString()} ({viewProgressPercent}%)
                   </span>
                 </div>
-                <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                <div className="w-full h-2 bg-white/[0.04] p-0.5 border border-white/5 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-[#38bdf8] rounded-full transition-all duration-500"
+                    className="h-full bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-400 rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(6,182,212,0.4)]"
                     style={{ width: `${viewProgressPercent}%` }}
                   />
                 </div>
               </div>
 
-              <div className="flex justify-between items-center pt-2 border-t border-slate-800">
+              <div className="flex justify-between items-center pt-2 border-t border-white/[0.06]">
                 <span className="text-slate-400">Min. Views for Payout</span>
-                <span className="font-semibold text-white">
+                <span className="font-semibold text-white font-mono">
                   {currentCampaign.minViewsForPayout || '100,000 views'}
                 </span>
               </div>
@@ -536,25 +543,25 @@ export default function SubmitClipPage() {
           </div>
 
           {/* Card: SUPPORTED PLATFORMS */}
-          <div className="rounded-2xl bg-[#121722] border border-slate-800/80 p-6 space-y-4">
+          <div className="rounded-3xl bg-gradient-to-b from-[#0f1322]/90 via-[#0a0d18]/95 to-[#060810] border border-white/[0.08] p-6 space-y-4 shadow-xl">
             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-              SUPPORTED PLATFORMS
+              ELIGIBLE CHANNELS
             </h3>
 
             <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-[#090d14] border border-slate-800 text-slate-300">
+              <div className="flex items-center gap-2 p-3 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-pink-500/30 text-slate-300 transition-colors">
                 <InstagramIcon className="w-4 h-4 text-pink-500" />
                 <span>Instagram</span>
               </div>
-              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-[#090d14] border border-slate-800 text-slate-300">
+              <div className="flex items-center gap-2 p-3 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-cyan-400/30 text-slate-300 transition-colors">
                 <TikTokIcon className="w-4 h-4 text-cyan-400" />
                 <span>TikTok</span>
               </div>
-              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-[#090d14] border border-slate-800 text-slate-300">
+              <div className="flex items-center gap-2 p-3 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-red-500/30 text-slate-300 transition-colors">
                 <YouTubeIcon className="w-4 h-4 text-red-500" />
                 <span>YouTube</span>
               </div>
-              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-[#090d14] border border-slate-800 text-slate-300">
+              <div className="flex items-center gap-2 p-3 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-blue-500/30 text-slate-300 transition-colors">
                 <FacebookIcon className="w-4 h-4 text-blue-500" />
                 <span>Facebook</span>
               </div>
@@ -567,16 +574,16 @@ export default function SubmitClipPage() {
       <div className="fixed bottom-6 right-6 z-40">
         <button
           onClick={() => setHelpOpen(!helpOpen)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-full font-bold text-xs text-white bg-[#00B887] hover:bg-[#009E74] transition-all shadow-xl shadow-emerald-500/25 cursor-pointer"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-full font-bold text-xs text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 transition-all shadow-xl shadow-purple-500/25 cursor-pointer"
         >
           <MessageCircle className="w-4 h-4" />
           <span>Need help?</span>
         </button>
 
         {helpOpen && (
-          <div className="absolute bottom-12 right-0 w-80 p-4 rounded-2xl bg-[#121722] border border-slate-700 shadow-2xl text-xs space-y-3">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-2">
-              <span className="font-bold text-white">Clip Matrix Clipper Support</span>
+          <div className="absolute bottom-12 right-0 w-80 p-5 rounded-3xl bg-[#0e1322] border border-purple-500/40 shadow-2xl text-xs space-y-3">
+            <div className="flex justify-between items-center border-b border-white/10 pb-2">
+              <span className="font-bold text-white">Clip Matrix Creator Support</span>
               <button
                 onClick={() => setHelpOpen(false)}
                 className="text-slate-400 hover:text-white"
@@ -592,7 +599,7 @@ export default function SubmitClipPage() {
                 href="https://discord.gg/clipmatrix"
                 target="_blank"
                 rel="noreferrer"
-                className="w-full py-2 rounded-xl bg-[#5865F2] hover:bg-[#4752C4] text-white font-bold text-center block"
+                className="w-full py-2.5 rounded-xl bg-[#5865F2] hover:bg-[#4752C4] text-white font-bold text-center block"
               >
                 Open Discord Support
               </a>
