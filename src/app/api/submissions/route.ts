@@ -231,11 +231,18 @@ export async function POST(request: Request) {
 
     // Verify clipper exists in DB to prevent foreign key issues
     let clipperId = user.id;
-    const dbClipper = await prisma.user.findUnique({ where: { id: clipperId } });
-    if (!dbClipper) {
-      const fallbackClipper = await prisma.user.findFirst({ where: { role: 'CLIPPER' } });
-      if (fallbackClipper) {
-        clipperId = fallbackClipper.id;
+    if (user.role === 'ADMIN') {
+      const demoClipper = await prisma.user.findFirst({ where: { email: 'clipper@clipmatrix.com' } });
+      if (demoClipper) {
+        clipperId = demoClipper.id;
+      }
+    } else {
+      const dbClipper = await prisma.user.findUnique({ where: { id: clipperId } });
+      if (!dbClipper) {
+        const fallbackClipper = await prisma.user.findFirst({ where: { role: 'CLIPPER' } });
+        if (fallbackClipper) {
+          clipperId = fallbackClipper.id;
+        }
       }
     }
 

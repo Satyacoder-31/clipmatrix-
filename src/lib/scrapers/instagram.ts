@@ -203,9 +203,31 @@ export async function scrapeInstagramReel(url: string): Promise<ScrapedVideoStat
       isModeledViews = true;
     }
 
-    // Check video title
+    // Check video title and author handle
     const ogTitleMatch = html.match(/<meta\s+property="og:title"\s+content="([^"]+)"/i);
-    const title = ogTitleMatch ? ogTitleMatch[1] : `Instagram Reel (${shortcode})`;
+    let title = ogTitleMatch ? ogTitleMatch[1] : `Instagram Reel (${shortcode})`;
+
+    // Dynamically extract real author handle and name from Instagram meta tags
+    let authorHandle = '@creator';
+    let authorName = 'Instagram Creator';
+
+    const twitterTitleMatch = html.match(/<meta\s+name="twitter:title"\s+content="([^"]+)"/i);
+    if (twitterTitleMatch) {
+      const handleInTwitter = twitterTitleMatch[1].match(/\((@[a-zA-Z0-9._]+)\)/);
+      if (handleInTwitter) authorHandle = handleInTwitter[1];
+      const nameInTwitter = twitterTitleMatch[1].split('(')[0]?.trim();
+      if (nameInTwitter) authorName = nameInTwitter;
+    }
+
+    if (authorHandle === '@creator') {
+      const ogUrlMatch = html.match(/https?:\/\/(?:www\.)?instagram\.com\/([a-zA-Z0-9._]+)\/reel\//i);
+      if (ogUrlMatch && ogUrlMatch[1] && !['reel', 'p', 'explore'].includes(ogUrlMatch[1])) {
+        authorHandle = `@${ogUrlMatch[1]}`;
+      } else if (ogDescMatch) {
+        const descAuthor = ogDescMatch[1].match(/-\s*([a-zA-Z0-9._]+)\s+on\s+/i);
+        if (descAuthor) authorHandle = `@${descAuthor[1].trim()}`;
+      }
+    }
 
     const demographics = calculateInstagramDemographics(viewCount, likeCount, commentCount, title);
     if (isModeledViews) {
@@ -217,8 +239,8 @@ export async function scrapeInstagramReel(url: string): Promise<ScrapedVideoStat
       videoId: shortcode,
       originalUrl: url,
       title,
-      authorHandle: '@reels_creator',
-      authorName: 'Instagram Creator',
+      authorHandle,
+      authorName,
       thumbnailUrl: '',
       publishedAt: new Date().toISOString(),
       viewCount,
@@ -236,7 +258,7 @@ export async function scrapeInstagramReel(url: string): Promise<ScrapedVideoStat
       videoId: shortcode,
       originalUrl: url,
       title: `Instagram Reel (${shortcode})`,
-      authorHandle: '@reels_creator',
+      authorHandle: '@creator',
       authorName: 'Instagram Creator',
       thumbnailUrl: '',
       publishedAt: new Date().toISOString(),
