@@ -19,9 +19,11 @@ export async function GET(request: Request) {
   }
 
   try {
-    const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || 'clipmatrix-production.up.railway.app';
-    const protocol = request.headers.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https');
-    const redirectUri = `${protocol}://${host}/api/auth/discord/callback`;
+    const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || '';
+    const isLocal = host.includes('localhost') || host.includes('127.0.0.1');
+    const redirectUri = isLocal
+      ? `http://${host || 'localhost:3000'}/api/auth/discord/callback`
+      : 'https://clipmatrix-production.up.railway.app/api/auth/discord/callback';
 
     // 1. Exchange authorization code for access token with Discord
     const tokenResponse = await fetch('https://discord.com/api/oauth2/token', {

@@ -30,9 +30,11 @@ export async function GET(request: Request) {
   const clientId = process.env.DISCORD_CLIENT_ID;
 
   if (clientId && clientId.trim() !== '') {
-    const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || 'clipmatrix-production.up.railway.app';
-    const protocol = request.headers.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https');
-    const redirectUri = `${protocol}://${host}/api/auth/discord/callback`;
+    const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || '';
+    const isLocal = host.includes('localhost') || host.includes('127.0.0.1');
+    const redirectUri = isLocal
+      ? `http://${host || 'localhost:3000'}/api/auth/discord/callback`
+      : 'https://clipmatrix-production.up.railway.app/api/auth/discord/callback';
 
     const discordAuthUrl = `https://discord.com/oauth2/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=identify%20email%20guilds.join`;
     return NextResponse.redirect(discordAuthUrl);
