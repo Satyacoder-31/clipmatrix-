@@ -30,7 +30,7 @@ export async function GET(request: Request) {
   const clientId = process.env.DISCORD_CLIENT_ID;
 
   if (clientId && clientId.trim() !== '') {
-    const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || 'clip-matrix.vercel.app';
+    const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || 'clipmatrix-production.up.railway.app';
     const protocol = request.headers.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https');
     const redirectUri = `${protocol}://${host}/api/auth/discord/callback`;
 
@@ -67,20 +67,94 @@ export async function POST(request: Request) {
     }
 
     const cleanUsername = discordUsername.trim().replace(/^@/, '');
-    const demoUser = DEMO_USERS.CLIPPER;
+    const email = `${cleanUsername.toLowerCase()}@discord.clipmatrix.in`;
+
+    // Find or create a real CLIPPER user in the database
+    let user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: email },
+          { name: cleanUsername },
+        ],
+      },
+      include: { clipperProfile: true, wallet: true },
+    });
+
+    if (!user) {
+      const defaultHash = await hashPassword(`discord_${cleanUsername}_clipmatrix`);
+      user = await prisma.user.create({
+        data: {
+          email: email,
+          name: cleanUsername,
+          passwordHash: defaultHash,
+          role: 'CLIPPER',
+          status: 'ACTIVE',
+          avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(cleanUsername)}&backgroundColor=5865F2`,
+          wallet: {
+            create: {
+              balance: 0,
+              pendingBalance: 0,
+              escrowBalance: 0,
+              lifetimeEarned: 0,
+              lifetimeSpent: 0,
+            },
+          },
+          clipperProfile: {
+            create: {
+              instagramHandle: `@${cleanUsername}`,
+              youtubeHandle: `@${cleanUsername}`,
+            },
+          },
+        },
+        include: { clipperProfile: true, wallet: true },
+      });
+    } else {
+      // Ensure strictly role: CLIPPER and has wallet & clipperProfile
+      if (user.role !== 'CLIPPER') {
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: { role: 'CLIPPER' },
+          include: { clipperProfile: true, wallet: true },
+        });
+      }
+      if (!user.wallet) {
+        await prisma.wallet.create({
+          data: {
+            userId: user.id,
+            balance: 0,
+            pendingBalance: 0,
+            escrowBalance: 0,
+            lifetimeEarned: 0,
+            lifetimeSpent: 0,
+          },
+        });
+      }
+      if (!user.clipperProfile) {
+        await prisma.clipperProfile.create({
+          data: {
+            userId: user.id,
+            instagramHandle: `@${cleanUsername}`,
+            youtubeHandle: `@${cleanUsername}`,
+          },
+        });
+      }
+    }
 
     const token = generateToken({
-      userId: demoUser.id,
-      email: `${cleanUsername.toLowerCase()}@discord.clipmatrix.in`,
+      userId: user.id,
+      email: user.email,
       role: 'CLIPPER',
-      name: cleanUsername,
+      name: user.name,
     });
 
     const response = NextResponse.json({
       success: true,
       user: {
-        ...demoUser,
-        name: cleanUsername,
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: 'CLIPPER',
+        avatar: user.avatar,
       },
       redirectUrl: '/dashboard/clipper',
     });

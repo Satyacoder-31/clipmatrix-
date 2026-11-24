@@ -19,7 +19,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || 'clip-matrix.vercel.app';
+    const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || 'clipmatrix-production.up.railway.app';
     const protocol = request.headers.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https');
     const redirectUri = `${protocol}://${host}/api/auth/discord/callback`;
 
@@ -98,20 +98,44 @@ export async function GET(request: Request) {
             create: {
               instagramHandle: `@${discordUser.username}`,
               youtubeHandle: `@${discordUser.username}`,
-              editingSoftware: 'CapCut / Premiere Pro',
-              portfolioUrl: `https://discord.com/users/${discordUser.id}`,
-              upiId: '',
-              city: 'Discord Clipper Network',
-              isVerified: true,
-              level: 'ROOKIE',
             },
           },
         },
         include: { clipperProfile: true, wallet: true },
       });
+    } else {
+      // Ensure user is strictly CLIPPER role and has wallet & profile
+      if (user.role !== 'CLIPPER') {
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: { role: 'CLIPPER' },
+          include: { clipperProfile: true, wallet: true },
+        });
+      }
+      if (!user.wallet) {
+        await prisma.wallet.create({
+          data: {
+            userId: user.id,
+            balance: 0,
+            pendingBalance: 0,
+            escrowBalance: 0,
+            lifetimeEarned: 0,
+            lifetimeSpent: 0,
+          },
+        });
+      }
+      if (!user.clipperProfile) {
+        await prisma.clipperProfile.create({
+          data: {
+            userId: user.id,
+            instagramHandle: `@${discordUser.username}`,
+            youtubeHandle: `@${discordUser.username}`,
+          },
+        });
+      }
     }
 
-    // 4. Issue session token
+    // 4. Issue session token strictly with CLIPPER role
     const token = generateToken({
       userId: user.id,
       email: user.email,
@@ -119,6 +143,7 @@ export async function GET(request: Request) {
       name: user.name,
     });
 
+    // 5. Redirect strictly to clipper dashboard
     const response = NextResponse.redirect(new URL('/dashboard/clipper', request.url));
     response.cookies.set('clipmatrix_session', token, {
       httpOnly: true,
@@ -130,7 +155,7 @@ export async function GET(request: Request) {
 
     return response;
   } catch (err) {
-    console.error('Discord OAuth error:', err);
-    return NextResponse.redirect(new URL('/auth/register-clipper?error=oauth_error', request.url));
+    console.error('Discord callback error:', err);
+    return NextResponse.redirect(new URL('/auth/register-clipper?error=internal_error', request.url));
   }
 }

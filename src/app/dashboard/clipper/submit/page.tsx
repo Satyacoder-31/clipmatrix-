@@ -348,13 +348,8 @@ export default function SubmitClipPage() {
                       value={videoUrl}
                       onChange={(e) => setVideoUrl(e.target.value)}
                       placeholder="https://www.instagram.com/reel/... or https://youtube.com/shorts/..."
-                      className={`w-full pl-5 ${detected ? 'pr-36' : 'pr-5'} py-3.5 rounded-2xl bg-black/40 border border-white/10 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 transition-all shadow-inner`}
+                      className="w-full px-5 py-3.5 rounded-2xl bg-black/40 border border-white/10 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 transition-all shadow-inner"
                     />
-                    {detected && (
-                      <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-cyan-300 bg-cyan-500/15 px-2.5 py-1 rounded-lg border border-cyan-500/30 font-mono select-none pointer-events-none">
-                        {detected} Detected
-                      </span>
-                    )}
                   </div>
 
                   <button
@@ -366,6 +361,18 @@ export default function SubmitClipPage() {
                     <span>{submitting ? 'Submitting...' : 'Submit Clip'}</span>
                   </button>
                 </div>
+
+                {detected && (
+                  <div className="mt-3 flex items-center justify-center gap-2 text-xs">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 font-mono text-xs font-semibold shadow-[0_0_12px_rgba(6,182,212,0.15)]">
+                      <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                      <span>{detected} Post Detected</span>
+                    </div>
+                    <span className="text-[11px] text-slate-400 font-mono">
+                      (Automatic view audit via API)
+                    </span>
+                  </div>
+                )}
 
                 {feedback && (
                   <div
