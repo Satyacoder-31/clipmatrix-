@@ -112,53 +112,103 @@ export async function scrapeInstagramReel(url: string): Promise<ScrapedVideoStat
   }
 
   const rapidApiKey = process.env.RAPIDAPI_KEY;
-  const rapidApiHost = process.env.RAPIDAPI_INSTAGRAM_HOST || 'instagram-scraper-api2.p.rapidapi.com';
+  const configuredHost = process.env.RAPIDAPI_INSTAGRAM_HOST;
 
-  // 1. Primary: RapidAPI Scraper (Residential Proxy Route)
+  // 1. Primary: RapidAPI Scrapers
   if (rapidApiKey) {
-    try {
-      const res = await fetch(`https://${rapidApiHost}/v1/post_info?code_or_id_or_url=${shortcode}`, {
-        headers: {
-          'X-RapidAPI-Key': rapidApiKey,
-          'X-RapidAPI-Host': rapidApiHost,
-        },
-        cache: 'no-store',
-      });
-      const json = await res.json();
-      const item = json.data || json;
+    const candidateHosts = configuredHost 
+      ? [configuredHost, 'instagram-cheapest.p.rapidapi.com', 'instagram-scraper-api2.p.rapidapi.com']
+      : ['instagram-cheapest.p.rapidapi.com', 'instagram-scraper-api2.p.rapidapi.com'];
 
-      if (item) {
-        const viewCount = parseInt(item.play_count || item.view_count || item.video_play_count || '0', 10);
-        const likeCount = parseInt(item.like_count || '0', 10);
-        const commentCount = parseInt(item.comment_count || '0', 10);
-        const caption = item.caption?.text || '';
-        const author = item.user?.username || 'instagram_creator';
+    // Deduplicate hosts
+    const hostsToTry = Array.from(new Set(candidateHosts));
 
-        const demographics = calculateInstagramDemographics(viewCount, likeCount, commentCount, caption);
-        demographics.source = 'OFFICIAL_API';
-        demographics.isModeledEstimate = false;
+    for (const host of hostsToTry) {
+      try {
+        const endpoint = host.includes('cheapest')
+          ? `https://${host}/api/v1/instagram/media_by_code2?code=${shortcode}`
+          : `https://${host}/v1/post_info?code_or_id_or_url=${shortcode}`;
 
-        return {
-          platform: 'INSTAGRAM',
-          videoId: shortcode,
-          originalUrl: url,
-          title: caption.slice(0, 80) || `Instagram Reel (${shortcode})`,
-          authorHandle: `@${author}`,
-          authorName: item.user?.full_name || author,
-          thumbnailUrl: item.thumbnail_url || item.image_versions2?.candidates?.[0]?.url || '',
-          publishedAt: new Date(item.taken_at ? item.taken_at * 1000 : Date.now()).toISOString(),
-          viewCount,
-          likeCount,
-          commentCount,
-          shareCount: 0,
-          sharesIsPrivateToCreator: true,
-          demographics,
-          verificationMethod: 'RAPIDAPI_INSTAGRAM_RESIDENTIAL',
-          scrapedAt: new Date().toISOString(),
-        };
+        const res = await fetch(endpoint, {
+          headers: {
+            'X-RapidAPI-Key': rapidApiKey,
+            'X-RapidAPI-Host': host,
+          },
+          cache: 'no-store',
+        });
+
+        if (res.status === 200) {
+          const json = await res.json();
+          const item = json.data?.items?.[0] || json.data || json.item || json.items?.[0] || json;
+
+          if (item && !item.message && !json.error) {
+            const viewCount = parseInt(
+              item.play_count ||
+              item.view_count ||
+              item.video_play_count ||
+              item.ig_play_count ||
+              '0',
+              10
+            );
+            const likeCount = parseInt(
+              item.like_count || item.edge_media_preview_like?.count || '0',
+              10
+            );
+            const commentCount = parseInt(
+              item.comment_count || item.edge_media_to_comment?.count || '0',
+              10
+            );
+            const caption =
+              item.caption?.text ||
+              item.edge_media_to_caption?.edges?.[0]?.node?.text ||
+              '';
+            const author =
+              item.user?.username ||
+              item.owner?.username ||
+              'instagram_creator';
+            const authorName =
+              item.user?.full_name ||
+              item.owner?.full_name ||
+              author;
+
+            const demographics = calculateInstagramDemographics(
+              viewCount,
+              likeCount,
+              commentCount,
+              caption
+            );
+            demographics.source = 'OFFICIAL_API';
+            demographics.isModeledEstimate = false;
+
+            return {
+              platform: 'INSTAGRAM',
+              videoId: shortcode,
+              originalUrl: url,
+              title: caption.slice(0, 80) || `Instagram Reel (${shortcode})`,
+              authorHandle: `@${author}`,
+              authorName,
+              thumbnailUrl:
+                item.thumbnail_url ||
+                item.image_versions2?.candidates?.[0]?.url ||
+                item.display_url ||
+                '',
+              publishedAt: new Date(
+                item.taken_at ? item.taken_at * 1000 : Date.now()
+              ).toISOString(),
+              viewCount,
+              likeCount,
+              commentCount,
+              shareCount: 0,
+              sharesIsPrivateToCreator: true,
+              demographics,
+              verificationMethod: 'RAPIDAPI_INSTAGRAM_RESIDENTIAL',
+              scrapedAt: new Date().toISOString(),
+            };
+          }
+        }
+      } catch {
+        // Try next host if available
       }
-    } catch {
-      // Fallback
     }
   }
 
