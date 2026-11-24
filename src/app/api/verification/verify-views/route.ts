@@ -105,11 +105,13 @@ export async function POST(request: Request) {
 
       // 3. Update Campaign verified views and remaining budget
       const viewDelta = viewsNum - submission.verifiedViews;
+      const willExhaustBudget = (campaign.remainingBudget - rewardDelta) <= 0;
       await tx.campaign.update({
         where: { id: campaign.id },
         data: {
           verifiedViews: { increment: Math.max(0, viewDelta) },
           remainingBudget: { decrement: Math.max(0, rewardDelta) },
+          ...(willExhaustBudget ? { status: 'COMPLETED' } : {}),
         },
       });
 

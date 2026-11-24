@@ -112,11 +112,13 @@ export async function PATCH(
           });
         }
 
-        // Decrement campaign remaining budget
+        // Decrement campaign remaining budget and complete campaign if budget exhausted
+        const willExhaustBudget = (submission.campaign.remainingBudget - creditedReward) <= 0;
         await tx.campaign.update({
           where: { id: submission.campaignId },
           data: {
             remainingBudget: { decrement: creditedReward },
+            ...(willExhaustBudget ? { status: 'COMPLETED' } : {}),
           },
         });
       }

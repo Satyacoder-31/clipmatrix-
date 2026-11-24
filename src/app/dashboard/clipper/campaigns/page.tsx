@@ -275,6 +275,11 @@ export default function ClipperCampaignMarketplacePage() {
                             <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
                             <span>PAUSED</span>
                           </span>
+                        ) : (camp.status === 'COMPLETED' || (camp.remainingBudget !== undefined && camp.remainingBudget <= 0)) ? (
+                          <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 text-[10px] font-mono font-bold flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                            <span>COMPLETED</span>
+                          </span>
                         ) : (
                           <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono font-bold flex items-center gap-1.5">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -373,6 +378,15 @@ export default function ClipperCampaignMarketplacePage() {
                     >
                       <Lock className="w-3.5 h-3.5 text-amber-400" />
                       <span>Campaign Paused</span>
+                    </button>
+                  ) : (camp.status === 'COMPLETED' || (camp.remainingBudget !== undefined && camp.remainingBudget <= 0)) ? (
+                    <button
+                      disabled
+                      className="flex-1 py-2.5 rounded-xl text-center text-xs font-bold text-cyan-300 bg-cyan-500/10 border border-cyan-500/30 cursor-not-allowed flex items-center justify-center gap-1.5 opacity-90"
+                      title="This campaign has reached its 100% budget cap and is completed."
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>Completed (100% Budget)</span>
                     </button>
                   ) : (
                     <Link

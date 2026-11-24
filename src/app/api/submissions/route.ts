@@ -203,6 +203,13 @@ export async function POST(request: Request) {
       );
     }
 
+    if (campaign.status === 'COMPLETED' || (campaign.remainingBudget !== undefined && campaign.remainingBudget <= 0)) {
+      return NextResponse.json(
+        { error: 'This campaign has completed its 100% budget and view goal. Submissions are closed.' },
+        { status: 400 }
+      );
+    }
+
     // Attempt real-time metadata & statistics enrichment via scraper
     let scrapedStats: any = null;
     try {

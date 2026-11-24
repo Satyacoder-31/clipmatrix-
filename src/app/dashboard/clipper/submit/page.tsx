@@ -199,7 +199,11 @@ export default function SubmitClipPage() {
                 >
                   {campaigns.map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.status === 'PAUSED' ? `[PAUSED] ${c.title}` : `Switch: ${c.title}`}
+                      {c.status === 'PAUSED'
+                        ? `[PAUSED] ${c.title}`
+                        : (c.status === 'COMPLETED' || (c.remainingBudget !== undefined && c.remainingBudget <= 0))
+                        ? `[COMPLETED] ${c.title}`
+                        : `Switch: ${c.title}`}
                     </option>
                   ))}
                 </select>
@@ -214,12 +218,19 @@ export default function SubmitClipPage() {
               <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full font-mono font-bold ${
                 currentCampaign.status === 'PAUSED'
                   ? 'bg-amber-500/10 border border-amber-500/30 text-amber-400'
+                  : (currentCampaign.status === 'COMPLETED' || (currentCampaign.remainingBudget !== undefined && currentCampaign.remainingBudget <= 0))
+                  ? 'bg-cyan-500/10 border border-cyan-500/30 text-cyan-400'
                   : 'bg-white/[0.03] border border-white/10'
               }`}>
                 {currentCampaign.status === 'PAUSED' ? (
                   <>
                     <Lock className="w-3.5 h-3.5 text-amber-400" />
                     <span>Paused Campaign</span>
+                  </>
+                ) : (currentCampaign.status === 'COMPLETED' || (currentCampaign.remainingBudget !== undefined && currentCampaign.remainingBudget <= 0)) ? (
+                  <>
+                    <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>Completed (100% Budget)</span>
                   </>
                 ) : (
                   <>
@@ -273,6 +284,17 @@ export default function SubmitClipPage() {
                 <h3 className="text-base font-bold text-white font-display">Submissions Temporarily Closed</h3>
                 <p className="text-xs text-amber-200/80 leading-relaxed">
                   The brand sponsor or admin has paused this campaign. New video submissions are not accepted while paused. Please select another active campaign from the dropdown above.
+                </p>
+              </div>
+            ) : (currentCampaign?.status === 'COMPLETED' || (currentCampaign?.remainingBudget !== undefined && currentCampaign.remainingBudget <= 0)) ? (
+              <div className="p-6 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 text-center space-y-2 max-w-xl mx-auto my-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 font-mono text-xs font-bold border border-cyan-500/40">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>CAMPAIGN 100% COMPLETED</span>
+                </div>
+                <h3 className="text-base font-bold text-white font-display">Target Views & Budget Delivered!</h3>
+                <p className="text-xs text-cyan-200/80 leading-relaxed">
+                  This campaign pool has reached 100% of its funded budget. Submissions are now closed. Approved clips retain their full earnings, and ongoing views are locked as organic viral bonus.
                 </p>
               </div>
             ) : (
