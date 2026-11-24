@@ -2,28 +2,31 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { hashPassword, generateToken } from '@/lib/auth';
 
+function getBaseUrl(request: Request): string {
+  const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || '';
+  const isLocal = host.includes('localhost') || host.includes('127.0.0.1');
+  return isLocal ? `http://${host || 'localhost:3000'}` : 'https://clipmatrix-production.up.railway.app';
+}
+
 export async function GET(request: Request) {
+  const baseUrl = getBaseUrl(request);
   const url = new URL(request.url);
   const code = url.searchParams.get('code');
   const error = url.searchParams.get('error');
 
   if (error || !code) {
-    return NextResponse.redirect(new URL('/auth/register-clipper?error=cancelled', request.url));
+    return NextResponse.redirect(`${baseUrl}/auth/register-clipper?error=cancelled`);
   }
 
   const clientId = process.env.DISCORD_CLIENT_ID;
   const clientSecret = process.env.DISCORD_CLIENT_SECRET;
 
   if (!clientId || !clientSecret) {
-    return NextResponse.redirect(new URL('/auth/register-clipper?error=missing_credentials', request.url));
+    return NextResponse.redirect(`${baseUrl}/auth/register-clipper?error=missing_credentials`);
   }
 
   try {
-    const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || '';
-    const isLocal = host.includes('localhost') || host.includes('127.0.0.1');
-    const redirectUri = isLocal
-      ? `http://${host || 'localhost:3000'}/api/auth/discord/callback`
-      : 'https://clipmatrix-production.up.railway.app/api/auth/discord/callback';
+    const redirectUri = `${baseUrl}/api/auth/discord/callback`;
 
     // 1. Exchange authorization code for access token with Discord
     const tokenResponse = await fetch('https://discord.com/api/oauth2/token', {
@@ -42,7 +45,7 @@ export async function GET(request: Request) {
 
     if (!tokenResponse.ok) {
       console.error('Discord token exchange failed:', await tokenResponse.text());
-      return NextResponse.redirect(new URL('/auth/register-clipper?error=token_failed', request.url));
+      return NextResponse.redirect(`${baseUrl}/auth/register-clipper?error=token_failed`);
     }
 
     const tokenData = await tokenResponse.json();
@@ -56,7 +59,7 @@ export async function GET(request: Request) {
     });
 
     if (!userResponse.ok) {
-      return NextResponse.redirect(new URL('/auth/register-clipper?error=user_fetch_failed', request.url));
+      return NextResponse.redirect(`${baseUrl}/auth/register-clipper?error=user_fetch_failed`);
     }
 
     const discordUser = await userResponse.json();
@@ -145,8 +148,8 @@ export async function GET(request: Request) {
       name: user.name,
     });
 
-    // 5. Redirect strictly to clipper dashboard
-    const response = NextResponse.redirect(new URL('/dashboard/clipper', request.url));
+    // 5. Redirect strictly to clipper dashboard on the correct public base URL
+    const response = NextResponse.redirect(`${baseUrl}/dashboard/clipper`);
     response.cookies.set('clipmatrix_session', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -158,6 +161,6 @@ export async function GET(request: Request) {
     return response;
   } catch (err) {
     console.error('Discord callback error:', err);
-    return NextResponse.redirect(new URL('/auth/register-clipper?error=internal_error', request.url));
+    return NextResponse.redirect(`${baseUrl}/auth/register-clipper?error=internal_error`);
   }
 }

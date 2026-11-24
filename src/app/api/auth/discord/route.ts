@@ -2,7 +2,14 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { hashPassword, generateToken, DEMO_USERS } from '@/lib/auth';
 
+function getBaseUrl(request: Request): string {
+  const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || '';
+  const isLocal = host.includes('localhost') || host.includes('127.0.0.1');
+  return isLocal ? `http://${host || 'localhost:3000'}` : 'https://clipmatrix-production.up.railway.app';
+}
+
 export async function GET(request: Request) {
+  const baseUrl = getBaseUrl(request);
   const url = new URL(request.url);
   const isDemo = url.searchParams.get('demo') === 'true';
 
@@ -16,7 +23,7 @@ export async function GET(request: Request) {
       name: demoUser.name,
     });
 
-    const response = NextResponse.redirect(new URL('/dashboard/clipper', request.url));
+    const response = NextResponse.redirect(`${baseUrl}/dashboard/clipper`);
     response.cookies.set('clipmatrix_session', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -30,11 +37,7 @@ export async function GET(request: Request) {
   const clientId = process.env.DISCORD_CLIENT_ID;
 
   if (clientId && clientId.trim() !== '') {
-    const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || '';
-    const isLocal = host.includes('localhost') || host.includes('127.0.0.1');
-    const redirectUri = isLocal
-      ? `http://${host || 'localhost:3000'}/api/auth/discord/callback`
-      : 'https://clipmatrix-production.up.railway.app/api/auth/discord/callback';
+    const redirectUri = `${baseUrl}/api/auth/discord/callback`;
 
     const discordAuthUrl = `https://discord.com/oauth2/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=identify%20email%20guilds.join`;
     return NextResponse.redirect(discordAuthUrl);
@@ -49,7 +52,7 @@ export async function GET(request: Request) {
     name: demoUser.name,
   });
 
-  const response = NextResponse.redirect(new URL('/dashboard/clipper', request.url));
+  const response = NextResponse.redirect(`${baseUrl}/dashboard/clipper`);
   response.cookies.set('clipmatrix_session', token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
