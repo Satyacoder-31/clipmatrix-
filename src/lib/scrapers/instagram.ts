@@ -111,6 +111,80 @@ export async function scrapeInstagramReel(url: string): Promise<ScrapedVideoStat
     throw new Error(`Invalid Instagram URL. Unable to extract shortcode from: ${url}`);
   }
 
+  const apifyToken = process.env.APIFY_API_TOKEN;
+
+  // 1. Primary: Apify Instagram Scraper ($5/mo free recurring tier)
+  if (apifyToken) {
+    try {
+      const res = await fetch(
+        `https://api.apify.com/v2/acts/apify~instagram-scraper/run-sync-get-dataset-items?token=${apifyToken}&timeout=60`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            resultsType: 'posts',
+            directUrls: [`https://www.instagram.com/reel/${shortcode}/`],
+            resultsLimit: 1,
+          }),
+          cache: 'no-store',
+        }
+      );
+
+      if (res.status === 200 || res.status === 201) {
+        const items = await res.json();
+        const item = Array.isArray(items) ? items[0] : items;
+
+        if (item && !item.error) {
+          const viewCount = parseInt(
+            item.videoPlayCount ||
+            item.videoViewCount ||
+            item.playCount ||
+            item.viewsCount ||
+            '0',
+            10
+          );
+          const likeCount = parseInt(item.likesCount || item.likes || '0', 10);
+          const commentCount = parseInt(item.commentsCount || item.comments || '0', 10);
+          const caption = item.caption || '';
+          const author = item.ownerUsername || 'instagram_creator';
+          const authorName = item.ownerFullName || author;
+
+          const demographics = calculateInstagramDemographics(
+            viewCount,
+            likeCount,
+            commentCount,
+            caption
+          );
+          demographics.source = 'OFFICIAL_API';
+          demographics.isModeledEstimate = false;
+
+          return {
+            platform: 'INSTAGRAM',
+            videoId: shortcode,
+            originalUrl: url,
+            title: caption.slice(0, 80) || `Instagram Reel (${shortcode})`,
+            authorHandle: `@${author}`,
+            authorName,
+            thumbnailUrl: item.displayUrl || item.thumbnailUrl || '',
+            publishedAt: item.timestamp
+              ? new Date(item.timestamp).toISOString()
+              : new Date().toISOString(),
+            viewCount,
+            likeCount,
+            commentCount,
+            shareCount: 0,
+            sharesIsPrivateToCreator: true,
+            demographics,
+            verificationMethod: 'APIFY_INSTAGRAM_RESIDENTIAL',
+            scrapedAt: new Date().toISOString(),
+          };
+        }
+      }
+    } catch {
+      // Fallback to RapidAPI / OpenGraph
+    }
+  }
+
   const rapidApiKey = process.env.RAPIDAPI_KEY;
   const configuredHost = process.env.RAPIDAPI_INSTAGRAM_HOST;
 
