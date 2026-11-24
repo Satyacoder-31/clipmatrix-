@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, DEMO_USERS } from '@/lib/auth';
 
 export async function GET() {
   try {
@@ -40,19 +40,22 @@ export async function PATCH(request: Request) {
     const { upiId, bankName, bankAccountNumber, bankIfsc, editingSoftware, phone, name } = body;
 
     // Update base user details if provided (only rename if not Super Admin)
+    let updatedName = user.name;
     if ((name || phone) && user.role !== 'ADMIN') {
-      await prisma.user.update({
+      const updatedUser = await prisma.user.update({
         where: { id: user.id },
         data: {
           ...(name ? { name } : {}),
           ...(phone ? { phone } : {}),
         },
       });
+      if (name) updatedName = updatedUser.name;
     }
 
     // Update clipper profile if clipper
+    let updatedProfile = user.clipperProfile;
     if (user.role === 'CLIPPER' || user.clipperProfile) {
-      await prisma.clipperProfile.upsert({
+      updatedProfile = await prisma.clipperProfile.upsert({
         where: { userId: user.id },
         create: {
           userId: user.id,
@@ -70,11 +73,29 @@ export async function PATCH(request: Request) {
           ...(editingSoftware !== undefined ? { editingSoftware } : {}),
         },
       });
+
+      // Synchronize in-memory demo identity
+      if (DEMO_USERS.CLIPPER) {
+        DEMO_USERS.CLIPPER.clipperProfile = {
+          ...DEMO_USERS.CLIPPER.clipperProfile,
+          ...updatedProfile,
+        };
+        if (name && user.role !== 'ADMIN') {
+          DEMO_USERS.CLIPPER.name = updatedName;
+        }
+      }
     }
 
     return NextResponse.json({
       success: true,
       message: 'Payment and profile details saved successfully',
+      user: {
+        id: user.id,
+        name: updatedName,
+        email: user.email,
+        role: user.role,
+        clipperProfile: updatedProfile,
+      },
     });
   } catch (error: any) {
     console.error('Failed to update profile:', error);

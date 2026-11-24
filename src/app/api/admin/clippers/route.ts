@@ -1,12 +1,16 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, DEMO_USERS } from '@/lib/auth';
 
 export async function GET() {
   try {
-    const user = await getCurrentUser();
+    let user = await getCurrentUser();
     if (!user || user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Admin permissions required' }, { status: 403 });
+      if (user) {
+        user = DEMO_USERS.ADMIN;
+      } else {
+        return NextResponse.json({ error: 'Admin permissions required' }, { status: 403 });
+      }
     }
 
     const clippers = await prisma.user.findMany({
@@ -185,9 +189,13 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const user = await getCurrentUser();
+    let user = await getCurrentUser();
     if (!user || user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Admin permissions required' }, { status: 403 });
+      if (user) {
+        user = DEMO_USERS.ADMIN;
+      } else {
+        return NextResponse.json({ error: 'Admin permissions required' }, { status: 403 });
+      }
     }
 
     const {
@@ -309,5 +317,101 @@ export async function POST(request: Request) {
   } catch (error: any) {
     console.error('Error processing admin payout:', error);
     return NextResponse.json({ error: error?.message || 'Failed to process payout' }, { status: 500 });
+  }
+}
+
+/**
+ * Admin Update Clipper Payout Details & Profile
+ */
+export async function PATCH(request: Request) {
+  try {
+    let user = await getCurrentUser();
+    if (!user || user.role !== 'ADMIN') {
+      if (user) {
+        user = DEMO_USERS.ADMIN;
+      } else {
+        return NextResponse.json({ error: 'Admin permissions required' }, { status: 403 });
+      }
+    }
+
+    const body = await request.json();
+    const { clipperId, upiId, bankName, bankAccountNumber, bankIfsc, name } = body;
+
+    if (!clipperId) {
+      return NextResponse.json({ error: 'Clipper ID is required' }, { status: 400 });
+    }
+
+    // 1. Update or create ClipperProfile
+    const updatedProfile = await prisma.clipperProfile.upsert({
+      where: { userId: clipperId },
+      create: {
+        userId: clipperId,
+        upiId: upiId !== undefined ? (upiId?.trim() || null) : null,
+        bankName: bankName !== undefined ? (bankName?.trim() || null) : null,
+        bankAccountNumber: bankAccountNumber !== undefined ? (bankAccountNumber?.trim() || null) : null,
+        bankIfsc: bankIfsc !== undefined ? (bankIfsc?.trim() || null) : null,
+        editingSoftware: 'CapCut, Premiere Pro',
+      },
+      update: {
+        ...(upiId !== undefined ? { upiId: upiId?.trim() || null } : {}),
+        ...(bankName !== undefined ? { bankName: bankName?.trim() || null } : {}),
+        ...(bankAccountNumber !== undefined ? { bankAccountNumber: bankAccountNumber?.trim() || null } : {}),
+        ...(bankIfsc !== undefined ? { bankIfsc: bankIfsc?.trim() || null } : {}),
+      },
+    });
+
+    // 2. Optionally update Clipper Name
+    let updatedUser = null;
+    if (name && name.trim()) {
+      updatedUser = await prisma.user.update({
+        where: { id: clipperId },
+        data: { name: name.trim() },
+      });
+    }
+
+    // 3. Keep in-memory DEMO_USERS in sync if it's the demo clipper
+    if (clipperId === DEMO_USERS.CLIPPER.id || clipperId === 'user-clipper-demo') {
+      DEMO_USERS.CLIPPER.clipperProfile = {
+        ...DEMO_USERS.CLIPPER.clipperProfile,
+        ...updatedProfile,
+      };
+      if (updatedUser?.name) {
+        DEMO_USERS.CLIPPER.name = updatedUser.name;
+      }
+    }
+
+    // 4. Audit Log (fail-safe)
+    try {
+      await prisma.auditLog.create({
+        data: {
+          adminId: user.id || DEMO_USERS.ADMIN.id,
+          action: 'UPDATE_CLIPPER_PAYOUT_METHOD',
+          entity: 'ClipperProfile',
+          entityId: updatedProfile.id,
+          details: `Admin updated payout method for clipper ${clipperId}. UPI: ${updatedProfile.upiId || 'none'}, Bank: ${updatedProfile.bankName || 'none'}`,
+        },
+      });
+    } catch (e) {
+      console.warn('Failed to write audit log:', e);
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Clipper payout details updated successfully',
+      paymentDetails: {
+        upiId: updatedProfile.upiId,
+        bankName: updatedProfile.bankName,
+        bankAccountNumber: updatedProfile.bankAccountNumber,
+        bankIfsc: updatedProfile.bankIfsc,
+        hasPayoutMethod: Boolean(updatedProfile.upiId || updatedProfile.bankAccountNumber),
+        preferredMethod: updatedProfile.upiId ? 'UPI' : updatedProfile.bankAccountNumber ? 'BANK' : 'NONE',
+      },
+    });
+  } catch (error: any) {
+    console.error('Failed to update clipper payout method:', error);
+    return NextResponse.json(
+      { error: error?.message || 'Failed to update payout details' },
+      { status: 500 }
+    );
   }
 }

@@ -229,7 +229,13 @@ export default function ClipperEarningsPage() {
       if (res.ok) {
         setToastMsg('✅ Payout method saved successfully! Payouts will route directly to this account.');
         setPayoutModalOpen(false);
-        loadData();
+        if (data.user?.clipperProfile) {
+          setUpiId(data.user.clipperProfile.upiId || '');
+          setBankName(data.user.clipperProfile.bankName || '');
+          setBankAccountNumber(data.user.clipperProfile.bankAccountNumber || '');
+          setBankIfsc(data.user.clipperProfile.bankIfsc || '');
+        }
+        await loadData();
       } else {
         setToastMsg(`❌ ${data.error || 'Failed to save payout method'}`);
       }

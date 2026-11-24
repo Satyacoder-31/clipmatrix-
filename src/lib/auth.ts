@@ -140,20 +140,15 @@ export async function getCurrentUser() {
     const decoded = verifyToken(token);
     if (!decoded) return null;
 
-    // Fast-path for demo identities
-    if (decoded.userId === 'user-clipper-demo' || decoded.email === 'clipper@clipmatrix.com') {
-      return DEMO_USERS.CLIPPER;
-    }
-    if (decoded.userId === 'user-brand-demo' || decoded.email === 'brand@clipmatrix.com') {
-      return DEMO_USERS.BRAND;
-    }
-    if (decoded.userId === 'user-admin-demo' || decoded.email === 'admin@clipmatrix.com') {
-      return DEMO_USERS.ADMIN;
-    }
-
+    // First attempt: Query live Prisma database by id or email to ensure updated records (e.g. payout methods) are reflected
     try {
-      const user = await prisma.user.findUnique({
-        where: { id: decoded.userId },
+      const user = await prisma.user.findFirst({
+        where: {
+          OR: [
+            ...(decoded.userId ? [{ id: decoded.userId }] : []),
+            ...(decoded.email ? [{ email: decoded.email }] : []),
+          ],
+        },
         include: {
           brandProfile: true,
           clipperProfile: true,
@@ -161,15 +156,33 @@ export async function getCurrentUser() {
         },
       });
 
-      if (user) return user;
+      if (user) {
+        // Keep in-memory DEMO_USERS in sync with live DB records
+        if (user.role === 'CLIPPER' && user.clipperProfile) {
+          DEMO_USERS.CLIPPER.clipperProfile = {
+            ...DEMO_USERS.CLIPPER.clipperProfile,
+            ...user.clipperProfile,
+          };
+          DEMO_USERS.CLIPPER.name = user.name;
+        } else if (user.role === 'ADMIN') {
+          DEMO_USERS.ADMIN.name = user.name;
+        }
+        return user;
+      }
     } catch {
-      // Prisma error fallback (e.g. SQLite DB path issue on Vercel)
+      // Prisma error fallback (e.g. temporary DB connection or serverless issue)
     }
 
-    // Role-based fallback
-    if (decoded.role === 'CLIPPER') return DEMO_USERS.CLIPPER;
-    if (decoded.role === 'BRAND') return DEMO_USERS.BRAND;
-    if (decoded.role === 'ADMIN') return DEMO_USERS.ADMIN;
+    // Role-based or demo fallback if DB record not found or DB unreachable
+    if (decoded.userId === 'user-clipper-demo' || decoded.email === 'clipper@clipmatrix.com' || decoded.role === 'CLIPPER') {
+      return DEMO_USERS.CLIPPER;
+    }
+    if (decoded.userId === 'user-brand-demo' || decoded.email === 'brand@clipmatrix.com' || decoded.role === 'BRAND') {
+      return DEMO_USERS.BRAND;
+    }
+    if (decoded.userId === 'user-admin-demo' || decoded.email === 'admin@clipmatrix.com' || decoded.role === 'ADMIN') {
+      return DEMO_USERS.ADMIN;
+    }
 
     return null;
   } catch (e) {

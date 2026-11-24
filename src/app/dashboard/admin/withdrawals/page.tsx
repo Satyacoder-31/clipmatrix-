@@ -25,6 +25,9 @@ import {
   ArrowUpRight,
   ShieldCheck,
   User,
+  Edit3,
+  Save,
+  Pencil,
 } from 'lucide-react';
 import { formatCurrency, formatNumber } from '@/lib/utils';
 
@@ -108,6 +111,61 @@ export default function AdminClipperPayoutsPage() {
 
   // Copy feedback
   const [copiedText, setCopiedText] = useState<string | null>(null);
+
+  // Edit Clipper Payout Method Modal State
+  const [editPayoutClipper, setEditPayoutClipper] = useState<ClipperData | null>(null);
+  const [editAccountName, setEditAccountName] = useState('');
+  const [editUpiId, setEditUpiId] = useState('');
+  const [editBankName, setEditBankName] = useState('');
+  const [editBankAccountNumber, setEditBankAccountNumber] = useState('');
+  const [editBankIfsc, setEditBankIfsc] = useState('');
+  const [savingEditPayout, setSavingEditPayout] = useState(false);
+
+  const openEditPayoutModal = (clipper: ClipperData) => {
+    setEditPayoutClipper(clipper);
+    setEditAccountName(clipper.name);
+    setEditUpiId(clipper.paymentDetails.upiId || '');
+    setEditBankName(clipper.paymentDetails.bankName || '');
+    setEditBankAccountNumber(clipper.paymentDetails.bankAccountNumber || '');
+    setEditBankIfsc(clipper.paymentDetails.bankIfsc || '');
+  };
+
+  const handleSaveClipperPayoutMethod = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editPayoutClipper) return;
+
+    try {
+      setSavingEditPayout(true);
+      const res = await fetch('/api/admin/clippers', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clipperId: editPayoutClipper.id,
+          name: editAccountName,
+          upiId: editUpiId,
+          bankName: editBankName,
+          bankAccountNumber: editBankAccountNumber,
+          bankIfsc: editBankIfsc,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setToastMsg({
+          text: `✅ Payout details updated for ${editPayoutClipper.name}! Method: ${editUpiId ? `UPI: ${editUpiId}` : editBankName || 'Bank'}`,
+          type: 'success',
+        });
+        setEditPayoutClipper(null);
+        await fetchClippers();
+      } else {
+        setToastMsg({ text: `❌ ${data.error || 'Failed to update payout details'}`, type: 'error' });
+      }
+    } catch {
+      setToastMsg({ text: '❌ Network error while saving payout details', type: 'error' });
+    } finally {
+      setSavingEditPayout(false);
+    }
+  };
 
   const fetchClippers = async () => {
     try {
@@ -421,7 +479,7 @@ export default function AdminClipperPayoutsPage() {
                       <div className="text-xs text-purple-300/70 font-mono">{clipper.email}</div>
 
                       {/* Payment Method Badges */}
-                      <div className="flex items-center gap-1.5 pt-1">
+                      <div className="flex items-center gap-1.5 pt-1 flex-wrap">
                         {clipper.paymentDetails.upiId ? (
                           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-[11px] font-mono font-semibold">
                             <Smartphone className="w-3 h-3 text-emerald-400" />
@@ -431,7 +489,7 @@ export default function AdminClipperPayoutsPage() {
                                 e.stopPropagation();
                                 handleCopy(clipper.paymentDetails.upiId!);
                               }}
-                              className="text-emerald-400 hover:text-white ml-1"
+                              className="text-emerald-400 hover:text-white ml-1 p-0.5 rounded hover:bg-emerald-500/20"
                               title="Copy UPI ID"
                             >
                               {copiedText === clipper.paymentDetails.upiId ? (
@@ -439,6 +497,17 @@ export default function AdminClipperPayoutsPage() {
                               ) : (
                                 <Copy className="w-3 h-3" />
                               )}
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openEditPayoutModal(clipper);
+                              }}
+                              className="text-emerald-400 hover:text-white ml-0.5 p-0.5 rounded hover:bg-emerald-500/20 flex items-center gap-0.5 text-[10px]"
+                              title="Edit UPI / Bank details"
+                            >
+                              <Edit3 className="w-3 h-3" />
+                              <span>Edit</span>
                             </button>
                           </div>
                         ) : clipper.paymentDetails.bankAccountNumber ? (
@@ -452,7 +521,7 @@ export default function AdminClipperPayoutsPage() {
                                 e.stopPropagation();
                                 handleCopy(clipper.paymentDetails.bankAccountNumber!);
                               }}
-                              className="text-purple-400 hover:text-white ml-1"
+                              className="text-purple-400 hover:text-white ml-1 p-0.5 rounded hover:bg-purple-500/20"
                               title="Copy Bank Account"
                             >
                               {copiedText === clipper.paymentDetails.bankAccountNumber ? (
@@ -461,11 +530,32 @@ export default function AdminClipperPayoutsPage() {
                                 <Copy className="w-3 h-3" />
                               )}
                             </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openEditPayoutModal(clipper);
+                              }}
+                              className="text-purple-400 hover:text-white ml-0.5 p-0.5 rounded hover:bg-purple-500/20 flex items-center gap-0.5 text-[10px]"
+                              title="Edit Bank / UPI details"
+                            >
+                              <Edit3 className="w-3 h-3" />
+                              <span>Edit</span>
+                            </button>
                           </div>
                         ) : (
-                          <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-mono">
-                            <AlertCircle className="w-3 h-3" />
-                            No payment method connected
+                          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-mono">
+                            <AlertCircle className="w-3 h-3 text-amber-400" />
+                            <span>No payment method connected</span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openEditPayoutModal(clipper);
+                              }}
+                              className="text-amber-300 hover:text-white underline font-bold ml-1 flex items-center gap-0.5 text-[10px]"
+                            >
+                              <Edit3 className="w-2.5 h-2.5" />
+                              <span>+ Connect Method</span>
+                            </button>
                           </div>
                         )}
                       </div>
@@ -529,6 +619,15 @@ export default function AdminClipperPayoutsPage() {
                     >
                       <DollarSign className="w-3.5 h-3.5" />
                       {hasDue ? `Pay Clipper (${formatCurrency(clipper.metrics.unpaidEarnings)})` : 'Manual Payout'}
+                    </button>
+
+                    <button
+                      onClick={() => openEditPayoutModal(clipper)}
+                      className="px-3 py-2 rounded-xl text-xs font-semibold bg-purple-950/60 hover:bg-purple-900/60 text-purple-200 border border-purple-800/50 flex items-center gap-1.5 transition-colors"
+                      title="Edit Clipper Payout Method (UPI / Bank)"
+                    >
+                      <Edit3 className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>Edit Payout</span>
                     </button>
 
                     <button
@@ -751,9 +850,22 @@ export default function AdminClipperPayoutsPage() {
 
                 {/* Connected Account Display */}
                 <div className="pt-2 border-t border-purple-900/30">
-                  <span className="text-purple-400 font-mono uppercase text-[10px] block mb-1">
-                    Connected Payout Destination:
-                  </span>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-purple-400 font-mono uppercase text-[10px]">
+                      Connected Payout Destination:
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const target = payModalClipper;
+                        setPayModalClipper(null);
+                        openEditPayoutModal(target);
+                      }}
+                      className="text-cyan-400 hover:text-cyan-300 text-[11px] font-mono flex items-center gap-1 underline cursor-pointer"
+                    >
+                      <Edit3 className="w-3 h-3" /> Change / Edit
+                    </button>
+                  </div>
                   {payModalClipper.paymentDetails.upiId ? (
                     <div className="p-2 rounded-lg bg-emerald-950/30 border border-emerald-500/30 flex items-center justify-between font-mono text-xs text-emerald-300">
                       <span>UPI: {payModalClipper.paymentDetails.upiId}</span>
@@ -772,8 +884,19 @@ export default function AdminClipperPayoutsPage() {
                       <div>IFSC: {payModalClipper.paymentDetails.bankIfsc}</div>
                     </div>
                   ) : (
-                    <div className="p-2 rounded-lg bg-amber-950/30 border border-amber-500/30 text-amber-300 text-xs font-mono">
-                      ⚠️ No payout method on file. Confirm destination with clipper.
+                    <div className="p-2 rounded-lg bg-amber-950/30 border border-amber-500/30 text-amber-300 text-xs font-mono flex items-center justify-between">
+                      <span>⚠️ No payout method on file.</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const target = payModalClipper;
+                          setPayModalClipper(null);
+                          openEditPayoutModal(target);
+                        }}
+                        className="text-amber-200 underline font-bold"
+                      >
+                        + Set Now
+                      </button>
                     </div>
                   )}
                 </div>
@@ -887,6 +1010,156 @@ export default function AdminClipperPayoutsPage() {
                     <>
                       <CheckCircle2 className="w-4 h-4" />
                       Confirm Payout & Deduct Earnings
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Clipper Payout Method Modal */}
+      {editPayoutClipper && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-lg rounded-3xl bg-[#120924] border border-cyan-500/40 p-6 shadow-2xl relative overflow-hidden">
+            <div className="flex items-center justify-between pb-4 border-b border-purple-900/40">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-300">
+                  <Edit3 className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white font-display">Edit Clipper Payout Details</h3>
+                  <p className="text-[11px] text-purple-300 font-mono">
+                    Update payment destination for {editPayoutClipper.name}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setEditPayoutClipper(null)}
+                className="w-8 h-8 rounded-lg bg-purple-950/60 hover:bg-purple-900/60 text-slate-400 hover:text-white flex items-center justify-center"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveClipperPayoutMethod} className="space-y-4 pt-4">
+              {/* Clipper Info Summary */}
+              <div className="p-3 rounded-xl bg-purple-950/40 border border-purple-900/30 flex items-center justify-between text-xs">
+                <div>
+                  <div className="text-[10px] text-purple-400 uppercase font-mono">Clipper Account</div>
+                  <div className="font-bold text-white font-display">{editPayoutClipper.name}</div>
+                  <div className="text-[11px] text-purple-300 font-mono">{editPayoutClipper.email}</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-[10px] text-purple-400 uppercase font-mono">Unpaid Balance</div>
+                  <div className="font-bold text-emerald-400 font-mono text-sm">
+                    {formatCurrency(editPayoutClipper.metrics.unpaidEarnings)}
+                  </div>
+                </div>
+              </div>
+
+              {/* Account Holder Name */}
+              <div>
+                <label className="block text-xs font-mono text-purple-300 mb-1">
+                  Clipper / Beneficiary Name:
+                </label>
+                <input
+                  type="text"
+                  value={editAccountName}
+                  onChange={(e) => setEditAccountName(e.target.value)}
+                  placeholder="e.g. Aarav Sharma"
+                  className="w-full px-3 py-2 rounded-xl bg-purple-950/60 border border-purple-800/50 text-white font-mono text-xs focus:outline-none focus:border-cyan-500"
+                />
+              </div>
+
+              {/* UPI ID */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-mono text-purple-300 flex items-center gap-1.5">
+                    <Smartphone className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>UPI ID (Primary Settlement):</span>
+                  </label>
+                  <span className="text-[10px] text-emerald-400 font-mono">Fast Instant Disburse</span>
+                </div>
+                <input
+                  type="text"
+                  value={editUpiId}
+                  onChange={(e) => setEditUpiId(e.target.value)}
+                  placeholder="e.g. satya@okaxis or username@okhdfcbank"
+                  className="w-full px-3 py-2 rounded-xl bg-purple-950/60 border border-purple-800/50 text-white font-mono text-xs focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div className="relative flex py-1 items-center">
+                <div className="flex-grow border-t border-purple-900/40"></div>
+                <span className="flex-shrink mx-2 text-[10px] font-mono text-purple-400 uppercase">
+                  And / Or Direct Bank Transfer Details
+                </span>
+                <div className="flex-grow border-t border-purple-900/40"></div>
+              </div>
+
+              {/* Bank Details */}
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-mono text-purple-300 mb-1">Bank Name:</label>
+                  <input
+                    type="text"
+                    value={editBankName}
+                    onChange={(e) => setEditBankName(e.target.value)}
+                    placeholder="e.g. HDFC Bank, ICICI Bank, SBI"
+                    className="w-full px-3 py-2 rounded-xl bg-purple-950/60 border border-purple-800/50 text-white font-mono text-xs focus:outline-none focus:border-cyan-500"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-mono text-purple-300 mb-1">Account Number:</label>
+                    <input
+                      type="text"
+                      value={editBankAccountNumber}
+                      onChange={(e) => setEditBankAccountNumber(e.target.value)}
+                      placeholder="e.g. 50100492819283"
+                      className="w-full px-3 py-2 rounded-xl bg-purple-950/60 border border-purple-800/50 text-white font-mono text-xs focus:outline-none focus:border-cyan-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-mono text-purple-300 mb-1">IFSC Code:</label>
+                    <input
+                      type="text"
+                      value={editBankIfsc}
+                      onChange={(e) => setEditBankIfsc(e.target.value)}
+                      placeholder="e.g. HDFC0001234"
+                      className="w-full px-3 py-2 rounded-xl bg-purple-950/60 border border-purple-800/50 text-white font-mono text-xs focus:outline-none focus:border-cyan-500 uppercase"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-purple-900/40">
+                <button
+                  type="button"
+                  onClick={() => setEditPayoutClipper(null)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-purple-300 hover:text-white bg-purple-950/40 hover:bg-purple-900/40"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingEditPayout}
+                  className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 shadow-glow-cyan disabled:opacity-50 flex items-center gap-2"
+                >
+                  {savingEditPayout ? (
+                    <>
+                      <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4" />
+                      Save Payout Details
                     </>
                   )}
                 </button>

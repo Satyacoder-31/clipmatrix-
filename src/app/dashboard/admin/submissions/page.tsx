@@ -29,6 +29,9 @@ import {
   FolderOpen,
   Wallet,
   Check,
+  Smartphone,
+  Building2,
+  AlertCircle,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -714,6 +717,32 @@ export default function AdminSubmissionsReviewPage() {
                         </strong>
                       </span>
 
+                      {clipperUser?.clipperProfile?.upiId ? (
+                        <>
+                          <span>•</span>
+                          <span className="inline-flex items-center gap-1 text-[11px] font-mono text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/25">
+                            <Smartphone className="w-3 h-3 text-emerald-400" />
+                            <span>UPI: {clipperUser.clipperProfile.upiId}</span>
+                          </span>
+                        </>
+                      ) : clipperUser?.clipperProfile?.bankAccountNumber ? (
+                        <>
+                          <span>•</span>
+                          <span className="inline-flex items-center gap-1 text-[11px] font-mono text-purple-300 bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/25">
+                            <Building2 className="w-3 h-3 text-purple-400" />
+                            <span>{clipperUser.clipperProfile.bankName || 'Bank'} •••• {clipperUser.clipperProfile.bankAccountNumber.slice(-4)}</span>
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <span>•</span>
+                          <span className="inline-flex items-center gap-1 text-[11px] font-mono text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/25">
+                            <AlertCircle className="w-3 h-3 text-amber-400" />
+                            <span>No Payout Method</span>
+                          </span>
+                        </>
+                      )}
+
                       <span>•</span>
 
                       {sub.verifiedViews > 0 ? (
@@ -920,9 +949,28 @@ export default function AdminSubmissionsReviewPage() {
                       <CheckCircle2 className="w-3 h-3" /> VERIFIED
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-300 mt-0.5">
-                    Posted Account: <span className="text-cyan-300 font-mono font-bold">{auditSub.postAccountHandle || '@creator'}</span> • Consolidates to Clipper User: <span className="text-white font-bold">{auditSub.clipper?.name || 'Verified Clipper'}</span>
-                  </p>
+                  <div className="flex items-center gap-2 flex-wrap text-[11px] text-slate-300 mt-1 font-mono">
+                    <span>Posted Account: <strong className="text-cyan-300 font-bold">{auditSub.postAccountHandle || '@creator'}</strong></span>
+                    <span>•</span>
+                    <span>Consolidates to Clipper User: <strong className="text-white font-bold">{auditSub.clipper?.name || 'Verified Clipper'}</strong></span>
+                    <span>•</span>
+                    {auditSub.clipper?.clipperProfile?.upiId ? (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-mono text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/25">
+                        <Smartphone className="w-3 h-3 text-emerald-400" />
+                        <span>UPI: {auditSub.clipper.clipperProfile.upiId}</span>
+                      </span>
+                    ) : auditSub.clipper?.clipperProfile?.bankAccountNumber ? (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-mono text-purple-300 bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/25">
+                        <Building2 className="w-3 h-3 text-purple-400" />
+                        <span>{auditSub.clipper.clipperProfile.bankName || 'Bank'} •••• {auditSub.clipper.clipperProfile.bankAccountNumber.slice(-4)}</span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-mono text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/25">
+                        <AlertCircle className="w-3 h-3 text-amber-400" />
+                        <span>No Payout Method</span>
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="text-left sm:text-right shrink-0 bg-black/40 px-3 py-1.5 rounded-xl border border-white/5">
@@ -1038,6 +1086,35 @@ export default function AdminSubmissionsReviewPage() {
                     ).toFixed(2)}
                   </div>
                 </div>
+              </div>
+
+              {/* Destination Payout Method Card */}
+              <div className="p-3 rounded-2xl bg-black/40 border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                <div className="flex items-center gap-2 font-mono flex-wrap">
+                  <span className="text-slate-400 text-[11px] uppercase">Destination Payout Method:</span>
+                  {auditSub?.clipper?.clipperProfile?.upiId ? (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-bold">
+                      <Smartphone className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>UPI: {auditSub.clipper.clipperProfile.upiId}</span>
+                    </span>
+                  ) : auditSub?.clipper?.clipperProfile?.bankAccountNumber ? (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-500/20 border border-purple-500/40 text-purple-300 font-bold">
+                      <Building2 className="w-3.5 h-3.5 text-purple-400" />
+                      <span>{auditSub.clipper.clipperProfile.bankName || 'Bank'} •••• {auditSub.clipper.clipperProfile.bankAccountNumber.slice(-4)} (IFSC: {auditSub.clipper.clipperProfile.bankIfsc})</span>
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300">
+                      <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
+                      <span>No payout destination connected by clipper yet</span>
+                    </span>
+                  )}
+                </div>
+                <Link
+                  href="/dashboard/admin/withdrawals"
+                  className="text-cyan-400 hover:text-cyan-300 text-[11px] font-mono flex items-center gap-1 underline shrink-0"
+                >
+                  Manage Payouts <ArrowRight className="w-3 h-3" />
+                </Link>
               </div>
 
               <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">

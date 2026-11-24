@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import {
   Users,
   Shield,
@@ -359,7 +360,13 @@ export default function AdminUsersPage() {
               </div>
             </div>
 
-            <div className="pt-2 flex justify-end">
+            <div className="pt-2 flex items-center justify-between">
+              <Link
+                href="/dashboard/admin/withdrawals"
+                className="text-xs text-cyan-400 hover:text-cyan-300 underline font-mono flex items-center gap-1"
+              >
+                <span>Edit / Disburse in Payouts Hub &rarr;</span>
+              </Link>
               <button
                 type="button"
                 onClick={() => setPayoutModalUser(null)}
