@@ -98,15 +98,17 @@ export default function ClipperSubmissionsPage() {
                         )}
                       </td>
                       <td className="py-3.5 px-4 font-bold">
-                        {sub.rewardEarned > 0 && !isPending ? (
+                        {sub.rewardEarned > 0 ? (
                           <span className="text-emerald-400 font-mono">{formatCurrency(sub.rewardEarned)}</span>
-                        ) : (
+                        ) : isPending ? (
                           <span className="text-slate-400 font-mono flex items-center gap-1 text-xs">
                             $0.00
                             <span className="text-[9px] text-amber-400 font-normal bg-amber-400/10 px-1 py-0.2 rounded border border-amber-400/20">
                               Pending
                             </span>
                           </span>
+                        ) : (
+                          <span className="text-emerald-400 font-mono">$0.00</span>
                         )}
                       </td>
                       <td className="py-3.5 px-4">

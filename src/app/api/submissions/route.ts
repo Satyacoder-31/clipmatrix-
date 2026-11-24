@@ -132,8 +132,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    if (user.role !== 'CLIPPER' && user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Only clippers can submit clips' }, { status: 403 });
+    if (user.role !== 'CLIPPER') {
+      return NextResponse.json(
+        { error: 'Only clippers can submit clips. Admins review and audit submissions.' },
+        { status: 403 }
+      );
     }
 
     const body = await request.json();
