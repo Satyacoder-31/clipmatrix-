@@ -309,7 +309,15 @@ export default function Navbar() {
             href={getDashboardUrl()}
             className="px-4 py-1.5 rounded-full text-xs font-semibold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 transition-all shadow-glow-purple flex items-center gap-1.5 border border-purple-400/40"
           >
-            <LayoutDashboard className="w-3.5 h-3.5" />
+            {user?.avatar ? (
+              <img
+                src={user.avatar}
+                alt={user.name || 'User'}
+                className="w-4 h-4 rounded-full object-cover shrink-0 border border-white/40"
+              />
+            ) : (
+              <LayoutDashboard className="w-3.5 h-3.5" />
+            )}
             <span>
               {user?.role === 'BRAND'
                 ? 'Brand Dashboard'

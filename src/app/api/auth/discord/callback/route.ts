@@ -109,14 +109,16 @@ export async function GET(request: Request) {
         include: { clipperProfile: true, wallet: true },
       });
     } else {
-      // Ensure user is strictly CLIPPER role and has wallet & profile
-      if (user.role !== 'CLIPPER') {
-        user = await prisma.user.update({
-          where: { id: user.id },
-          data: { role: 'CLIPPER' },
-          include: { clipperProfile: true, wallet: true },
-        });
-      }
+      // Ensure user is strictly CLIPPER role and sync latest Discord avatar/name
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          role: 'CLIPPER',
+          avatar: avatar,
+          name: username,
+        },
+        include: { clipperProfile: true, wallet: true },
+      });
       if (!user.wallet) {
         await prisma.wallet.create({
           data: {

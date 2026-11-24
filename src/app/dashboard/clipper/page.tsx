@@ -40,20 +40,38 @@ export default function ClipperOverviewPage() {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white font-display">
-            Clipper Command Dashboard
-          </h1>
-          <p className="text-xs sm:text-sm text-purple-200/70">
-            Track performance views, submission approvals, and withdraw verified CPM rewards.
-          </p>
+      {/* Clipper Welcome Banner with Avatar */}
+      <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-purple-950/40 via-indigo-950/30 to-[#0e1026] border border-purple-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl">
+        <div className="flex items-center gap-4">
+          {stats?.avatar ? (
+            <img
+              src={stats.avatar}
+              alt={stats.name || 'Clipper'}
+              className="w-14 h-14 rounded-2xl object-cover border-2 border-purple-500/40 shadow-lg shadow-purple-500/20 shrink-0"
+            />
+          ) : (
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-purple-600 to-cyan-500 flex items-center justify-center text-white text-xl font-bold border-2 border-purple-500/40 shadow-lg shadow-purple-500/20 shrink-0">
+              {stats?.name?.charAt(0) || 'C'}
+            </div>
+          )}
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg sm:text-2xl font-black text-white font-display">
+                Welcome back, {stats?.name || 'Clipper'}
+              </h1>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                DISCORD VERIFIED
+              </span>
+            </div>
+            <p className="text-xs text-slate-400 font-mono mt-0.5">
+              {stats?.email || 'Track performance views, submission approvals, and withdraw verified CPM rewards.'}
+            </p>
+          </div>
         </div>
 
         <a
           href="/dashboard/clipper/submit"
-          className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-purple-600 hover:bg-purple-500 transition-colors shadow-glow-purple flex items-center justify-center gap-2 self-start sm:self-auto"
+          className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-purple-600 hover:bg-purple-500 transition-colors shadow-glow-purple flex items-center justify-center gap-2 self-start sm:self-auto shrink-0"
         >
           <Video className="w-4 h-4" />
           <span>Submit New Clip</span>

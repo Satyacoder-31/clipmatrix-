@@ -291,9 +291,17 @@ export default function DashboardSidebar({
       <div className="p-4 border-t border-purple-500/20 bg-[#070a1a]/95 space-y-3 shrink-0">
         {/* User Card */}
         <div className="flex items-center gap-3 p-2 rounded-xl bg-white/[0.03] border border-white/[0.05]">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 to-cyan-500 text-white font-bold flex items-center justify-center text-sm shrink-0 shadow-md">
-            {initial}
-          </div>
+          {user?.avatar ? (
+            <img
+              src={user.avatar}
+              alt={displayName}
+              className="w-9 h-9 rounded-xl object-cover shrink-0 shadow-md border border-purple-500/40"
+            />
+          ) : (
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 to-cyan-500 text-white font-bold flex items-center justify-center text-sm shrink-0 shadow-md">
+              {initial}
+            </div>
+          )}
           <div className="min-w-0 flex-1">
             <div className="font-bold text-xs text-white truncate">{displayName}</div>
             <div className="flex items-center gap-2 mt-0.5">

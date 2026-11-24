@@ -129,8 +129,23 @@ export default function AdminUsersPage() {
                 return (
                   <tr key={u.id} className="hover:bg-purple-950/20 transition-colors">
                     <td className="py-4 px-4">
-                      <div className="font-bold text-white">{u.name}</div>
-                      <div className="text-[10px] text-purple-400">{u.email}</div>
+                      <div className="flex items-center gap-3">
+                        {u.avatar ? (
+                          <img
+                            src={u.avatar}
+                            alt={u.name}
+                            className="w-9 h-9 rounded-xl object-cover shrink-0 border border-purple-500/40 shadow"
+                          />
+                        ) : (
+                          <div className="w-9 h-9 rounded-xl bg-purple-600/30 text-purple-300 font-bold flex items-center justify-center text-xs shrink-0 border border-purple-500/30">
+                            {u.name?.charAt(0) || 'U'}
+                          </div>
+                        )}
+                        <div>
+                          <div className="font-bold text-white">{u.name}</div>
+                          <div className="text-[10px] text-purple-400">{u.email}</div>
+                        </div>
+                      </div>
                     </td>
                     <td className="py-4 px-4">
                       <span

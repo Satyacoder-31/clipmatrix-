@@ -82,6 +82,7 @@ function ClipperProfileInner() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [avatar, setAvatar] = useState('');
   const [editingSoftware, setEditingSoftware] = useState('CapCut, Premiere Pro');
   const [experienceYears, setExperienceYears] = useState('1-3 years');
   const [clipperLevel, setClipperLevel] = useState('PRO_CLIPPER');
@@ -121,6 +122,7 @@ function ClipperProfileInner() {
         setName(meData.user.name || '');
         setEmail(meData.user.email || '');
         setPhone(meData.user.phone || '');
+        setAvatar(meData.user.avatar || '');
         if (meData.user.clipperProfile) {
           setEditingSoftware(meData.user.clipperProfile.editingSoftware || 'CapCut, Premiere Pro');
           setExperienceYears(meData.user.clipperProfile.experienceYears || '1-3 years');
@@ -296,9 +298,17 @@ function ClipperProfileInner() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             {/* Creator Avatar */}
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-500 to-purple-600 flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-cyan-500/20 shrink-0">
-              {initialLetter}
-            </div>
+            {avatar ? (
+              <img
+                src={avatar}
+                alt={name || 'Clipper'}
+                className="w-16 h-16 rounded-2xl object-cover shadow-lg shadow-cyan-500/20 shrink-0 border-2 border-cyan-500/40"
+              />
+            ) : (
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-500 to-purple-600 flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-cyan-500/20 shrink-0">
+                {initialLetter}
+              </div>
+            )}
 
             <div className="space-y-1">
               <div className="flex items-center gap-2.5">

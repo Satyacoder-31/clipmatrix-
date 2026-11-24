@@ -682,7 +682,15 @@ export default function AdminSubmissionsReviewPage() {
                     {/* Consolidated Clipper User & Specific Handle Badges */}
                     <div className="flex flex-wrap items-center gap-3 text-xs text-slate-300/90 pt-0.5">
                       <span className="flex items-center gap-1.5">
-                        <Users className="w-3.5 h-3.5 text-cyan-400" />
+                        {clipperUser?.avatar ? (
+                          <img
+                            src={clipperUser.avatar}
+                            alt={clipperUser.name || 'Clipper'}
+                            className="w-4 h-4 rounded-full object-cover shrink-0 border border-purple-400/40"
+                          />
+                        ) : (
+                          <Users className="w-3.5 h-3.5 text-cyan-400" />
+                        )}
                         <span>
                           Clipper User:{' '}
                           <strong className="text-white">
