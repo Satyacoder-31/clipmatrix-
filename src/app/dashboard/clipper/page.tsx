@@ -153,9 +153,11 @@ export default function ClipperOverviewPage() {
 
                   <div className="flex items-center gap-4">
                     <div className="text-right">
-                      <div className="font-bold text-white">{sub.verifiedViews.toLocaleString()} Views</div>
-                      <div className="text-emerald-400 font-semibold text-[11px]">
-                        {sub.rewardEarned > 0 ? `Earned ₹${sub.rewardEarned.toLocaleString('en-IN')}` : 'Calculating...'}
+                      <div className="font-bold text-white">
+                        {sub.verifiedViews > 0 ? `${sub.verifiedViews.toLocaleString()} Views` : `${(sub.reportedViews || 0).toLocaleString()} Views (Reported)`}
+                      </div>
+                      <div className="text-emerald-400 font-semibold text-[11px] font-mono">
+                        {sub.rewardEarned > 0 ? `Earned ${formatCurrency(sub.rewardEarned)}` : (sub.status === 'PENDING_REVIEW' ? 'Pending Review ($0.00)' : '$0.00')}
                       </div>
                     </div>
 

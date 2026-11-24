@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { formatCurrency } from '@/lib/utils';
 import {
   Users,
   Shield,
@@ -188,7 +189,7 @@ export default function AdminUsersPage() {
                       )}
                     </td>
                     <td className="py-4 px-4 font-bold text-white font-mono">
-                      ₹{u.wallet?.balance?.toLocaleString('en-IN') || 0}
+                      {formatCurrency(u.wallet?.balance || 0)}
                     </td>
                     <td className="py-4 px-4">
                       <span
@@ -250,7 +251,7 @@ export default function AdminUsersPage() {
                 </div>
               </div>
               <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                Wallet: ₹{payoutModalUser.wallet?.balance?.toLocaleString('en-IN') || 0}
+                Unpaid Earnings: {formatCurrency(payoutModalUser.wallet?.balance || 0)}
               </span>
             </div>
 

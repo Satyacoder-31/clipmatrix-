@@ -53,7 +53,7 @@ export default function ClipperSubmissionsPage() {
                   <th className="py-3 px-4">Clip Title & Campaign</th>
                   <th className="py-3 px-4">Platform</th>
                   <th className="py-3 px-4">Verified Views</th>
-                  <th className="py-3 px-4">Reward</th>
+                  <th className="py-3 px-4">Reward ($ USD)</th>
                   <th className="py-3 px-4">Status</th>
                   <th className="py-3 px-4">Action</th>
                 </tr>
@@ -61,6 +61,7 @@ export default function ClipperSubmissionsPage() {
               <tbody className="divide-y divide-purple-900/30">
                 {submissions.map((sub) => {
                   const badge = getStatusBadge(sub.status);
+                  const isPending = sub.status === 'PENDING_REVIEW' || sub.status === 'PENDING' || sub.status === 'SUBMITTED';
                   return (
                     <tr key={sub.id} className="hover:bg-purple-950/20 transition-colors">
                       <td className="py-3.5 px-4 font-mono text-purple-300">{sub.submissionNumber}</td>
@@ -79,23 +80,34 @@ export default function ClipperSubmissionsPage() {
                         </span>
                       </td>
                       <td className="py-3.5 px-4 font-bold text-white">
-                        {sub.verifiedViews > 0 ? (
+                        {sub.verifiedViews > 0 && !isPending ? (
                           <span className="text-cyan-400 flex items-center gap-1 font-mono">
                             <Eye className="w-3 h-3" /> {sub.verifiedViews.toLocaleString()}
                           </span>
                         ) : sub.reportedViews > 0 ? (
                           <span className="text-white/90 flex items-center gap-1 font-mono">
                             <Eye className="w-3 h-3 text-purple-400" /> {sub.reportedViews.toLocaleString()}
-                            <span className="text-[9px] text-amber-400 font-normal ml-1 bg-amber-400/10 px-1.5 py-0.5 rounded border border-amber-400/20">Reported</span>
+                            <span className="text-[9px] text-amber-400 font-normal ml-1 bg-amber-400/10 px-1.5 py-0.5 rounded border border-amber-400/20">
+                              {isPending ? 'Pending Audit' : 'Reported'}
+                            </span>
                           </span>
                         ) : (
                           <span className="text-purple-400/60 font-mono text-xs flex items-center gap-1">
-                            <Eye className="w-3 h-3 text-purple-500/40" /> 0 (Syncing)
+                            <Eye className="w-3 h-3 text-purple-500/40" /> 0 (Pending)
                           </span>
                         )}
                       </td>
-                      <td className="py-3.5 px-4 font-bold text-emerald-400">
-                        {sub.rewardEarned > 0 ? `₹${sub.rewardEarned.toLocaleString('en-IN')}` : '₹0'}
+                      <td className="py-3.5 px-4 font-bold">
+                        {sub.rewardEarned > 0 && !isPending ? (
+                          <span className="text-emerald-400 font-mono">{formatCurrency(sub.rewardEarned)}</span>
+                        ) : (
+                          <span className="text-slate-400 font-mono flex items-center gap-1 text-xs">
+                            $0.00
+                            <span className="text-[9px] text-amber-400 font-normal bg-amber-400/10 px-1 py-0.2 rounded border border-amber-400/20">
+                              Pending
+                            </span>
+                          </span>
+                        )}
                       </td>
                       <td className="py-3.5 px-4">
                         <span className={`px-2.5 py-1 rounded-full border text-[10px] font-bold ${badge.classes}`}>

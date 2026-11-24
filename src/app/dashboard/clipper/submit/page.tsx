@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { formatCurrency } from '@/lib/utils';
 import {
   ArrowLeft,
   Calendar,
@@ -492,7 +493,7 @@ export default function SubmitClipPage() {
                 <div className="p-5 rounded-3xl bg-gradient-to-b from-[#0f1322] to-[#070912] border border-white/[0.08]">
                   <div className="text-xs text-slate-400 mb-1">Total Earned</div>
                   <div className="text-2xl font-bold text-emerald-400 font-display">
-                    ₹{mySubmissions.reduce((acc, s) => acc + (s.rewardEarned || 0), 0).toLocaleString()}
+                    {formatCurrency(mySubmissions.reduce((acc, s) => acc + (s.rewardEarned || 0), 0))}
                   </div>
                 </div>
                 <div className="p-5 rounded-3xl bg-gradient-to-b from-[#0f1322] to-[#070912] border border-white/[0.08]">
@@ -508,9 +509,9 @@ export default function SubmitClipPage() {
             {activeTab === 'leaderboard' && (
               <div className="rounded-3xl bg-gradient-to-b from-[#0f1322] to-[#070912] border border-white/[0.08] p-5 space-y-2">
                 {[
-                  { rank: 1, name: 'Aarav Sharma', views: '4.2M views', earnings: '₹5,040' },
-                  { rank: 2, name: 'Ananya Joshi', views: '2.8M views', earnings: '₹3,360' },
-                  { rank: 3, name: 'Rohit Varma', views: '1.9M views', earnings: '₹2,280' },
+                  { rank: 1, name: 'Aarav Sharma', views: '4.2M views', earnings: '$2,100' },
+                  { rank: 2, name: 'Ananya Joshi', views: '2.8M views', earnings: '$1,400' },
+                  { rank: 3, name: 'Rohit Varma', views: '1.9M views', earnings: '$950' },
                 ].map((clipper) => (
                   <div
                     key={clipper.rank}
@@ -551,13 +552,13 @@ export default function SubmitClipPage() {
 
               <div className="flex justify-between items-center">
                 <span className="text-slate-400">Base CPM Rate</span>
-                <span className="font-bold text-white font-mono">₹{currentCampaign.cpmRate || 120}</span>
+                <span className="font-bold text-white font-mono">$0.50 / 1k views</span>
               </div>
 
               <div className="flex justify-between items-center">
                 <span className="text-slate-400">Total Campaign Budget</span>
                 <span className="font-bold text-white font-mono">
-                  ₹{totalBudget.toLocaleString()}
+                  {formatCurrency(totalBudget)}
                 </span>
               </div>
 
@@ -571,7 +572,7 @@ export default function SubmitClipPage() {
                 <div className="flex justify-between items-center text-xs font-mono">
                   <span className="text-slate-400">Budget Spent</span>
                   <span className="font-bold text-amber-400">
-                    ₹{usedBudget.toLocaleString()} ({budgetUsedPercent}%)
+                    {formatCurrency(usedBudget)} ({budgetUsedPercent}%)
                   </span>
                 </div>
                 <div className="w-full h-2 bg-white/[0.04] p-0.5 border border-white/5 rounded-full overflow-hidden">
