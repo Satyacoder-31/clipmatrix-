@@ -73,6 +73,36 @@ export async function GET(request: Request) {
       submissions = [];
     }
 
+    // If Brand is requesting, sanitize: NO clipper personal names/profiles, NO rewards/budget, ONLY views and social accounts
+    if (user.role === 'BRAND') {
+      const sanitizedSubmissions = submissions.map((sub) => {
+        const handle =
+          sub.clipper?.clipperProfile?.instagramHandle ||
+          sub.clipper?.clipperProfile?.youtubeHandle ||
+          sub.clipper?.clipperProfile?.tiktokHandle ||
+          `@clipper_${sub.id.slice(-4)}`;
+
+        return {
+          id: sub.id,
+          submissionNumber: sub.submissionNumber,
+          campaignId: sub.campaignId,
+          platform: sub.platform,
+          videoUrl: sub.videoUrl,
+          title: sub.title,
+          status: sub.status,
+          verifiedViews: sub.verifiedViews || 0,
+          reportedViews: sub.reportedViews || 0,
+          submittedAt: sub.submittedAt,
+          campaign: {
+            id: sub.campaign?.id,
+            title: sub.campaign?.title,
+          },
+          clipperAccount: handle, // ONLY the social media handle
+        };
+      });
+      return NextResponse.json({ submissions: sanitizedSubmissions });
+    }
+
     return NextResponse.json({ submissions });
   } catch (error) {
     console.error('Error fetching submissions:', error);

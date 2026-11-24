@@ -97,6 +97,15 @@ export async function POST(request: Request) {
       }
     }
 
+    // Role-based login gateway enforcement:
+    // Admin & Brand log in with ID/Password; Clippers must authenticate via Discord
+    if (user.role === 'CLIPPER') {
+      return NextResponse.json(
+        { error: 'Clipper accounts must log in with Discord. Please use the Discord Clipper Gateway.' },
+        { status: 403 }
+      );
+    }
+
     if (user.status === 'SUSPENDED') {
       return NextResponse.json({ error: 'Account has been suspended. Please contact support.' }, { status: 403 });
     }

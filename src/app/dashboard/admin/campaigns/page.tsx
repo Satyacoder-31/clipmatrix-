@@ -17,6 +17,7 @@ import {
   Sparkles,
   ShieldCheck,
   Edit3,
+  X,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -26,9 +27,29 @@ export default function AdminCampaignsPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [editingCamp, setEditingCamp] = useState<any>(null);
-  const [newCpm, setNewCpm] = useState(150);
-  const [newBudget, setNewBudget] = useState(50000);
+  const [newCpm, setNewCpm] = useState(0.50);
+  const [newBudget, setNewBudget] = useState(1500);
   const [toastMsg, setToastMsg] = useState('');
+
+  // Add Campaign Modal State
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [brands, setBrands] = useState<any[]>([]);
+  const [creating, setCreating] = useState(false);
+
+  // New Campaign Form Fields
+  const [newTitle, setNewTitle] = useState('');
+  const [newBrandId, setNewBrandId] = useState('');
+  const [newIndustry, setNewIndustry] = useState('Creator Economy');
+  const [newDescription, setNewDescription] = useState('');
+  const [newCampBudget, setNewCampBudget] = useState('1500');
+  const [newCampCpm, setNewCampCpm] = useState('0.50');
+  const [newTargetViews, setNewTargetViews] = useState('3000000');
+  const [newSourceUrl, setNewSourceUrl] = useState('');
+  const [newDriveUrl, setNewDriveUrl] = useState('');
+  const [newGuidelines, setNewGuidelines] = useState('Extract punchy hooks, add bold 2-word animated subtitles, and keep edits between 15-45s.');
+  const [newHashtags, setNewHashtags] = useState('#ad #viral');
+  const [newPlatforms, setNewPlatforms] = useState<string[]>(['INSTAGRAM', 'TIKTOK', 'YOUTUBE']);
+  const [newThumbnail, setNewThumbnail] = useState('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=80');
 
   const fetchCampaigns = () => {
     setLoading(true);
@@ -40,9 +61,98 @@ export default function AdminCampaignsPage() {
       .finally(() => setLoading(false));
   };
 
+  const fetchBrands = () => {
+    fetch('/api/admin/users?role=BRAND')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.users) {
+          setBrands(d.users);
+          if (d.users.length > 0 && !newBrandId) {
+            setNewBrandId(d.users[0].id);
+          }
+        }
+      })
+      .catch(() => {});
+  };
+
   useEffect(() => {
     fetchCampaigns();
+    fetchBrands();
   }, []);
+
+  // Update target views automatically when budget or CPM changes
+  const handleBudgetChange = (b: string) => {
+    setNewCampBudget(b);
+    const bNum = parseFloat(b) || 0;
+    const cpmNum = parseFloat(newCampCpm) || 0.5;
+    if (cpmNum > 0) {
+      setNewTargetViews(String(Math.round((bNum / cpmNum) * 1000)));
+    }
+  };
+
+  const handleCpmChange = (c: string) => {
+    setNewCampCpm(c);
+    const bNum = parseFloat(newCampBudget) || 0;
+    const cpmNum = parseFloat(c) || 0.5;
+    if (cpmNum > 0) {
+      setNewTargetViews(String(Math.round((bNum / cpmNum) * 1000)));
+    }
+  };
+
+  const handleTogglePlatform = (p: string) => {
+    if (newPlatforms.includes(p)) {
+      if (newPlatforms.length > 1) {
+        setNewPlatforms(newPlatforms.filter((x) => x !== p));
+      }
+    } else {
+      setNewPlatforms([...newPlatforms, p]);
+    }
+  };
+
+  const handleCreateCampaign = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTitle.trim()) return;
+
+    setCreating(true);
+    try {
+      const res = await fetch('/api/campaigns', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: newTitle,
+          brandId: newBrandId,
+          industry: newIndustry,
+          description: newDescription || newTitle,
+          totalBudget: parseFloat(newCampBudget) || 1000,
+          cpmRate: parseFloat(newCampCpm) || 0.50,
+          targetViews: parseInt(newTargetViews) || 2000000,
+          allowedPlatforms: newPlatforms.join(','),
+          sourceVideoUrl: newSourceUrl,
+          driveAssetsUrl: newDriveUrl,
+          thumbnailUrl: newThumbnail,
+          guidelines: newGuidelines,
+          requiredHashtags: newHashtags,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setToastMsg(`❌ ${data.error || 'Failed to create campaign'}`);
+        return;
+      }
+
+      setToastMsg(`✅ Campaign "${newTitle}" created and published to marketplace!`);
+      setAddModalOpen(false);
+      // Reset form
+      setNewTitle('');
+      setNewDescription('');
+      fetchCampaigns();
+    } catch {
+      setToastMsg('❌ An error occurred during campaign creation.');
+    } finally {
+      setCreating(false);
+    }
+  };
 
   const handleToggleStatus = async (id: string, currentStatus: string) => {
     const newStatus = currentStatus === 'ACTIVE' ? 'PAUSED' : 'ACTIVE';
@@ -109,23 +219,36 @@ export default function AdminCampaignsPage() {
             Campaign Controls & Budget Allocation
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Monitor all brand briefs, adjust campaign budgets, toggle campaign visibility, and inspect live submissions.
+            Create, post, and manage all creator campaigns. Brand sponsors track views while admins govern budgets.
           </p>
         </div>
 
-        <Link
-          href="/dashboard/admin/submissions"
-          className="px-5 py-2.5 rounded-xl font-bold text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 transition-all text-xs flex items-center gap-2 shadow-lg shadow-purple-500/20 self-start sm:self-auto"
-        >
-          <Film className="w-4 h-4 text-cyan-300" />
-          <span>Review Video Clips ↗</span>
-        </Link>
+        <div className="flex items-center gap-3 self-start sm:self-auto">
+          <button
+            onClick={() => {
+              fetchBrands();
+              setAddModalOpen(true);
+            }}
+            className="px-5 py-2.5 rounded-xl font-bold text-white bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 hover:from-emerald-500 hover:to-cyan-400 transition-all text-xs flex items-center gap-2 shadow-lg shadow-emerald-500/20 cursor-pointer"
+          >
+            <PlusCircle className="w-4 h-4" />
+            <span>+ Add Campaign</span>
+          </button>
+
+          <Link
+            href="/dashboard/admin/submissions"
+            className="px-4 py-2.5 rounded-xl font-bold text-slate-300 hover:text-white bg-white/[0.05] hover:bg-white/10 border border-white/10 transition-all text-xs flex items-center gap-2 cursor-pointer"
+          >
+            <Film className="w-4 h-4 text-cyan-300" />
+            <span>Review Clips ↗</span>
+          </Link>
+        </div>
       </div>
 
       {toastMsg && (
         <div className="p-4 rounded-xl bg-purple-950/90 border border-purple-500/40 text-xs text-white flex items-center justify-between shadow-lg">
           <span>{toastMsg}</span>
-          <button onClick={() => setToastMsg('')} className="text-purple-300 hover:text-white font-bold">
+          <button onClick={() => setToastMsg('')} className="text-purple-300 hover:text-white font-bold cursor-pointer">
             ✕
           </button>
         </div>
@@ -146,7 +269,7 @@ export default function AdminCampaignsPage() {
           <div className="text-2xl font-black text-cyan-400 font-display">
             {activeCount} / {campaigns.length}
           </div>
-          <div className="text-xs text-purple-300">Live on Clipper Marketplace</div>
+          <div className="text-xs text-purple-300 font-mono">Live on Clipper Marketplace</div>
         </div>
 
         <div className="p-5 rounded-2xl bg-[#0c1022] border border-white/[0.08] space-y-1">
@@ -154,7 +277,7 @@ export default function AdminCampaignsPage() {
           <div className="text-2xl font-black text-emerald-400 font-display">
             {totalVerifiedViews.toLocaleString()}
           </div>
-          <div className="text-xs text-slate-400">Audited via Social APIs</div>
+          <div className="text-xs text-slate-400 font-mono">Audited via Social APIs</div>
         </div>
       </div>
 
@@ -188,92 +311,84 @@ export default function AdminCampaignsPage() {
         </div>
       </div>
 
-      {/* Campaign Cards / Table */}
+      {/* Campaign Cards */}
       {loading ? (
         <div className="py-20 text-center text-slate-400">
           <span className="inline-block w-8 h-8 border-2 border-white/20 border-t-cyan-400 rounded-full animate-spin" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="py-20 text-center rounded-3xl bg-[#0c1022] border border-white/[0.08] space-y-2">
+        <div className="py-20 text-center rounded-3xl bg-[#0c1022] border border-white/[0.08] space-y-3">
           <FolderKanban className="w-10 h-10 text-slate-600 mx-auto" />
-          <h3 className="text-base font-bold text-white">No campaigns found</h3>
+          <h3 className="text-base font-bold text-white font-display">No campaigns found</h3>
+          <p className="text-xs text-slate-400 max-w-sm mx-auto">
+            Click "+ Add Campaign" above to post the first creator brief to the marketplace.
+          </p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {filtered.map((camp) => (
             <div
               key={camp.id}
-              className="p-5 sm:p-6 rounded-3xl bg-[#0c1022] border border-white/[0.08] hover:border-purple-500/40 transition-all space-y-4 shadow-xl"
+              className="p-6 rounded-3xl bg-gradient-to-b from-[#0f1322]/90 via-[#0a0d18]/95 to-[#060810] border border-white/[0.08] hover:border-purple-500/30 transition-all space-y-4 flex flex-col justify-between shadow-xl"
             >
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                <div className="space-y-1.5 min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
-                    <span className="text-cyan-400 font-bold bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
-                      {camp.industry || 'Tech & AI'}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-white/[0.04] border border-white/10 text-purple-300">
+                      {camp.industry || 'Creator'}
                     </span>
-                    <span className="text-slate-500">•</span>
-                    <span className="text-purple-300 font-semibold">{camp.brand?.name || 'Sponsor Brand'}</span>
-                    <span className="text-slate-500">•</span>
-                    <span
-                      className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
-                        camp.status === 'ACTIVE'
-                          ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                          : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                      }`}
-                    >
-                      {camp.status}
+                    <span className="text-xs text-slate-400 font-medium">
+                      Brand: <strong className="text-white">{camp.brand?.name || 'Clip Matrix Partner'}</strong>
                     </span>
                   </div>
 
-                  <h3 className="text-lg font-bold text-white font-display">{camp.title}</h3>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 text-xs">
-                    <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
-                      <div className="text-[10px] text-slate-400">Total Budget</div>
-                      <div className="font-bold text-white font-mono mt-0.5">
-                        ${camp.totalBudget?.toLocaleString()}
-                      </div>
-                    </div>
-                    <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
-                      <div className="text-[10px] text-slate-400">Remaining Budget</div>
-                      <div className="font-bold text-emerald-400 font-mono mt-0.5">
-                        ${camp.remainingBudget?.toLocaleString()}
-                      </div>
-                    </div>
-                    <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
-                      <div className="text-[10px] text-slate-400">Reward Model</div>
-                      <div className="font-bold text-cyan-300 font-mono mt-0.5">
-                        ${Number(camp.cpmRate || 0.50).toFixed(2)} CPM
-                      </div>
-                    </div>
-                    <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
-                      <div className="text-[10px] text-slate-400">Verified Views</div>
-                      <div className="font-bold text-white font-mono mt-0.5">
-                        {camp.verifiedViews?.toLocaleString() || 0}
-                      </div>
-                    </div>
-                  </div>
+                  <span
+                    className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+                      camp.status === 'ACTIVE'
+                        ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                        : 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                    }`}
+                  >
+                    {camp.status}
+                  </span>
                 </div>
 
-                {/* Right Controls */}
-                <div className="flex flex-wrap lg:flex-col items-stretch gap-2 shrink-0">
+                <h3 className="text-lg font-bold text-white font-display">{camp.title}</h3>
+                <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                  {camp.description}
+                </p>
+
+                <div className="grid grid-cols-3 gap-2 p-3 rounded-2xl bg-white/[0.03] border border-white/[0.06] text-center text-xs">
+                  <div>
+                    <div className="text-[10px] text-slate-400 font-mono">Budget Pool</div>
+                    <div className="font-bold text-white font-mono mt-0.5">${(camp.totalBudget || 0).toLocaleString()}</div>
+                  </div>
+                  <div>
+                    <div className="text-[10px] text-slate-400 font-mono">CPM Rate</div>
+                    <div className="font-bold text-cyan-400 font-mono mt-0.5">${Number(camp.cpmRate || 0.50).toFixed(2)}</div>
+                  </div>
+                  <div>
+                    <div className="text-[10px] text-slate-400 font-mono">Verified Views</div>
+                    <div className="font-bold text-emerald-400 font-mono mt-0.5">{(camp.verifiedViews || 0).toLocaleString()}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-3 flex items-center justify-between border-t border-white/[0.06] text-xs">
+                <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleToggleStatus(camp.id, camp.status)}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold text-white transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                      camp.status === 'ACTIVE'
-                        ? 'bg-amber-600/80 hover:bg-amber-600'
-                        : 'bg-emerald-600 hover:bg-emerald-500'
-                    }`}
+                    className="px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/10 text-slate-300 hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer font-medium"
                   >
                     {camp.status === 'ACTIVE' ? (
                       <>
-                        <Pause className="w-3.5 h-3.5" />
-                        <span>Pause Campaign</span>
+                        <Pause className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Pause</span>
                       </>
                     ) : (
                       <>
-                        <Play className="w-3.5 h-3.5" />
-                        <span>Activate</span>
+                        <Play className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>Resume</span>
                       </>
                     )}
                   </button>
@@ -281,23 +396,25 @@ export default function AdminCampaignsPage() {
                   <button
                     onClick={() => {
                       setEditingCamp(camp);
-                      setNewCpm(camp.cpmRate || 150);
-                      setNewBudget(camp.totalBudget || 50000);
+                      setNewCpm(camp.cpmRate || 0.50);
+                      setNewBudget(camp.totalBudget || 1500);
                     }}
-                    className="px-4 py-2 rounded-xl bg-white/[0.05] hover:bg-white/10 border border-white/10 text-xs font-semibold text-slate-300 hover:text-white flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                    className="px-3 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/25 transition-colors flex items-center gap-1.5 cursor-pointer font-medium"
                   >
-                    <Edit3 className="w-3.5 h-3.5 text-cyan-400" />
+                    <Edit3 className="w-3.5 h-3.5" />
                     <span>Edit Rates</span>
                   </button>
-
-                  <Link
-                    href={`/dashboard/admin/submissions?campaignId=${camp.id}`}
-                    className="px-4 py-2 rounded-xl bg-purple-950/70 hover:bg-purple-900 border border-purple-500/30 text-xs font-bold text-purple-200 hover:text-white flex items-center justify-center gap-1.5 transition-all"
-                  >
-                    <Film className="w-3.5 h-3.5 text-cyan-400" />
-                    <span>Review Clips</span>
-                  </Link>
                 </div>
+
+                <a
+                  href={`/campaigns/${camp.slug || camp.id}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-purple-400 hover:text-purple-300 flex items-center gap-1 font-semibold"
+                >
+                  <span>Preview Page</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
               </div>
             </div>
           ))}
@@ -344,19 +461,229 @@ export default function AdminCampaignsPage() {
               <button
                 type="button"
                 onClick={() => setEditingCamp(null)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white"
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleSaveBudget}
-                className="px-5 py-2.5 rounded-xl font-bold text-white bg-cyan-600 hover:bg-cyan-500 text-xs flex items-center gap-1.5 shadow-md shadow-cyan-500/20"
+                className="px-5 py-2.5 rounded-xl font-bold text-white bg-cyan-600 hover:bg-cyan-500 text-xs flex items-center gap-1.5 shadow-md shadow-cyan-500/20 cursor-pointer"
               >
                 <Check className="w-4 h-4" />
                 <span>Save Changes</span>
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Campaign Modal (Admin Only) */}
+      {addModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+          <div className="w-full max-w-2xl rounded-3xl bg-[#0d091e] border border-purple-500/40 p-6 sm:p-8 space-y-6 shadow-2xl my-8 relative">
+            <button
+              onClick={() => setAddModalOpen(false)}
+              className="absolute top-6 right-6 text-slate-400 hover:text-white font-bold cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-mono font-bold border border-emerald-500/30 mb-2">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>ADMIN CAMPAIGN DISPATCH</span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold text-white font-display">
+                Post New Campaign Brief
+              </h2>
+              <p className="text-xs text-slate-400 mt-1">
+                Configure rates, assign to a brand sponsor, and publish to the clipper marketplace.
+              </p>
+            </div>
+
+            <form onSubmit={handleCreateCampaign} className="space-y-4 text-xs">
+              {/* Brand Sponsor Selection */}
+              <div>
+                <label className="text-purple-300 font-semibold block mb-1">Brand Sponsor</label>
+                <select
+                  value={newBrandId}
+                  onChange={(e) => setNewBrandId(e.target.value)}
+                  className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white outline-none focus:border-cyan-400 cursor-pointer"
+                >
+                  {brands.length === 0 ? (
+                    <option value="">Default Brand Partner</option>
+                  ) : (
+                    brands.map((b) => (
+                      <option key={b.id} value={b.id}>
+                        {b.name} ({b.email})
+                      </option>
+                    ))
+                  )}
+                </select>
+              </div>
+
+              {/* Title & Industry */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-purple-300 font-semibold block mb-1">Campaign Title *</label>
+                  <input
+                    type="text"
+                    required
+                    value={newTitle}
+                    onChange={(e) => setNewTitle(e.target.value)}
+                    placeholder="e.g. Brendan Backstrom Clipping #11"
+                    className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white placeholder-slate-500 outline-none focus:border-cyan-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-purple-300 font-semibold block mb-1">Industry / Category</label>
+                  <select
+                    value={newIndustry}
+                    onChange={(e) => setNewIndustry(e.target.value)}
+                    className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white outline-none focus:border-cyan-400 cursor-pointer"
+                  >
+                    <option value="Creator Economy">Creator Economy</option>
+                    <option value="Tech & AI">Tech & AI</option>
+                    <option value="FinTech">FinTech</option>
+                    <option value="Gaming & Esports">Gaming & Esports</option>
+                    <option value="Music & Beats">Music & Beats</option>
+                    <option value="Lifestyle & Fitness">Lifestyle & Fitness</option>
+                    <option value="UGC & E-Commerce">UGC & E-Commerce</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="text-purple-300 font-semibold block mb-1">Campaign Description</label>
+                <textarea
+                  rows={2}
+                  value={newDescription}
+                  onChange={(e) => setNewDescription(e.target.value)}
+                  placeholder="Clip the highest-converting moments, podcast highlights, and viral insights..."
+                  className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white placeholder-slate-500 outline-none focus:border-cyan-400 resize-none"
+                />
+              </div>
+
+              {/* Budget, CPM, and Target Views */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="text-purple-300 font-semibold block mb-1">Total Budget ($)</label>
+                  <input
+                    type="number"
+                    min="100"
+                    step="50"
+                    value={newCampBudget}
+                    onChange={(e) => handleBudgetChange(e.target.value)}
+                    className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white font-mono outline-none focus:border-cyan-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-purple-300 font-semibold block mb-1">CPM Rate ($ / 1k views)</label>
+                  <input
+                    type="number"
+                    min="0.10"
+                    step="0.05"
+                    value={newCampCpm}
+                    onChange={(e) => handleCpmChange(e.target.value)}
+                    className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white font-mono outline-none focus:border-cyan-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-purple-300 font-semibold block mb-1">Target Views</label>
+                  <input
+                    type="number"
+                    value={newTargetViews}
+                    onChange={(e) => setNewTargetViews(e.target.value)}
+                    className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white font-mono outline-none focus:border-cyan-400"
+                  />
+                </div>
+              </div>
+
+              {/* Allowed Platforms */}
+              <div>
+                <label className="text-purple-300 font-semibold block mb-1.5">Eligible Channels</label>
+                <div className="flex flex-wrap gap-2">
+                  {['INSTAGRAM', 'TIKTOK', 'YOUTUBE', 'FACEBOOK'].map((p) => {
+                    const active = newPlatforms.includes(p);
+                    return (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => handleTogglePlatform(p)}
+                        className={`px-3 py-1.5 rounded-xl font-mono text-[11px] font-bold border transition-all cursor-pointer ${
+                          active
+                            ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50'
+                            : 'bg-white/[0.03] text-slate-400 border-white/10'
+                        }`}
+                      >
+                        {active ? '✓ ' : ''}{p}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Source Video & Drive Link */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-purple-300 font-semibold block mb-1">Master Source Video URL</label>
+                  <input
+                    type="url"
+                    value={newSourceUrl}
+                    onChange={(e) => setNewSourceUrl(e.target.value)}
+                    placeholder="https://youtube.com/watch?v=... or Google Drive"
+                    className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white placeholder-slate-500 outline-none focus:border-cyan-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-purple-300 font-semibold block mb-1">Drive / Asset Assets Folder</label>
+                  <input
+                    type="url"
+                    value={newDriveUrl}
+                    onChange={(e) => setNewDriveUrl(e.target.value)}
+                    placeholder="https://drive.google.com/drive/folders/..."
+                    className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white placeholder-slate-500 outline-none focus:border-cyan-400"
+                  />
+                </div>
+              </div>
+
+              {/* Guidelines */}
+              <div>
+                <label className="text-purple-300 font-semibold block mb-1">Clipping Rules & Guidelines</label>
+                <textarea
+                  rows={2}
+                  value={newGuidelines}
+                  onChange={(e) => setNewGuidelines(e.target.value)}
+                  className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white outline-none focus:border-cyan-400 resize-none"
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setAddModalOpen(false)}
+                  className="px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white cursor-pointer"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={creating}
+                  className="px-6 py-2.5 rounded-xl font-bold text-white bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-500 hover:opacity-90 transition-all shadow-lg shadow-emerald-500/25 flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>{creating ? 'Publishing...' : 'Publish Campaign'}</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -2,16 +2,17 @@
 
 import React, { useEffect, useState } from 'react';
 import {
-  CreditCard,
   TrendingUp,
   Eye,
   CheckCircle2,
-  Clock,
-  PlusCircle,
   ExternalLink,
   ArrowRight,
+  FolderKanban,
+  Sparkles,
+  Share2,
 } from 'lucide-react';
-import { formatCurrency, formatNumber, getStatusBadge } from '@/lib/utils';
+import { formatNumber, getStatusBadge } from '@/lib/utils';
+import Link from 'next/link';
 
 export default function BrandOverviewPage() {
   const [user, setUser] = useState<any>(null);
@@ -34,43 +35,39 @@ export default function BrandOverviewPage() {
   }, []);
 
   const totalVerifiedViews = submissions.reduce((acc, s) => acc + (s.verifiedViews || 0), 0);
-  const pendingCount = submissions.filter((s) => s.status === 'PENDING_REVIEW' || s.status === 'UNDER_REVIEW').length;
-  const approvedCount = submissions.filter((s) => s.status === 'APPROVED' || s.status === 'VIEWS_VERIFIED').length;
+  const totalTargetViews = campaigns.reduce((acc, c) => acc + (c.targetViews || 0), 0);
+  const completionPercent = totalTargetViews > 0
+    ? Math.min(100, Math.round((totalVerifiedViews / totalTargetViews) * 100))
+    : (campaigns.length > 0 ? 0 : 0);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 max-w-6xl">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-white/[0.08]">
         <div>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-mono font-bold mb-2">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>BRAND AUDIT TELEMETRY</span>
+          </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white font-display">
-            Brand Analytics Command Center
+            Campaign Reach & Performance Analytics
           </h1>
-          <p className="text-xs sm:text-sm text-purple-200/70">
-            Monitor real-time campaign reach, approve submitted clips, and audit verified short-form views.
+          <p className="text-xs sm:text-sm text-purple-200/70 mt-1">
+            Real-time verified views, video clips, and creator social distribution across your campaigns.
           </p>
         </div>
 
-        <a
-          href="/dashboard/brand/campaigns/new"
-          className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-purple-600 hover:bg-purple-500 transition-colors shadow-glow-purple flex items-center justify-center gap-2 self-start sm:self-auto"
+        <Link
+          href="/dashboard/brand/campaigns"
+          className="px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:opacity-90 transition-all shadow-lg shadow-purple-600/25 flex items-center gap-2 self-start sm:self-auto cursor-pointer"
         >
-          <PlusCircle className="w-4 h-4" />
-          <span>Launch New Campaign</span>
-        </a>
+          <FolderKanban className="w-4 h-4" />
+          <span>Track Campaigns</span>
+        </Link>
       </div>
 
-      {/* KPI Cards */}
+      {/* KPI Cards - Zero Budget / Currency, Focused on Views & Reach */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-[#140c26] border border-purple-900/50 space-y-1">
-          <div className="text-xs text-purple-300 font-medium flex items-center gap-1.5">
-            <CreditCard className="w-4 h-4 text-purple-400" /> Total Campaign Spend
-          </div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-white font-display">
-            {formatCurrency(user?.wallet?.lifetimeSpent ?? 0)}
-          </div>
-          <div className="text-[10px] text-purple-400">100% Escrow Accounted</div>
-        </div>
-
         <div className="p-5 rounded-2xl bg-[#140c26] border border-purple-900/50 space-y-1">
           <div className="text-xs text-purple-300 font-medium flex items-center gap-1.5">
             <Eye className="w-4 h-4 text-cyan-400" /> Total Verified Views
@@ -78,85 +75,119 @@ export default function BrandOverviewPage() {
           <div className="text-2xl sm:text-3xl font-extrabold text-cyan-400 font-display">
             {formatNumber(totalVerifiedViews ?? 0)}
           </div>
-          <div className="text-[10px] text-cyan-300/70">Average $0.12 Cost Per View</div>
+          <div className="text-[10px] text-cyan-300/70 font-mono">Organic Audited Views</div>
         </div>
 
         <div className="p-5 rounded-2xl bg-[#140c26] border border-purple-900/50 space-y-1">
           <div className="text-xs text-purple-300 font-medium flex items-center gap-1.5">
-            <Clock className="w-4 h-4 text-amber-400" /> Pending Review
-          </div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-amber-400 font-display">
-            {pendingCount} Submissions
-          </div>
-          <div className="text-[10px] text-amber-300/70">Awaiting Your Approval</div>
-        </div>
-
-        <div className="p-5 rounded-2xl bg-[#140c26] border border-purple-900/50 space-y-1">
-          <div className="text-xs text-purple-300 font-medium flex items-center gap-1.5">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Approved Video Clips
+            <TrendingUp className="w-4 h-4 text-emerald-400" /> Campaign Completion
           </div>
           <div className="text-2xl sm:text-3xl font-extrabold text-emerald-400 font-display">
-            {approvedCount} Clips
+            {completionPercent}%
           </div>
-          <div className="text-[10px] text-emerald-300/70">Across Reels & Shorts</div>
+          <div className="text-[10px] text-emerald-300/70 font-mono">
+            {totalVerifiedViews.toLocaleString()} / {(totalTargetViews || 0).toLocaleString()} Views
+          </div>
+        </div>
+
+        <div className="p-5 rounded-2xl bg-[#140c26] border border-purple-900/50 space-y-1">
+          <div className="text-xs text-purple-300 font-medium flex items-center gap-1.5">
+            <Share2 className="w-4 h-4 text-pink-400" /> Viral Social Clips
+          </div>
+          <div className="text-2xl sm:text-3xl font-extrabold text-white font-display">
+            {submissions.length} Clips
+          </div>
+          <div className="text-[10px] text-pink-300/70 font-mono">Circulating on Feeds</div>
+        </div>
+
+        <div className="p-5 rounded-2xl bg-[#140c26] border border-purple-900/50 space-y-1">
+          <div className="text-xs text-purple-300 font-medium flex items-center gap-1.5">
+            <CheckCircle2 className="w-4 h-4 text-purple-400" /> Active Campaigns
+          </div>
+          <div className="text-2xl sm:text-3xl font-extrabold text-white font-display">
+            {campaigns.length} Briefs
+          </div>
+          <div className="text-[10px] text-purple-300/70 font-mono">Managed by Clip Matrix Admins</div>
         </div>
       </div>
 
-      {/* Review Submissions Callout Table */}
-      <div className="rounded-2xl bg-[#140c26] border border-purple-900/50 p-6 space-y-4">
+      {/* Live Social Media Posts & Creator Accounts Table */}
+      <div className="rounded-2xl bg-[#140c26] border border-purple-900/50 p-6 space-y-4 shadow-xl">
         <div className="flex items-center justify-between pb-3 border-b border-purple-900/40">
           <div>
-            <h2 className="text-base font-bold text-white font-display">Pending Clip Review Queue</h2>
-            <p className="text-xs text-purple-300/70">Inspect incoming clips and approve them for CPM payouts.</p>
+            <h2 className="text-base font-bold text-white font-display">Recent Live Social Media Posts</h2>
+            <p className="text-xs text-purple-300/70">
+              Live short-form content circulating across creator social accounts.
+            </p>
           </div>
-          <a
+          <Link
             href="/dashboard/brand/submissions"
-            className="text-xs font-semibold text-purple-400 hover:text-purple-200"
+            className="text-xs font-semibold text-cyan-400 hover:text-cyan-300 flex items-center gap-1 group"
           >
-            Open Review Workbench
-          </a>
+            <span>View All Social Clips</span>
+            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+          </Link>
         </div>
 
-        <div className="divide-y divide-purple-900/30 text-xs">
-          {submissions.slice(0, 4).map((sub) => {
-            const badge = getStatusBadge(sub.status);
-            return (
-              <div key={sub.id} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-[10px] text-purple-400">{sub.submissionNumber}</span>
-                    <span className="text-purple-300">•</span>
-                    <span className="font-bold text-white">{sub.title}</span>
+        {loading ? (
+          <div className="py-12 text-center text-xs text-slate-400 font-mono">
+            Loading live social metrics...
+          </div>
+        ) : submissions.length === 0 ? (
+          <div className="py-12 text-center space-y-2">
+            <Share2 className="w-8 h-8 text-purple-400 mx-auto opacity-50" />
+            <h4 className="text-sm font-bold text-white font-display">No Clips Submitted Yet</h4>
+            <p className="text-xs text-purple-300/70 max-w-sm mx-auto">
+              As clippers post reels and shorts for your active briefs, their social accounts and verified view counts will appear here.
+            </p>
+          </div>
+        ) : (
+          <div className="divide-y divide-purple-900/30 text-xs">
+            {submissions.slice(0, 6).map((sub) => {
+              const badge = getStatusBadge(sub.status);
+              return (
+                <div key={sub.id} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-[10px] text-purple-400">{sub.submissionNumber}</span>
+                      <span className="text-purple-400">•</span>
+                      <span className="font-bold text-white">{sub.title}</span>
+                    </div>
+                    <div className="text-purple-300/70 text-[11px] flex flex-wrap items-center gap-2">
+                      <span className="px-2 py-0.5 rounded bg-white/[0.04] border border-white/10 text-cyan-300 font-mono">
+                        Account: {sub.clipperAccount || '@creator'}
+                      </span>
+                      <span>•</span>
+                      <span className="text-purple-300 font-semibold">{sub.platform}</span>
+                      <span>•</span>
+                      <a
+                        href={sub.videoUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-cyan-400 hover:underline inline-flex items-center gap-1 font-semibold"
+                      >
+                        <span>Watch Post</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
                   </div>
-                  <div className="text-purple-300/70 text-[11px] flex items-center gap-2">
-                    <span>By: {sub.clipper?.name}</span>
-                    <span>•</span>
-                    <span className="text-cyan-400">{sub.platform}</span>
-                    <span>•</span>
-                    <a
-                      href={sub.videoUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-purple-300 hover:underline flex items-center gap-0.5"
-                    >
-                      Watch Post <ExternalLink className="w-3 h-3" />
-                    </a>
-                  </div>
-                </div>
 
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    <div className="font-bold text-white">{sub.verifiedViews.toLocaleString()} Verified Views</div>
-                    <div className="text-[10px] text-emerald-400">Escrow Allocated</div>
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <div className="font-bold text-white text-sm font-mono">
+                        {(sub.verifiedViews || 0).toLocaleString()} Views
+                      </div>
+                      <div className="text-[10px] text-emerald-400 font-mono">Verified Reach</div>
+                    </div>
+                    <span className={`px-2.5 py-1 rounded-full border text-[10px] font-bold ${badge.classes}`}>
+                      {badge.label}
+                    </span>
                   </div>
-                  <span className={`px-2.5 py-1 rounded-full border text-[10px] font-bold ${badge.classes}`}>
-                    {badge.label}
-                  </span>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

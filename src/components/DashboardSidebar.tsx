@@ -55,8 +55,10 @@ export default function DashboardSidebar({
     router.refresh();
   };
 
+  type WorkspaceItem = { label: string; href: string; icon: any; badge?: string };
+
   // Distinct Clip Matrix Workspace Items
-  const clipperWorkspace = [
+  const clipperWorkspace: WorkspaceItem[] = [
     { label: 'Command Dashboard', href: '/dashboard/clipper', icon: LayoutDashboard },
     { label: 'Campaign Marketplace', href: '/dashboard/clipper/campaigns', icon: Compass, badge: 'LIVE' },
     { label: 'My Video Clips', href: '/dashboard/clipper/submissions', icon: Film },
@@ -66,17 +68,14 @@ export default function DashboardSidebar({
     { label: '5% Referrals', href: '/dashboard/clipper/referrals', icon: Share2 },
   ];
 
-  const brandWorkspace = [
-    { label: 'Brand Overview', href: '/dashboard/brand', icon: LayoutDashboard },
-    { label: 'Launch Campaign', href: '/dashboard/brand/campaigns/new', icon: PlusCircle, badge: 'NEW' },
-    { label: 'Campaign Manager', href: '/dashboard/brand/campaigns', icon: FolderKanban },
-    { label: 'Review Submissions', href: '/dashboard/brand/submissions', icon: CheckSquare },
-    { label: 'Billing & Treasury', href: '/dashboard/brand/billing', icon: CreditCard },
-    { label: 'Marketplace View', href: '/dashboard/clipper/campaigns', icon: Compass },
+  const brandWorkspace: WorkspaceItem[] = [
+    { label: 'Campaign Analytics', href: '/dashboard/brand', icon: LayoutDashboard },
+    { label: 'My Campaigns & Views', href: '/dashboard/brand/campaigns', icon: FolderKanban },
+    { label: 'Viral Social Clips', href: '/dashboard/brand/submissions', icon: CheckSquare },
     { label: 'Notifications', href: '/dashboard/clipper/notifications', icon: Bell },
   ];
 
-  const adminWorkspace = [
+  const adminWorkspace: WorkspaceItem[] = [
     { label: 'Command Hub', href: '/dashboard/admin', icon: LayoutDashboard },
     { label: 'Review Video Clips', href: '/dashboard/admin/submissions', icon: Film, badge: 'REVIEW' },
     { label: 'Verify Views Engine', href: '/dashboard/admin/verification', icon: CheckSquare, badge: 'LIVE' },

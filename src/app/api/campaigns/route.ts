@@ -14,6 +14,14 @@ export async function GET(request: Request) {
 
     const where: any = {};
 
+    const user = await getCurrentUser();
+    const brandId = searchParams.get('brandId');
+    if (brandId) {
+      where.brandId = brandId;
+    } else if (user?.role === 'BRAND') {
+      where.brandId = user.id;
+    }
+
     if (status && status !== 'ALL') {
       where.status = status;
     } else if (!status) {
@@ -78,6 +86,35 @@ export async function GET(request: Request) {
       campaigns = [];
     }
 
+    // If Brand is requesting, strip all financial/budget fields - show ONLY views and completion
+    if (user?.role === 'BRAND') {
+      const sanitizedCampaigns = campaigns.map((c) => {
+        const targetViews = c.targetViews || 0;
+        const verifiedViews = c.verifiedViews || 0;
+        const completionPercent = targetViews > 0 ? Math.min(100, Math.round((verifiedViews / targetViews) * 100)) : 0;
+        return {
+          id: c.id,
+          title: c.title,
+          slug: c.slug,
+          industry: c.industry,
+          description: c.description,
+          objective: c.objective,
+          thumbnailUrl: c.thumbnailUrl,
+          allowedPlatforms: c.allowedPlatforms,
+          targetViews,
+          verifiedViews,
+          completionPercent,
+          status: c.status,
+          createdAt: c.createdAt,
+          sourceVideoUrl: c.sourceVideoUrl,
+          driveAssetsUrl: c.driveAssetsUrl,
+          guidelines: c.guidelines,
+          _count: c._count,
+        };
+      });
+      return NextResponse.json({ campaigns: sanitizedCampaigns });
+    }
+
     return NextResponse.json({ campaigns });
   } catch (error) {
     console.error('Error fetching campaigns:', error);
@@ -88,13 +125,18 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const user = await getCurrentUser();
-    if (!user || (user.role !== 'BRAND' && user.role !== 'ADMIN')) {
-      return NextResponse.json({ error: 'Unauthorized: Only Brands or Admins can create campaigns' }, { status: 403 });
+    // Only administrators can manage and post campaigns
+    if (!user || user.role !== 'ADMIN') {
+      return NextResponse.json(
+        { error: 'Unauthorized: Campaigns are managed and posted by Clip Matrix Administrators only.' },
+        { status: 403 }
+      );
     }
 
     const body = await request.json();
     const {
       title,
+      brandId: requestedBrandId,
       industry,
       description,
       objective,
@@ -106,10 +148,10 @@ export async function POST(request: Request) {
       hookSuggestions,
       prohibitedContent,
       requiredHashtags,
-      allowedPlatforms, // array or string
+      allowedPlatforms,
       minDurationSec,
       maxDurationSec,
-      rewardModel, // 'CPM' | 'FIXED' | 'MILESTONE' | 'HYBRID'
+      rewardModel,
       rewardPerClip,
       cpmRate,
       maxRewardPerClip,
@@ -118,96 +160,58 @@ export async function POST(request: Request) {
       deadline,
     } = body;
 
-    if (!title || !description || !guidelines || !totalBudget) {
-      return NextResponse.json({ error: 'Please provide all required campaign fields' }, { status: 400 });
+    if (!title || !description) {
+      return NextResponse.json({ error: 'Campaign title and description are required' }, { status: 400 });
     }
 
-    const budgetNum = parseFloat(totalBudget);
-    if (isNaN(budgetNum) || budgetNum < 100) {
-      return NextResponse.json({ error: 'Minimum campaign budget is $100' }, { status: 400 });
+    // Determine target brand sponsor
+    let assignedBrandId = requestedBrandId;
+    if (!assignedBrandId) {
+      const defaultBrand = await prisma.user.findFirst({ where: { role: 'BRAND' } });
+      assignedBrandId = defaultBrand ? defaultBrand.id : user.id;
     }
 
-    // Check brand wallet balance
-    const brandWallet = await prisma.wallet.findUnique({
-      where: { userId: user.id },
-    });
+    const budgetNum = parseFloat(totalBudget) || 1000;
+    const cpmNum = parseFloat(cpmRate) || 0.50;
+    const targetViewsNum = parseInt(targetViews) || Math.floor((budgetNum / (cpmNum || 0.5)) * 1000);
 
-    if (user.role === 'BRAND') {
-      if (!brandWallet || brandWallet.balance < budgetNum) {
-        return NextResponse.json(
-          { error: `Insufficient treasury balance (Available: $${(brandWallet?.balance || 0).toFixed(2)}). Please fund your campaign balance first.` },
-          { status: 400 }
-        );
-      }
-    }
-
-    // Slug generation
     const slug = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')}-${Date.now().toString().slice(-4)}`;
 
     const platformsString = Array.isArray(allowedPlatforms)
       ? allowedPlatforms.join(',')
       : (allowedPlatforms || 'INSTAGRAM,YOUTUBE,TIKTOK');
 
-    // Create campaign in transaction + lock escrow
-    const newCampaign = await prisma.$transaction(async (tx) => {
-      const camp = await tx.campaign.create({
-        data: {
-          title,
-          slug,
-          brandId: user.id,
-          industry: industry || 'Tech & AI',
-          description,
-          objective: objective || 'Drive brand awareness & viral reach',
-          sourceVideoUrl: sourceVideoUrl || '',
-          driveAssetsUrl: driveAssetsUrl || '',
-          rawVideoDownloadUrl: rawVideoDownloadUrl || '',
-          thumbnailUrl: thumbnailUrl || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=80',
-          guidelines,
-          hookSuggestions: hookSuggestions || '',
-          prohibitedContent: prohibitedContent || '',
-          requiredHashtags: requiredHashtags || '#viral #ad',
-          allowedPlatforms: platformsString,
-          minDurationSec: parseInt(minDurationSec) || 15,
-          maxDurationSec: parseInt(maxDurationSec) || 60,
-          aspectRatio: '9:16',
-          rewardModel: rewardModel || 'CPM',
-          rewardPerClip: parseFloat(rewardPerClip) || 0,
-          cpmRate: parseFloat(cpmRate) || 0.5,
-          maxRewardPerClip: parseFloat(maxRewardPerClip) || 1000,
-          totalBudget: budgetNum,
-          remainingBudget: budgetNum,
-          targetViews: parseInt(targetViews) || Math.floor((budgetNum / 0.5) * 1000),
-          status: 'ACTIVE', // Automatically active or ready
-          isFeatured: true,
-          deadline: deadline ? new Date(deadline) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-        },
-      });
-
-      // If brand created it, deduct from available balance and move to escrow
-      if (brandWallet && user.role === 'BRAND') {
-        await tx.wallet.update({
-          where: { userId: user.id },
-          data: {
-            balance: { decrement: budgetNum },
-            escrowBalance: { increment: budgetNum },
-            lifetimeSpent: { increment: budgetNum },
-          },
-        });
-
-        await tx.transaction.create({
-          data: {
-            walletId: brandWallet.id,
-            userId: user.id,
-            amount: -budgetNum,
-            type: 'CAMPAIGN_ESCROW_LOCK',
-            status: 'COMPLETED',
-            description: `Escrow allocation for campaign: "${title}"`,
-            referenceId: camp.id,
-          },
-        });
-      }
-
-      return camp;
+    const newCampaign = await prisma.campaign.create({
+      data: {
+        title,
+        slug,
+        brandId: assignedBrandId,
+        industry: industry || 'Tech & AI',
+        description: description || title,
+        objective: objective || 'Drive brand awareness & viral reach',
+        sourceVideoUrl: sourceVideoUrl || '',
+        driveAssetsUrl: driveAssetsUrl || '',
+        rawVideoDownloadUrl: rawVideoDownloadUrl || '',
+        thumbnailUrl: thumbnailUrl || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=80',
+        guidelines: guidelines || 'Create high-engagement vertical clips adhering to platform guidelines.',
+        hookSuggestions: hookSuggestions || '',
+        prohibitedContent: prohibitedContent || '',
+        requiredHashtags: requiredHashtags || '#viral #ad',
+        allowedPlatforms: platformsString,
+        minDurationSec: parseInt(minDurationSec) || 15,
+        maxDurationSec: parseInt(maxDurationSec) || 60,
+        aspectRatio: '9:16',
+        rewardModel: rewardModel || 'CPM',
+        rewardPerClip: parseFloat(rewardPerClip) || 0,
+        cpmRate: cpmNum,
+        maxRewardPerClip: parseFloat(maxRewardPerClip) || 1000,
+        totalBudget: budgetNum,
+        remainingBudget: budgetNum,
+        targetViews: targetViewsNum,
+        status: 'ACTIVE',
+        isFeatured: true,
+        deadline: deadline ? new Date(deadline) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      },
     });
 
     return NextResponse.json({ success: true, campaign: newCampaign });

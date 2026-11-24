@@ -155,18 +155,16 @@ export default function LoginPage() {
                 <div className="text-[10px] text-purple-300/70 mt-0.5 truncate">Aether AI Labs</div>
               </button>
 
-              <button
-                type="button"
-                onClick={() => handleLogin(undefined, 'CLIPPER')}
-                disabled={loading}
-                className="p-3 rounded-xl bg-[#5865F2]/20 hover:bg-[#5865F2]/35 border border-[#5865F2]/50 text-left transition-all group cursor-pointer"
+              <Link
+                href="/auth/register-clipper"
+                className="p-3 rounded-xl bg-[#5865F2]/20 hover:bg-[#5865F2]/35 border border-[#5865F2]/50 text-left transition-all group cursor-pointer block"
               >
                 <div className="flex items-center gap-2 text-xs font-bold text-[#8ea1e1]">
                   <Scissors className="w-3.5 h-3.5 text-[#5865F2] -rotate-45" />
                   <span>Clipper (Discord)</span>
                 </div>
-                <div className="text-[10px] text-slate-300/70 mt-0.5 truncate">Aarav (Elite Clipper)</div>
-              </button>
+                <div className="text-[10px] text-slate-300/70 mt-0.5 truncate">Discord OAuth Gateway</div>
+              </Link>
 
               <button
                 type="button"
@@ -185,7 +183,7 @@ export default function LoginPage() {
           <div className="relative flex items-center justify-center">
             <div className="border-t border-purple-900/50 w-full" />
             <span className="bg-[#120a22] px-3 text-[11px] font-mono text-purple-400 uppercase">
-              Or Sign In With Email
+              Admin & Brand/Creator Sign In
             </span>
           </div>
 
