@@ -73,9 +73,9 @@ export default function BrandBillingPage() {
         <div className="p-6 rounded-2xl bg-[#140c26] border border-purple-900/50 space-y-2">
           <div className="text-xs text-purple-300 uppercase font-mono">Lifetime Deployed</div>
           <div className="text-3xl font-extrabold text-cyan-400 font-display">
-            {formatCurrency(wallet?.lifetimeSpent || 350000)}
+            {formatCurrency(wallet?.lifetimeSpent ?? 0)}
           </div>
-          <div className="text-xs text-cyan-300/70">Delivered 2.4M+ verified views</div>
+          <div className="text-xs text-cyan-300/70">Verified organic reach</div>
         </div>
       </div>
 

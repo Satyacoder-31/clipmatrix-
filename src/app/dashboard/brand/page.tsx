@@ -66,7 +66,7 @@ export default function BrandOverviewPage() {
             <CreditCard className="w-4 h-4 text-purple-400" /> Total Campaign Spend
           </div>
           <div className="text-2xl sm:text-3xl font-extrabold text-white font-display">
-            {formatCurrency(user?.wallet?.lifetimeSpent || 350000)}
+            {formatCurrency(user?.wallet?.lifetimeSpent ?? 0)}
           </div>
           <div className="text-[10px] text-purple-400">100% Escrow Accounted</div>
         </div>
@@ -76,9 +76,9 @@ export default function BrandOverviewPage() {
             <Eye className="w-4 h-4 text-cyan-400" /> Total Verified Views
           </div>
           <div className="text-2xl sm:text-3xl font-extrabold text-cyan-400 font-display">
-            {formatNumber(totalVerifiedViews || 257000)}
+            {formatNumber(totalVerifiedViews ?? 0)}
           </div>
-          <div className="text-[10px] text-cyan-300/70">Average ₹0.12 Cost Per View</div>
+          <div className="text-[10px] text-cyan-300/70">Average $0.12 Cost Per View</div>
         </div>
 
         <div className="p-5 rounded-2xl bg-[#140c26] border border-purple-900/50 space-y-1">

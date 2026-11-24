@@ -21,6 +21,7 @@ import {
   Zap,
   Eye,
   Lock,
+  Sparkles,
 } from 'lucide-react';
 
 // Platform SVG Icons
@@ -52,10 +53,11 @@ export default function SubmitClipPage() {
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [selectedCampaignId, setSelectedCampaignId] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<'submissions' | 'stats' | 'leaderboard'>('submissions');
   const [mySubmissions, setMySubmissions] = useState<any[]>([]);
+  const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [helpOpen, setHelpOpen] = useState(false);
 
@@ -64,6 +66,7 @@ export default function SubmitClipPage() {
 
   // Load campaigns
   useEffect(() => {
+    setLoading(true);
     fetch('/api/campaigns?status=ALL')
       .then((r) => r.json())
       .then((data) => {
@@ -75,10 +78,26 @@ export default function SubmitClipPage() {
           } else {
             setSelectedCampaignId(data.campaigns[0].id);
           }
+        } else {
+          setCampaigns([]);
+          setSelectedCampaignId('');
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        setCampaigns([]);
+      })
+      .finally(() => setLoading(false));
   }, [searchParams]);
+
+  // Load real leaderboard rankings
+  useEffect(() => {
+    fetch('/api/leaderboard')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.clippers) setLeaderboard(data.clippers);
+      })
+      .catch(() => {});
+  }, []);
 
   // Load user submissions for this campaign
   const fetchMySubmissions = (campaignId: string) => {
@@ -111,30 +130,18 @@ export default function SubmitClipPage() {
 
   const detected = detectPlatform(videoUrl);
 
-  const currentCampaign = campaigns.find((c) => c.id === selectedCampaignId) || {
-    id: selectedCampaignId || 'camp-default',
-    title: 'Brendan Backstrom Clipping #10',
-    description: 'Brendan Backstrom Clipping #10',
-    cpmRate: 120,
-    totalBudget: 10000,
-    remainingBudget: 2915,
-    targetViews: 10000000,
-    verifiedViews: 8765909,
-    status: 'ACTIVE',
-    avgReview: '8.8h',
-    minViewsForPayout: '100,000 views',
-  };
+  const currentCampaign = campaigns.find((c) => c.id === selectedCampaignId) || (campaigns.length > 0 ? campaigns[0] : null);
 
   // Budget calculations
-  const totalBudget = currentCampaign.totalBudget || 10000;
-  const remainingBudget = currentCampaign.remainingBudget !== undefined ? currentCampaign.remainingBudget : 2915;
+  const totalBudget = currentCampaign ? (currentCampaign.totalBudget || 0) : 0;
+  const remainingBudget = currentCampaign ? (currentCampaign.remainingBudget !== undefined ? currentCampaign.remainingBudget : totalBudget) : 0;
   const usedBudget = Math.max(0, totalBudget - remainingBudget);
-  const budgetUsedPercent = Math.min(100, Math.round((usedBudget / (totalBudget || 1)) * 100));
+  const budgetUsedPercent = totalBudget > 0 ? Math.min(100, Math.round((usedBudget / totalBudget) * 100)) : 0;
 
   // View calculations
-  const targetViews = currentCampaign.targetViews || 10000000;
-  const verifiedViews = currentCampaign.verifiedViews || 8765909;
-  const viewProgressPercent = Math.min(100, Math.round((verifiedViews / (targetViews || 1)) * 100));
+  const targetViews = currentCampaign ? (currentCampaign.targetViews || 0) : 0;
+  const verifiedViews = currentCampaign ? (currentCampaign.verifiedViews || 0) : 0;
+  const viewProgressPercent = targetViews > 0 ? Math.min(100, Math.round((verifiedViews / targetViews) * 100)) : 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -170,6 +177,39 @@ export default function SubmitClipPage() {
       setSubmitting(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#07090e] text-slate-200 flex items-center justify-center">
+        <div className="text-slate-400 font-mono text-sm animate-pulse">Loading campaign brief...</div>
+      </div>
+    );
+  }
+
+  if (!currentCampaign) {
+    return (
+      <div className="min-h-screen bg-[#07090e] text-slate-200 py-16 px-4">
+        <div className="max-w-md mx-auto rounded-3xl bg-gradient-to-b from-[#0f1322]/90 via-[#0a0d18]/95 to-[#060810] border border-white/[0.08] p-8 sm:p-10 text-center space-y-4 shadow-2xl">
+          <div className="w-16 h-16 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center mx-auto text-purple-300 shadow-[0_0_20px_rgba(168,85,247,0.25)]">
+            <Sparkles className="w-8 h-8 text-cyan-400" />
+          </div>
+          <h2 className="text-xl sm:text-2xl font-bold text-white font-display">No Active Campaigns</h2>
+          <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+            There are currently no active campaigns available to submit clips to. Wait for brands to fund new briefs or browse the campaign marketplace.
+          </p>
+          <div className="pt-2">
+            <Link
+              href="/dashboard/clipper/campaigns"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:opacity-90 transition-all shadow-lg shadow-purple-600/30 cursor-pointer"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Browse Marketplace</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#07090e] text-slate-200 pb-20">
@@ -241,7 +281,7 @@ export default function SubmitClipPage() {
               </span>
               <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono font-bold">
                 <DollarSign className="w-3.5 h-3.5" />
-                <span>$0.50 CPM</span>
+                <span>${Number(currentCampaign.cpmRate || 0.50).toFixed(2)} CPM</span>
               </span>
               <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.03] border border-white/10 font-mono">
                 <Users className="w-3.5 h-3.5 text-purple-400" />
@@ -509,25 +549,31 @@ export default function SubmitClipPage() {
             {/* Tab: Leaderboard */}
             {activeTab === 'leaderboard' && (
               <div className="rounded-3xl bg-gradient-to-b from-[#0f1322] to-[#070912] border border-white/[0.08] p-5 space-y-2">
-                {[
-                  { rank: 1, name: 'Aarav Sharma', views: '4.2M views', earnings: '$2,100' },
-                  { rank: 2, name: 'Ananya Joshi', views: '2.8M views', earnings: '$1,400' },
-                  { rank: 3, name: 'Rohit Varma', views: '1.9M views', earnings: '$950' },
-                ].map((clipper) => (
-                  <div
-                    key={clipper.rank}
-                    className="flex items-center justify-between p-3.5 rounded-2xl bg-black/30 border border-white/5 text-xs"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="font-bold text-cyan-400 w-5">#{clipper.rank}</span>
-                      <span className="font-semibold text-white">{clipper.name}</span>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <span className="text-slate-400">{clipper.views}</span>
-                      <span className="font-bold text-emerald-400">{clipper.earnings}</span>
-                    </div>
+                {leaderboard.length === 0 ? (
+                  <div className="p-8 text-center space-y-3">
+                    <Trophy className="w-8 h-8 text-cyan-400 mx-auto opacity-70" />
+                    <div className="text-sm font-bold text-white font-display">Viral Leaderboard is Fresh</div>
+                    <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
+                      No clips have been verified yet. Submit your clip above to claim the #1 rank on the leaderboard!
+                    </p>
                   </div>
-                ))}
+                ) : (
+                  leaderboard.map((clipper) => (
+                    <div
+                      key={clipper.id || clipper.rank}
+                      className="flex items-center justify-between p-3.5 rounded-2xl bg-black/30 border border-white/5 text-xs"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="font-bold text-cyan-400 w-5">#{clipper.rank}</span>
+                        <span className="font-semibold text-white">{clipper.name}</span>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <span className="text-slate-400">{(clipper.views || 0).toLocaleString()} views</span>
+                        <span className="font-bold text-emerald-400">{formatCurrency(clipper.earned || 0)}</span>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             )}
           </div>
@@ -553,7 +599,7 @@ export default function SubmitClipPage() {
 
               <div className="flex justify-between items-center">
                 <span className="text-slate-400">Base CPM Rate</span>
-                <span className="font-bold text-white font-mono">$0.50 / 1k views</span>
+                <span className="font-bold text-white font-mono">${Number(currentCampaign.cpmRate || 0.50).toFixed(2)} / 1k views</span>
               </div>
 
               <div className="flex justify-between items-center">
@@ -603,7 +649,7 @@ export default function SubmitClipPage() {
               <div className="flex justify-between items-center pt-2 border-t border-white/[0.06]">
                 <span className="text-slate-400">Min. Views for Payout</span>
                 <span className="font-semibold text-white font-mono">
-                  {currentCampaign.minViewsForPayout || '100,000 views'}
+                  {currentCampaign.minViewsForPayout || '1,000 views'}
                 </span>
               </div>
             </div>

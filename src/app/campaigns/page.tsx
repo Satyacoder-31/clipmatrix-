@@ -168,16 +168,31 @@ export default function MarketplacePage() {
             </button>
           </div>
 
+          {/* If No Campaigns */}
+          {!loading && campaigns.length === 0 && (
+            <div className="rounded-3xl bg-gradient-to-b from-[#110e26]/90 via-[#0a0818]/95 to-[#060410] border border-purple-500/30 p-10 text-center space-y-4 shadow-2xl flex flex-col items-center justify-center">
+              <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-300 shadow-[0_0_20px_rgba(168,85,247,0.25)]">
+                <Sparkles className="w-7 h-7 text-cyan-400" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white font-display">No Active Campaigns</h3>
+                <p className="text-xs text-purple-200/70 max-w-xs mx-auto leading-relaxed mt-1">
+                  All previous campaigns have concluded or are awaiting new budget funding from brand sponsors.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Dynamic Active Campaigns */}
           {campaigns.map((camp) => {
-            const totalBudget = camp.totalBudget || 50000;
-            const remainingBudget = camp.remainingBudget ?? totalBudget;
+            const totalBudget = camp.totalBudget || 0;
+            const remainingBudget = camp.remainingBudget !== undefined ? camp.remainingBudget : totalBudget;
             const usedBudget = Math.max(0, totalBudget - remainingBudget);
-            const budgetPercent = Math.min(100, Math.round((usedBudget / totalBudget) * 100));
+            const budgetPercent = totalBudget > 0 ? Math.min(100, Math.round((usedBudget / totalBudget) * 100)) : 0;
 
-            const targetViews = camp.targetViews || 500000;
+            const targetViews = camp.targetViews || 0;
             const verifiedViews = camp.verifiedViews || 0;
-            const viewsPercent = Math.min(100, Math.round((verifiedViews / targetViews) * 100));
+            const viewsPercent = targetViews > 0 ? Math.min(100, Math.round((verifiedViews / targetViews) * 100)) : 0;
 
             const platformsList = (camp.allowedPlatforms || 'INSTAGRAM,YOUTUBE,TIKTOK').toUpperCase();
 
@@ -220,7 +235,7 @@ export default function MarketplacePage() {
                   <div className="p-3.5 rounded-2xl bg-white/[0.03] backdrop-blur-md border border-white/[0.06] flex items-center justify-between">
                     <div className="flex items-baseline gap-1.5">
                       <span className="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-300 font-display">
-                        ₹{camp.cpmRate || 120}
+                        ${Number(camp.cpmRate || 0.50).toFixed(2)}
                       </span>
                       <span className="text-[11px] text-purple-300 font-mono">/ 1K CPM</span>
                     </div>

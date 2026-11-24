@@ -51,10 +51,10 @@ export default function AdminOverviewPage() {
             <Users className="w-4 h-4 text-purple-400" /> Total Ecosystem Users
           </div>
           <div className="text-2xl sm:text-3xl font-extrabold text-white font-display">
-            {metrics?.totalUsers || 6}
+            {metrics?.totalUsers ?? 0}
           </div>
           <div className="text-[10px] text-purple-400">
-            {metrics?.totalBrands || 3} Brands • {metrics?.totalClippers || 3} Clippers
+            {metrics?.totalBrands ?? 0} Brands • {metrics?.totalClippers ?? 0} Clippers
           </div>
         </div>
 
@@ -63,7 +63,7 @@ export default function AdminOverviewPage() {
             <Eye className="w-4 h-4 text-cyan-400" /> Verified Organic Views
           </div>
           <div className="text-2xl sm:text-3xl font-extrabold text-cyan-400 font-display">
-            {formatNumber(metrics?.totalVerifiedViews || 319000)}
+            {formatNumber(metrics?.totalVerifiedViews ?? 0)}
           </div>
           <div className="text-[10px] text-cyan-300/70">Audited Through View Snapshots</div>
         </div>
@@ -73,7 +73,7 @@ export default function AdminOverviewPage() {
             <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Total Payouts Dispatched
           </div>
           <div className="text-2xl sm:text-3xl font-extrabold text-emerald-400 font-display">
-            {formatCurrency(metrics?.totalCompletedPayoutAmount || 15000)}
+            {formatCurrency(metrics?.totalCompletedPayoutAmount ?? 0)}
           </div>
           <div className="text-[10px] text-emerald-300/70">Settled via RazorpayX / UPI</div>
         </div>
@@ -83,7 +83,7 @@ export default function AdminOverviewPage() {
             <TrendingUp className="w-4 h-4 text-amber-400" /> Platform Net Revenue (15%)
           </div>
           <div className="text-2xl sm:text-3xl font-extrabold text-amber-400 font-display">
-            {formatCurrency(metrics?.estimatedPlatformRevenue || 38000)}
+            {formatCurrency(metrics?.estimatedPlatformRevenue ?? 0)}
           </div>
           <div className="text-[10px] text-amber-300/70">Retained Commission</div>
         </div>

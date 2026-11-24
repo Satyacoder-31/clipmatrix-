@@ -69,79 +69,13 @@ export default function ClipperCampaignMarketplacePage() {
 
       const res = await fetch(`/api/campaigns?${params.toString()}`);
       const data = await res.json();
-      if (data.campaigns && data.campaigns.length > 0) {
+      if (data.campaigns) {
         setCampaigns(data.campaigns);
       } else {
-        // Fallback demo campaigns with rich stats
-        setCampaigns([
-          {
-            id: 'camp-1',
-            title: 'Brendan Backstrom Clipping #10',
-            slug: 'brendan-backstrom-10',
-            industry: 'Creator Economy',
-            cpmRate: 85,
-            totalBudget: 100000,
-            remainingBudget: 29000,
-            targetViews: 10000000,
-            verifiedViews: 8800000,
-            status: 'ACTIVE',
-            avgReview: '8.8h',
-            allowedPlatforms: 'INSTAGRAM,TIKTOK,YOUTUBE',
-            discordUrl: 'https://discord.gg/clipmatrix',
-            avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100',
-          },
-          {
-            id: 'camp-2',
-            title: 'Lexnour Clipping #4',
-            slug: 'lexnour-clipping-4',
-            industry: 'Music & Beats',
-            cpmRate: 90,
-            totalBudget: 10000,
-            remainingBudget: 454,
-            targetViews: 1000000,
-            verifiedViews: 1000000,
-            status: 'ACTIVE',
-            avgReview: '3.4d',
-            allowedPlatforms: 'TIKTOK',
-            discordUrl: 'https://discord.gg/clipmatrix',
-            avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100',
-          },
-          {
-            id: 'camp-3',
-            title: 'Dr. Dre-DAX Clipping',
-            slug: 'dr-dre-dax-clipping',
-            industry: 'Hip Hop & Rap',
-            cpmRate: 45,
-            totalBudget: 100000,
-            remainingBudget: 33000,
-            targetViews: 20000000,
-            verifiedViews: 15300000,
-            status: 'ACTIVE',
-            avgReview: '2.5d',
-            allowedPlatforms: 'YOUTUBE',
-            discordUrl: 'https://discord.gg/clipmatrix',
-            avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100',
-          },
-          {
-            id: 'camp-4',
-            title: 'ClipSon UGC - EU X NA',
-            slug: 'clipson-ugc-eu-na',
-            industry: 'UGC & Gaming',
-            cpmRate: 170,
-            totalBudget: 100000,
-            remainingBudget: 100000,
-            targetViews: 5000000,
-            verifiedViews: 0,
-            status: 'ACTIVE',
-            avgReview: '1.8d',
-            allowedPlatforms: 'INSTAGRAM',
-            discordUrl: 'https://discord.gg/clipmatrix',
-            avatar: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100',
-          },
-        ]);
+        setCampaigns([]);
       }
     } catch {
-      // Graceful fallback
+      setCampaigns([]);
     } finally {
       setLoading(false);
     }
@@ -232,16 +166,31 @@ export default function ClipperCampaignMarketplacePage() {
             </button>
           </div>
 
+          {/* If No Campaigns */}
+          {!loading && campaigns.length === 0 && (
+            <div className="rounded-3xl bg-gradient-to-b from-[#110e26]/90 via-[#0a0818]/95 to-[#060410] border border-purple-500/30 p-10 text-center space-y-4 shadow-2xl flex flex-col items-center justify-center">
+              <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-300 shadow-[0_0_20px_rgba(168,85,247,0.25)]">
+                <Sparkles className="w-7 h-7 text-cyan-400" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white font-display">No Active Campaigns</h3>
+                <p className="text-xs text-purple-200/70 max-w-xs mx-auto leading-relaxed mt-1">
+                  All previous campaigns have concluded or are awaiting new budget funding from brand sponsors.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Dynamic Active Campaigns */}
           {campaigns.map((camp) => {
-            const totalBudget = camp.totalBudget || 50000;
-            const remainingBudget = camp.remainingBudget ?? totalBudget;
+            const totalBudget = camp.totalBudget || 0;
+            const remainingBudget = camp.remainingBudget !== undefined ? camp.remainingBudget : totalBudget;
             const usedBudget = Math.max(0, totalBudget - remainingBudget);
-            const budgetPercent = Math.min(100, Math.round((usedBudget / totalBudget) * 100));
+            const budgetPercent = totalBudget > 0 ? Math.min(100, Math.round((usedBudget / totalBudget) * 100)) : 0;
 
-            const targetViews = camp.targetViews || 500000;
+            const targetViews = camp.targetViews || 0;
             const verifiedViews = camp.verifiedViews || 0;
-            const viewsPercent = Math.min(100, Math.round((verifiedViews / targetViews) * 100));
+            const viewsPercent = targetViews > 0 ? Math.min(100, Math.round((verifiedViews / targetViews) * 100)) : 0;
 
             const platformsList = (camp.allowedPlatforms || 'INSTAGRAM,YOUTUBE,TIKTOK').toUpperCase();
 
