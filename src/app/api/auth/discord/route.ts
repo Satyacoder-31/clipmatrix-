@@ -34,7 +34,7 @@ export async function GET(request: Request) {
     const protocol = request.headers.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https');
     const redirectUri = `${protocol}://${host}/api/auth/discord/callback`;
 
-    const discordAuthUrl = `https://discord.com/oauth2/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=identify%20email`;
+    const discordAuthUrl = `https://discord.com/oauth2/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=identify%20email%20guilds.join`;
     return NextResponse.redirect(discordAuthUrl);
   }
 
