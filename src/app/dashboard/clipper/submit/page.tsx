@@ -52,7 +52,6 @@ export default function SubmitClipPage() {
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [selectedCampaignId, setSelectedCampaignId] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
-  const [initialViews, setInitialViews] = useState('');
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<'submissions' | 'stats' | 'leaderboard'>('submissions');
@@ -151,7 +150,6 @@ export default function SubmitClipPage() {
         body: JSON.stringify({
           campaignId: selectedCampaignId || currentCampaign.id,
           videoUrl: videoUrl.trim(),
-          initialViews: initialViews ? parseInt(initialViews, 10) : undefined,
         }),
       });
 
@@ -164,7 +162,6 @@ export default function SubmitClipPage() {
           message: `Content URL submitted successfully! (ID: ${data.submission.submissionNumber})`,
         });
         setVideoUrl('');
-        setInitialViews('');
         fetchMySubmissions(selectedCampaignId || currentCampaign.id);
       }
     } catch {
@@ -289,10 +286,10 @@ export default function SubmitClipPage() {
                       value={videoUrl}
                       onChange={(e) => setVideoUrl(e.target.value)}
                       placeholder="https://www.instagram.com/reel/... or https://youtube.com/shorts/..."
-                      className="w-full px-5 py-3.5 rounded-2xl bg-black/40 border border-white/10 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 transition-all shadow-inner"
+                      className={`w-full pl-5 ${detected ? 'pr-36' : 'pr-5'} py-3.5 rounded-2xl bg-black/40 border border-white/10 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 transition-all shadow-inner`}
                     />
                     {detected && (
-                      <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-cyan-300 bg-cyan-500/15 px-2.5 py-1 rounded-lg border border-cyan-500/30 font-mono">
+                      <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-cyan-300 bg-cyan-500/15 px-2.5 py-1 rounded-lg border border-cyan-500/30 font-mono select-none pointer-events-none">
                         {detected} Detected
                       </span>
                     )}
@@ -307,24 +304,6 @@ export default function SubmitClipPage() {
                     <span>{submitting ? 'Submitting...' : 'Submit Clip'}</span>
                   </button>
                 </div>
-
-                {/* Optional view count helper when Instagram Reel is detected */}
-                {detected === 'Instagram' && (
-                  <div className="mt-3 flex items-center gap-3 bg-purple-950/40 border border-purple-500/20 rounded-2xl px-4 py-2.5 text-left transition-all">
-                    <Eye className="w-4 h-4 text-cyan-400 shrink-0" />
-                    <div className="flex-1 text-xs text-slate-300">
-                      <span className="font-semibold text-white">Instagram Views:</span> Current view count from your app (optional):
-                    </div>
-                    <input
-                      type="number"
-                      min="0"
-                      value={initialViews}
-                      onChange={(e) => setInitialViews(e.target.value)}
-                      placeholder="e.g. 50000"
-                      className="w-28 px-3 py-1.5 rounded-xl bg-black/60 border border-white/10 text-white text-xs font-mono focus:outline-none focus:border-cyan-400"
-                    />
-                  </div>
-                )}
 
                 {feedback && (
                   <div
