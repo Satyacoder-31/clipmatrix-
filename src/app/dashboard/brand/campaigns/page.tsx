@@ -26,7 +26,7 @@ export default function BrandCampaignsPage() {
 
   const fetchCampaigns = () => {
     setLoading(true);
-    fetch('/api/campaigns')
+    fetch('/api/campaigns?portal=brand')
       .then((r) => r.json())
       .then((data) => {
         if (data.campaigns) setCampaigns(data.campaigns);

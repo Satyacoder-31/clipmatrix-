@@ -17,13 +17,14 @@ export default function BrandReviewSubmissionsPage() {
   const fetchSubmissions = () => {
     setLoading(true);
     const params = new URLSearchParams();
+    params.set('portal', 'brand');
     if (selectedCampaignId !== 'ALL') {
       params.set('campaignId', selectedCampaignId);
     }
 
     Promise.all([
       fetch(`/api/submissions?${params.toString()}`).then((r) => r.json()),
-      fetch('/api/campaigns').then((r) => r.json()),
+      fetch('/api/campaigns?portal=brand').then((r) => r.json()),
     ])
       .then(([subData, campData]) => {
         if (subData.submissions) setSubmissions(subData.submissions);

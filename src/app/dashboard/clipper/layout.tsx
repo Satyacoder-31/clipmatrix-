@@ -17,37 +17,15 @@ export default function ClipperLayout({ children }: { children: React.ReactNode 
       try {
         const res = await fetch('/api/auth/me');
         const data = await res.json();
-        if (!data.authenticated) {
+        if (!data.authenticated || data.user?.role !== 'CLIPPER') {
           router.push('/auth/register-clipper');
           return;
         }
 
-        // If the active session is not a CLIPPER (e.g. left over from visiting admin panel),
-        // automatically switch session to CLIPPER so all APIs and views strictly show clipper data
-        if (data.user.role !== 'CLIPPER') {
-          const switchRes = await fetch('/api/auth/switch-role', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ role: 'CLIPPER' }),
-          });
-          const switchData = await switchRes.json();
-          if (switchData.user) {
-            setUser(switchData.user);
-            router.refresh();
-            return;
-          }
-        }
-
         setUser(data.user);
-      } catch {
-        // Fallback for offline / demo mode
-        setUser({
-          name: 'Aarav Sharma (Elite Clipper)',
-          role: 'CLIPPER',
-          email: 'clipper@clipmatrix.com',
-        });
-      } finally {
         setLoading(false);
+      } catch {
+        router.push('/auth/register-clipper');
       }
     };
 

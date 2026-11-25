@@ -4,13 +4,13 @@ import { getCurrentUser } from '@/lib/auth';
 import { normalizeAccessCode } from '@/lib/campaign-code';
 
 /**
- * Unlocks a registered campaign's view analytics for the authenticated Brand user
+ * Unlocks a registered campaign's view analytics for the authenticated Brand (or previewing Admin)
  * when the matching campaign accessCode is presented.
  */
 export async function POST(request: Request) {
   try {
     const user = await getCurrentUser();
-    if (!user || user.role !== 'BRAND') {
+    if (!user || (user.role !== 'BRAND' && user.role !== 'ADMIN')) {
       return NextResponse.json(
         { error: 'Unauthorized: Brand login required to unlock campaign analytics.' },
         { status: 403 }
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
       }
     } else {
       campaign = await prisma.campaign.findFirst({
-        where: { accessCode: cleanCode },
+        where: { accessCode: { equals: cleanCode, mode: 'insensitive' } },
       });
     }
 
@@ -69,12 +69,12 @@ export async function POST(request: Request) {
 }
 
 /**
- * Re-locks a campaign from the current Brand user's unlocked view list.
+ * Re-locks a campaign from the current user's unlocked view list.
  */
 export async function DELETE(request: Request) {
   try {
     const user = await getCurrentUser();
-    if (!user || user.role !== 'BRAND') {
+    if (!user || (user.role !== 'BRAND' && user.role !== 'ADMIN')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 

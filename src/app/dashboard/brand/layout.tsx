@@ -16,20 +16,16 @@ export default function BrandLayout({ children }: { children: React.ReactNode })
     fetch('/api/auth/me')
       .then((res) => res.json())
       .then((data) => {
-        if (!data.authenticated) {
+        if (!data.authenticated || (data.user?.role !== 'BRAND' && data.user?.role !== 'ADMIN')) {
           router.push('/auth/brand');
-        } else {
-          setUser(data.user);
+          return;
         }
+        setUser(data.user);
+        setLoading(false);
       })
       .catch(() => {
-        setUser({
-          name: 'Aether AI Labs',
-          role: 'BRAND',
-          email: 'brand@clipmatrix.com',
-        });
-      })
-      .finally(() => setLoading(false));
+        router.push('/auth/brand');
+      });
   }, [router]);
 
   if (loading) {

@@ -12,22 +12,24 @@ export async function GET(request: Request) {
     const search = searchParams.get('search');
     const sort = searchParams.get('sort'); // 'latest' | 'reward' | 'budget'
     const status = searchParams.get('status');
+    const portal = searchParams.get('portal');
 
     const where: any = {};
 
     const user = await getCurrentUser();
+    const isBrandView = user?.role === 'BRAND' || (user?.role === 'ADMIN' && portal === 'brand');
     const brandId = searchParams.get('brandId');
 
-    // Note: For BRAND users, list ALL registered campaigns so they can see the registry
+    // Note: In Brand directory view, list ALL registered campaigns so users can see the registry
     // and unlock campaigns belonging to them via access code.
-    if (brandId && user?.role !== 'BRAND') {
+    if (brandId && !isBrandView) {
       where.brandId = brandId;
     }
 
     if (status && status !== 'ALL') {
       where.status = status;
     } else if (!status) {
-      if (user?.role === 'BRAND') {
+      if (isBrandView) {
         where.status = { in: ['ACTIVE', 'PAUSED', 'COMPLETED'] };
       } else {
         // By default public/clipper marketplace shows active campaigns
@@ -91,8 +93,8 @@ export async function GET(request: Request) {
       campaigns = [];
     }
 
-    // For BRAND role: return all registered campaigns, gating analytics behind unlock access code
-    if (user?.role === 'BRAND') {
+    // For BRAND directory view: return all registered campaigns, gating analytics behind unlock access code
+    if (isBrandView && user) {
       const accesses = await prisma.brandCampaignAccess.findMany({
         where: { brandId: user.id },
         select: { campaignId: true },

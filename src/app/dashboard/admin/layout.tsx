@@ -17,33 +17,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       try {
         const res = await fetch('/api/auth/me');
         const data = await res.json();
-        if (!data.authenticated) {
+        if (!data.authenticated || data.user?.role !== 'ADMIN') {
           router.push('/auth/admin');
           return;
         }
 
-        // If authenticated as non-ADMIN, switch to ADMIN persona for admin management suite
-        if (data.user.role !== 'ADMIN') {
-          await fetch('/api/auth/switch-role', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ role: 'ADMIN' }),
-          });
-        }
-
-        setUser({
-          name: 'ClipMatrix Super Admin',
-          role: 'ADMIN',
-          email: 'admin@clipmatrix.com',
-        });
-      } catch {
-        setUser({
-          name: 'ClipMatrix Super Admin',
-          role: 'ADMIN',
-          email: 'admin@clipmatrix.com',
-        });
-      } finally {
+        setUser(data.user);
         setLoading(false);
+      } catch {
+        router.push('/auth/admin');
       }
     };
 

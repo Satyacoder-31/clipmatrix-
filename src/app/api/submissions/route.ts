@@ -14,6 +14,8 @@ export async function GET(request: Request) {
     const campaignId = searchParams.get('campaignId');
     const status = searchParams.get('status');
     const platform = searchParams.get('platform');
+    const portal = searchParams.get('portal');
+    const isBrandView = user.role === 'BRAND' || (user.role === 'ADMIN' && portal === 'brand');
 
     const where: any = {};
 
@@ -21,7 +23,7 @@ export async function GET(request: Request) {
     if (user.role === 'CLIPPER') {
       where.clipperId = user.id;
       if (campaignId) where.campaignId = campaignId;
-    } else if (user.role === 'BRAND') {
+    } else if (isBrandView) {
       const accesses = await prisma.brandCampaignAccess.findMany({
         where: { brandId: user.id },
         select: { campaignId: true },
@@ -90,8 +92,8 @@ export async function GET(request: Request) {
       submissions = [];
     }
 
-    // If Brand is requesting, sanitize: NO clipper personal names/profiles, NO rewards/budget, ONLY views and social accounts
-    if (user.role === 'BRAND') {
+    // In Brand view, sanitize: NO clipper personal names/profiles, NO rewards/budget, ONLY views and social accounts
+    if (isBrandView) {
       const sanitizedSubmissions = submissions.map((sub) => {
         const handle =
           sub.clipper?.clipperProfile?.instagramHandle ||

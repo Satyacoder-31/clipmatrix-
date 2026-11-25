@@ -29,8 +29,8 @@ export default function BrandOverviewPage() {
   const loadData = () => {
     setLoading(true);
     Promise.all([
-      fetch('/api/submissions').then((r) => r.json()),
-      fetch('/api/campaigns').then((r) => r.json()),
+      fetch('/api/submissions?portal=brand').then((r) => r.json()),
+      fetch('/api/campaigns?portal=brand').then((r) => r.json()),
     ])
       .then(([subData, campData]) => {
         if (subData.submissions) setSubmissions(subData.submissions);
