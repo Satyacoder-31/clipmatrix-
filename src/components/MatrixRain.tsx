@@ -27,13 +27,13 @@ export default function MatrixRain() {
     const speeds: number[] = [];
     const columnColors: string[] = [];
 
-    // Reference palette: Primary Blue #2563EB, Primary Purple #7C3AED, Accent Cyan #00D4FF
+    // Calm palette without harsh strobe/glint flashes
     const colors = [
-      'rgba(37, 99, 235, 0.55)',  // Primary Blue #2563EB
-      'rgba(124, 58, 237, 0.60)', // Primary Purple #7C3AED
-      'rgba(0, 212, 255, 0.65)',  // Accent Cyan #00D4FF
-      'rgba(99, 102, 241, 0.50)', // Indigo
-      'rgba(56, 189, 248, 0.55)', // Sky blue
+      'rgba(37, 99, 235, 0.45)',  // Primary Blue #2563EB
+      'rgba(124, 58, 237, 0.48)', // Primary Purple #7C3AED
+      'rgba(0, 212, 255, 0.45)',  // Accent Cyan #00D4FF
+      'rgba(99, 102, 241, 0.42)', // Indigo
+      'rgba(56, 189, 248, 0.45)', // Sky blue
     ];
 
     const maxRows = Math.ceil(height / fontSize);
@@ -62,7 +62,7 @@ export default function MatrixRain() {
     window.addEventListener('resize', handleResize, { passive: true });
 
     let lastDraw = 0;
-    const fps = 32;
+    const fps = 26;
     const interval = 1000 / fps;
 
     const render = (currentTime: number) => {
@@ -72,27 +72,20 @@ export default function MatrixRain() {
       if (delta < interval) return;
       lastDraw = currentTime - (delta % interval);
 
-      // Trailing fade in background color #0A0E23
-      ctx.fillStyle = 'rgba(10, 14, 35, 0.12)';
+      // Smooth trailing fade matching background color
+      ctx.fillStyle = 'rgba(7, 10, 26, 0.14)';
       ctx.fillRect(0, 0, width, height);
 
       ctx.font = `600 ${fontSize}px 'Space Grotesk', 'Courier New', monospace`;
+      ctx.shadowBlur = 0;
 
       for (let i = 0; i < columns; i++) {
         const char = characters.charAt(Math.floor(Math.random() * characters.length));
         const x = i * colSpacing;
         const y = drops[i] * fontSize;
 
-        // Leading edge glint (cyan/white glow)
-        if (Math.random() > 0.85) {
-          ctx.fillStyle = '#ffffff';
-          ctx.shadowColor = '#00d4ff';
-          ctx.shadowBlur = 8;
-        } else {
-          ctx.fillStyle = columnColors[i];
-          ctx.shadowBlur = 0;
-        }
-
+        // Steady per-column color (no random white/neon strobe flashes)
+        ctx.fillStyle = columnColors[i];
         ctx.fillText(char, x, y);
 
         // Reset to top when off screen
@@ -115,7 +108,7 @@ export default function MatrixRain() {
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 w-full h-full pointer-events-none opacity-65 mix-blend-screen"
+      className="absolute inset-0 w-full h-full pointer-events-none opacity-55"
       style={{ willChange: 'transform' }}
     />
   );
