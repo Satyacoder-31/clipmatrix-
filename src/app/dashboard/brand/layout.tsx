@@ -13,19 +13,25 @@ export default function BrandLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
 
   useEffect(() => {
-    fetch('/api/auth/me')
-      .then((res) => res.json())
-      .then((data) => {
-        if (!data.authenticated || (data.user?.role !== 'BRAND' && data.user?.role !== 'ADMIN')) {
+    const loadBrandUser = () => {
+      fetch('/api/auth/me', { cache: 'no-store' })
+        .then((res) => res.json())
+        .then((data) => {
+          if (!data.authenticated || (data.user?.role !== 'BRAND' && data.user?.role !== 'ADMIN')) {
+            router.push('/auth/brand');
+            return;
+          }
+          setUser(data.user);
+          setLoading(false);
+        })
+        .catch(() => {
           router.push('/auth/brand');
-          return;
-        }
-        setUser(data.user);
-        setLoading(false);
-      })
-      .catch(() => {
-        router.push('/auth/brand');
-      });
+        });
+    };
+
+    loadBrandUser();
+    window.addEventListener('clipmatrix-profile-updated', loadBrandUser);
+    return () => window.removeEventListener('clipmatrix-profile-updated', loadBrandUser);
   }, [router]);
 
   if (loading) {

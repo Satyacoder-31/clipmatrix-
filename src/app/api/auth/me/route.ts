@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getCurrentUser, DEMO_USERS } from '@/lib/auth';
+import { getCurrentUser, DEMO_USERS, hashPassword, verifyPassword, generateToken } from '@/lib/auth';
 
 export async function GET() {
   try {
@@ -37,19 +37,157 @@ export async function PATCH(request: Request) {
     }
 
     const body = await request.json();
-    const { upiId, bankName, bankAccountNumber, bankIfsc, editingSoftware, phone, name } = body;
+    const {
+      upiId,
+      bankName,
+      bankAccountNumber,
+      bankIfsc,
+      editingSoftware,
+      phone,
+      name,
+      email,
+      avatar,
+      currentPassword,
+      newPassword,
+      companyName,
+      industry,
+      companySize,
+      website,
+      logoUrl,
+      description,
+    } = body;
 
-    // Update base user details if provided (only rename if not Super Admin)
-    let updatedName = user.name;
-    if ((name || phone) && user.role !== 'ADMIN') {
-      const updatedUser = await prisma.user.update({
+    // Validate optional email change
+    const normalizedEmail =
+      typeof email === 'string' && email.trim() ? email.trim().toLowerCase() : undefined;
+    if (normalizedEmail && normalizedEmail !== user.email.toLowerCase()) {
+      const existingByEmail = await prisma.user.findUnique({
+        where: { email: normalizedEmail },
+        select: { id: true },
+      });
+      if (existingByEmail && existingByEmail.id !== user.id) {
+        return NextResponse.json(
+          { error: 'Another account already uses this email address.' },
+          { status: 409 }
+        );
+      }
+    }
+
+    // Validate optional password update
+    let nextPasswordHash: string | undefined;
+    if (typeof newPassword === 'string' && newPassword.length > 0) {
+      if (newPassword.length < 6) {
+        return NextResponse.json(
+          { error: 'New password must be at least 6 characters long.' },
+          { status: 400 }
+        );
+      }
+      if ((user as any).passwordHash) {
+        if (!currentPassword || typeof currentPassword !== 'string') {
+          return NextResponse.json(
+            { error: 'Current password is required to set a new password.' },
+            { status: 400 }
+          );
+        }
+        const validCurrent = await verifyPassword(currentPassword, (user as any).passwordHash);
+        if (!validCurrent) {
+          return NextResponse.json(
+            { error: 'Current password is incorrect.' },
+            { status: 400 }
+          );
+        }
+      }
+      nextPasswordHash = await hashPassword(newPassword);
+    }
+
+    // Validate avatar size if provided (supports URL or compact base64 data URI)
+    const normalizedAvatar =
+      avatar === undefined
+        ? undefined
+        : typeof avatar === 'string' && avatar.trim()
+        ? avatar.trim()
+        : null;
+    if (normalizedAvatar && normalizedAvatar.length > 1_500_000) {
+      return NextResponse.json(
+        { error: 'Profile image is too large. Please use an image under 1MB or paste an image URL.' },
+        { status: 400 }
+      );
+    }
+
+    // Update base user details (admins keep their fixed Super Admin display name unless changing other fields)
+    let updatedUserRecord: any = user;
+    const userUpdateData: Record<string, any> = {};
+    if (typeof name === 'string' && name.trim() && user.role !== 'ADMIN') {
+      userUpdateData.name = name.trim();
+    }
+    if (normalizedEmail && user.role !== 'ADMIN') {
+      userUpdateData.email = normalizedEmail;
+    }
+    if (phone !== undefined) {
+      userUpdateData.phone = typeof phone === 'string' ? phone.trim() || null : null;
+    }
+    if (normalizedAvatar !== undefined) {
+      userUpdateData.avatar = normalizedAvatar;
+    }
+    if (nextPasswordHash) {
+      userUpdateData.passwordHash = nextPasswordHash;
+    }
+
+    if (Object.keys(userUpdateData).length > 0) {
+      updatedUserRecord = await prisma.user.update({
         where: { id: user.id },
-        data: {
-          ...(name ? { name } : {}),
-          ...(phone ? { phone } : {}),
+        data: userUpdateData,
+      });
+    }
+
+    const updatedName = updatedUserRecord.name;
+    const updatedEmail = updatedUserRecord.email;
+    const updatedAvatar = updatedUserRecord.avatar ?? user.avatar ?? null;
+    const updatedPhone = updatedUserRecord.phone ?? (user as any).phone ?? null;
+
+    // Update Brand profile when Brand edits brand details
+    let updatedBrandProfile = user.brandProfile;
+    const hasBrandFields =
+      companyName !== undefined ||
+      industry !== undefined ||
+      companySize !== undefined ||
+      website !== undefined ||
+      logoUrl !== undefined ||
+      description !== undefined;
+
+    if (user.role === 'BRAND' && hasBrandFields) {
+      const resolvedCompanyName =
+        (typeof companyName === 'string' && companyName.trim()) ||
+        user.brandProfile?.companyName ||
+        updatedName ||
+        'Brand Partner';
+
+      updatedBrandProfile = await prisma.brandProfile.upsert({
+        where: { userId: user.id },
+        create: {
+          userId: user.id,
+          companyName: resolvedCompanyName,
+          industry: typeof industry === 'string' && industry.trim() ? industry.trim() : 'Technology',
+          companySize: typeof companySize === 'string' && companySize.trim() ? companySize.trim() : '11-50',
+          website: typeof website === 'string' ? website.trim() || null : null,
+          logoUrl: typeof logoUrl === 'string' ? logoUrl.trim() || updatedAvatar : updatedAvatar,
+          description: typeof description === 'string' ? description.trim() || null : null,
+        },
+        update: {
+          ...(typeof companyName === 'string' && companyName.trim()
+            ? { companyName: companyName.trim() }
+            : {}),
+          ...(typeof industry === 'string' && industry.trim() ? { industry: industry.trim() } : {}),
+          ...(typeof companySize === 'string' && companySize.trim()
+            ? { companySize: companySize.trim() }
+            : {}),
+          ...(website !== undefined ? { website: typeof website === 'string' ? website.trim() || null : null } : {}),
+          ...(logoUrl !== undefined ? { logoUrl: typeof logoUrl === 'string' ? logoUrl.trim() || null : null } : {}),
+          ...(description !== undefined
+            ? { description: typeof description === 'string' ? description.trim() || null : null }
+            : {}),
         },
       });
-      if (name) updatedName = updatedUser.name;
     }
 
     // Update clipper profile if clipper
@@ -75,7 +213,7 @@ export async function PATCH(request: Request) {
       });
 
       // Synchronize in-memory demo identity
-      if (DEMO_USERS.CLIPPER) {
+      if (DEMO_USERS.CLIPPER && user.email === DEMO_USERS.CLIPPER.email) {
         DEMO_USERS.CLIPPER.clipperProfile = {
           ...DEMO_USERS.CLIPPER.clipperProfile,
           ...updatedProfile,
@@ -86,17 +224,43 @@ export async function PATCH(request: Request) {
       }
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
-      message: 'Payment and profile details saved successfully',
+      message: nextPasswordHash
+        ? 'Account security and profile details updated successfully'
+        : 'Account and profile details saved successfully',
       user: {
         id: user.id,
         name: updatedName,
-        email: user.email,
+        email: updatedEmail,
         role: user.role,
+        status: user.status,
+        avatar: updatedAvatar,
+        phone: updatedPhone,
+        brandProfile: updatedBrandProfile,
         clipperProfile: updatedProfile,
+        wallet: user.wallet,
       },
     });
+
+    // Refresh JWT cookie when display name or login email changed
+    if (updatedEmail !== user.email || updatedName !== user.name) {
+      const freshToken = generateToken({
+        userId: user.id,
+        email: updatedEmail,
+        role: user.role as 'BRAND' | 'CLIPPER' | 'ADMIN',
+        name: updatedName,
+      });
+      response.cookies.set('clipmatrix_session', freshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 7 * 24 * 60 * 60,
+      });
+    }
+
+    return response;
   } catch (error: any) {
     console.error('Failed to update profile:', error);
     return NextResponse.json(
