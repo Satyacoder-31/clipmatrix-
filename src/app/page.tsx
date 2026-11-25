@@ -41,6 +41,8 @@ import {
   XCircle,
   Link2,
   Plus,
+  X,
+  ExternalLink,
 } from 'lucide-react';
 import { formatCurrency, formatNumber } from '@/lib/utils';
 
@@ -48,6 +50,7 @@ export default function HomePage() {
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [filteredPlatform, setFilteredPlatform] = useState('ALL');
   const [activeTab, setActiveTab] = useState<'brand' | 'clipper'>('brand');
+  const [playingShowcase, setPlayingShowcase] = useState<'ig' | 'yt' | null>(null);
 
   // ROI Calculator state
   const [calcBudget, setCalcBudget] = useState(2500);
@@ -277,7 +280,7 @@ export default function HomePage() {
             HERO VISUAL SHOWCASE: 3D DYNAMIC VIRAL CLIP CARDS & PIPELINE
             ===================================================================== */}
         <div className="mt-14 w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-          {/* Left Vertical Clip Card (Podcast / Founder Hook) */}
+          {/* Left Vertical Clip Card (Real Instagram Reel: DcsnbnfvynC) */}
           <motion.div
             initial={{ opacity: 0, x: -30, rotateY: 10 }}
             animate={{ opacity: 1, x: 0, rotateY: 0 }}
@@ -285,51 +288,86 @@ export default function HomePage() {
             className="lg:col-span-4 rounded-3xl bg-gradient-to-b from-[#1c0e35] to-[#100720] border border-purple-500/30 p-4 shadow-2xl shadow-purple-950/70 text-left relative overflow-hidden group hover:border-purple-400/60 transition-all"
           >
             <div className="relative aspect-[9/14] sm:aspect-[9/13] rounded-2xl overflow-hidden bg-black/80">
-              <img
-                src="https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=600&auto=format&fit=crop&q=80"
-                alt="Podcast viral clip"
-                loading="eager"
-                decoding="async"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/60" />
+              {playingShowcase === 'ig' ? (
+                <>
+                  <iframe
+                    src="https://www.instagram.com/reel/DcsnbnfvynC/embed/"
+                    title="Instagram Reel showcase"
+                    className="w-full h-full border-0 bg-black"
+                    allow="autoplay; encrypted-media; picture-in-picture"
+                    allowFullScreen
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setPlayingShowcase(null)}
+                    aria-label="Close Reel preview"
+                    className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full bg-black/80 hover:bg-black border border-white/25 flex items-center justify-center text-white cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </>
+              ) : (
+                <>
+                  <img
+                    src="/showcase-ig-reel.jpg"
+                    alt="Instagram Reel by @theprakharworld"
+                    loading="eager"
+                    decoding="async"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-85"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-black/55" />
 
-              {/* Platform & Status Badge */}
-              <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
-                <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-pink-600 text-white shadow-md flex items-center gap-1">
-                  <Instagram className="w-3 h-3" /> Instagram Reels
-                </span>
-                <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
-                  VERIFIED
-                </span>
-              </div>
+                  {/* Platform & Status Badge */}
+                  <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
+                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-pink-600 text-white shadow-md flex items-center gap-1">
+                      <Instagram className="w-3 h-3" /> Instagram Reels
+                    </span>
+                    <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+                      VERIFIED
+                    </span>
+                  </div>
 
-              {/* Play icon overlay */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center text-white shadow-glow-purple group-hover:scale-110 transition-transform">
-                  <Play className="w-5 h-5 fill-white ml-0.5" />
-                </div>
-              </div>
+                  {/* Interactive Play Button */}
+                  <button
+                    type="button"
+                    onClick={() => setPlayingShowcase('ig')}
+                    aria-label="Play Instagram Reel"
+                    className="absolute inset-0 flex items-center justify-center cursor-pointer"
+                  >
+                    <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center text-white shadow-glow-purple group-hover:scale-110 transition-transform">
+                      <Play className="w-5 h-5 fill-white ml-0.5" />
+                    </div>
+                  </button>
 
-              {/* Hook Caption */}
-              <div className="absolute bottom-16 left-3 right-3">
-                <div className="p-2.5 rounded-xl bg-black/60 backdrop-blur-md border border-white/10 text-xs font-semibold text-white">
-                  "The #1 reason 90% of SaaS startups fail within 12 months..."
-                </div>
-              </div>
+                  {/* Hook Caption */}
+                  <div className="absolute bottom-14 left-3 right-3 pointer-events-none">
+                    <div className="p-2.5 rounded-xl bg-black/65 backdrop-blur-md border border-white/10 text-xs font-semibold text-white line-clamp-2">
+                      "Sonam Wangchuk (born September 1, 1966, in Uleytokpo, near Alchi, Ladakh)..."
+                    </div>
+                  </div>
 
-              {/* Bottom Metrics Bar */}
-              <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-[11px] font-semibold text-white/90">
-                <span className="flex items-center gap-1 text-purple-300">
-                  <Eye className="w-3.5 h-3.5 text-purple-400" /> 1.48M Views
-                </span>
-                <span className="text-emerald-400 font-mono font-bold">+$740 Earned</span>
-              </div>
+                  {/* Bottom Metrics Bar */}
+                  <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-[11px] font-semibold text-white/90 pointer-events-none">
+                    <span className="flex items-center gap-1 text-purple-300">
+                      <Eye className="w-3.5 h-3.5 text-purple-400" /> 1.97M Views
+                    </span>
+                    <span className="text-emerald-400 font-mono font-bold">+$986 Earned</span>
+                  </div>
+                </>
+              )}
             </div>
 
-            <div className="mt-3 flex items-center justify-between text-xs px-1">
-              <span className="text-purple-300/80">Clipper: <strong className="text-white">@nikhil.cuts</strong></span>
-              <span className="text-xs font-mono text-cyan-400 font-semibold">CPM: $0.50</span>
+            <div className="mt-3 flex items-center justify-between text-xs px-1 gap-2">
+              <a
+                href="https://www.instagram.com/reel/DcsnbnfvynC/?stkn=MWE5MHd5NTJrOHA4NQ=="
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-purple-300/80 hover:text-white inline-flex items-center gap-1 truncate transition-colors"
+              >
+                <span>Clipper: <strong className="text-white">@theprakharworld</strong></span>
+                <ExternalLink className="w-3 h-3 text-purple-400 shrink-0" />
+              </a>
+              <span className="text-xs font-mono text-cyan-400 font-semibold shrink-0">CPM: $0.50</span>
             </div>
           </motion.div>
 
@@ -401,7 +439,7 @@ export default function HomePage() {
             </button>
           </motion.div>
 
-          {/* Right Vertical Clip Card (Tech / D2C Launch Hook) */}
+          {/* Right Vertical Clip Card (Real YouTube Short: UdSdSV0xytM) */}
           <motion.div
             initial={{ opacity: 0, x: 30, rotateY: -10 }}
             animate={{ opacity: 1, x: 0, rotateY: 0 }}
@@ -409,51 +447,86 @@ export default function HomePage() {
             className="lg:col-span-4 rounded-3xl bg-gradient-to-b from-[#1c0e35] to-[#100720] border border-purple-500/30 p-4 shadow-2xl shadow-purple-950/70 text-left relative overflow-hidden group hover:border-purple-400/60 transition-all"
           >
             <div className="relative aspect-[9/14] sm:aspect-[9/13] rounded-2xl overflow-hidden bg-black/80">
-              <img
-                src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=80"
-                alt="Tech AI viral clip"
-                loading="lazy"
-                decoding="async"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/60" />
+              {playingShowcase === 'yt' ? (
+                <>
+                  <iframe
+                    src="https://www.youtube.com/embed/UdSdSV0xytM?autoplay=1&playsinline=1"
+                    title="YouTube Short showcase"
+                    className="w-full h-full border-0 bg-black"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setPlayingShowcase(null)}
+                    aria-label="Close YouTube Short preview"
+                    className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full bg-black/80 hover:bg-black border border-white/25 flex items-center justify-center text-white cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </>
+              ) : (
+                <>
+                  <img
+                    src="https://i.ytimg.com/vi/UdSdSV0xytM/oardefault.jpg"
+                    alt="YouTube Short by @Daxmessage"
+                    loading="eager"
+                    decoding="async"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-85"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-black/55" />
 
-              {/* Platform & Status Badge */}
-              <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
-                <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-600 text-white shadow-md flex items-center gap-1">
-                  <Youtube className="w-3 h-3" /> YouTube Shorts
-                </span>
-                <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-400 border border-cyan-500/40">
-                  TOP VIRAL
-                </span>
-              </div>
+                  {/* Platform & Status Badge */}
+                  <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
+                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-600 text-white shadow-md flex items-center gap-1">
+                      <Youtube className="w-3 h-3" /> YouTube Shorts
+                    </span>
+                    <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-400 border border-cyan-500/40">
+                      TOP VIRAL
+                    </span>
+                  </div>
 
-              {/* Play icon overlay */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center text-white shadow-glow-purple group-hover:scale-110 transition-transform">
-                  <Play className="w-5 h-5 fill-white ml-0.5" />
-                </div>
-              </div>
+                  {/* Interactive Play Button */}
+                  <button
+                    type="button"
+                    onClick={() => setPlayingShowcase('yt')}
+                    aria-label="Play YouTube Short"
+                    className="absolute inset-0 flex items-center justify-center cursor-pointer"
+                  >
+                    <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center text-white shadow-glow-purple group-hover:scale-110 transition-transform">
+                      <Play className="w-5 h-5 fill-white ml-0.5" />
+                    </div>
+                  </button>
 
-              {/* Hook Caption */}
-              <div className="absolute bottom-16 left-3 right-3">
-                <div className="p-2.5 rounded-xl bg-black/60 backdrop-blur-md border border-white/10 text-xs font-semibold text-white">
-                  "This 3D generative model renders full scenes in 4 seconds flat..."
-                </div>
-              </div>
+                  {/* Hook Caption */}
+                  <div className="absolute bottom-14 left-3 right-3 pointer-events-none">
+                    <div className="p-2.5 rounded-xl bg-black/65 backdrop-blur-md border border-white/10 text-xs font-semibold text-white line-clamp-2">
+                      "Snoop & Em couldn't believe @Thatsdax said THIS... 🤐🔥"
+                    </div>
+                  </div>
 
-              {/* Bottom Metrics Bar */}
-              <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-[11px] font-semibold text-white/90">
-                <span className="flex items-center gap-1 text-cyan-300">
-                  <Eye className="w-3.5 h-3.5 text-cyan-400" /> 920K Views
-                </span>
-                <span className="text-amber-400 font-mono font-bold">3.8x ROAS</span>
-              </div>
+                  {/* Bottom Metrics Bar */}
+                  <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-[11px] font-semibold text-white/90 pointer-events-none">
+                    <span className="flex items-center gap-1 text-cyan-300">
+                      <Eye className="w-3.5 h-3.5 text-cyan-400" /> 792K Views
+                    </span>
+                    <span className="text-amber-400 font-mono font-bold">+$396 Earned</span>
+                  </div>
+                </>
+              )}
             </div>
 
-            <div className="mt-3 flex items-center justify-between text-xs px-1">
-              <span className="text-purple-300/80">Brand: <strong className="text-white">Aether AI 2.0</strong></span>
-              <span className="text-xs font-mono text-emerald-400 font-semibold">CPM: $0.50</span>
+            <div className="mt-3 flex items-center justify-between text-xs px-1 gap-2">
+              <a
+                href="https://www.youtube.com/shorts/UdSdSV0xytM"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-purple-300/80 hover:text-white inline-flex items-center gap-1 truncate transition-colors"
+              >
+                <span>Clipper: <strong className="text-white">@Daxmessage</strong></span>
+                <ExternalLink className="w-3 h-3 text-cyan-400 shrink-0" />
+              </a>
+              <span className="text-xs font-mono text-emerald-400 font-semibold shrink-0">CPM: $0.50</span>
             </div>
           </motion.div>
         </div>
