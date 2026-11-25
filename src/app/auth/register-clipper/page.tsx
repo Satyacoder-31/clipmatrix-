@@ -102,7 +102,7 @@ function DiscordClipperContent() {
         </div>
       )}
 
-      {/* Direct 1-Click Discord Login Button - NO INPUT FIELD */}
+      {/* Direct 1-Click Discord Login Button */}
       <div className="space-y-4">
         <a
           href="/api/auth/discord"
@@ -113,16 +113,6 @@ function DiscordClipperContent() {
           </svg>
           <span>Login with Discord</span>
           <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-        </a>
-
-        {/* Instant Demo Login Button */}
-        <a
-          href="/api/auth/discord?demo=true"
-          className="w-full py-3.5 px-6 rounded-2xl font-bold text-[#8ea1e1] hover:text-white bg-[#5865F2]/15 hover:bg-[#5865F2]/30 border border-[#5865F2]/40 transition-all flex items-center justify-center gap-2.5 text-sm cursor-pointer group shadow-[0_0_15px_rgba(88,101,242,0.15)]"
-        >
-          <Sparkles className="w-4 h-4 text-cyan-400 group-hover:rotate-12 transition-transform" />
-          <span>Demo Login with Discord (1-Click)</span>
-          <ArrowRight className="w-4 h-4 text-cyan-300 group-hover:translate-x-1 transition-transform" />
         </a>
       </div>
 

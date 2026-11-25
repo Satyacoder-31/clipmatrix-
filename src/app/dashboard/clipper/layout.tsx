@@ -22,6 +22,13 @@ export default function ClipperLayout({ children }: { children: React.ReactNode 
           return;
         }
 
+        // Prevent legacy seeded demo clipper session from impersonating Discord clippers
+        if (data.user?.email === 'clipper@clipmatrix.com') {
+          await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+          router.push('/auth/register-clipper');
+          return;
+        }
+
         setUser(data.user);
         setLoading(false);
       } catch {

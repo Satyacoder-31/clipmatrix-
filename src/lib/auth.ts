@@ -157,30 +157,20 @@ export async function getCurrentUser() {
       });
 
       if (user) {
-        // Keep in-memory DEMO_USERS in sync with live DB records
-        if (user.role === 'CLIPPER' && user.clipperProfile) {
-          DEMO_USERS.CLIPPER.clipperProfile = {
-            ...DEMO_USERS.CLIPPER.clipperProfile,
-            ...user.clipperProfile,
-          };
-          DEMO_USERS.CLIPPER.name = user.name;
-        } else if (user.role === 'ADMIN') {
-          DEMO_USERS.ADMIN.name = user.name;
-        }
         return user;
       }
     } catch {
       // Prisma error fallback (e.g. temporary DB connection or serverless issue)
     }
 
-    // Role-based or demo fallback if DB record not found or DB unreachable
-    if (decoded.userId === 'user-clipper-demo' || decoded.email === 'clipper@clipmatrix.com' || decoded.role === 'CLIPPER') {
+    // Legacy offline fallback ONLY for explicit demo token IDs (never overwrite real Discord/Brand/Admin users)
+    if (decoded.userId === 'user-clipper-demo') {
       return DEMO_USERS.CLIPPER;
     }
-    if (decoded.userId === 'user-brand-demo' || decoded.email === 'brand@clipmatrix.com' || decoded.role === 'BRAND') {
+    if (decoded.userId === 'user-brand-demo') {
       return DEMO_USERS.BRAND;
     }
-    if (decoded.userId === 'user-admin-demo' || decoded.email === 'admin@clipmatrix.com' || decoded.role === 'ADMIN') {
+    if (decoded.userId === 'user-admin-demo') {
       return DEMO_USERS.ADMIN;
     }
 

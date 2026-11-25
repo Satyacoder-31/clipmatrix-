@@ -10,30 +10,6 @@ function getBaseUrl(request: Request): string {
 
 export async function GET(request: Request) {
   const baseUrl = getBaseUrl(request);
-  const url = new URL(request.url);
-  const isDemo = url.searchParams.get('demo') === 'true';
-
-  // Instant demo Clipper login
-  if (isDemo) {
-    const demoUser = DEMO_USERS.CLIPPER;
-    const token = generateToken({
-      userId: demoUser.id,
-      email: demoUser.email,
-      role: 'CLIPPER',
-      name: demoUser.name,
-    });
-
-    const response = NextResponse.redirect(`${baseUrl}/dashboard/clipper`);
-    response.cookies.set('clipmatrix_session', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 7 * 24 * 60 * 60,
-    });
-    return response;
-  }
-
   const clientId = process.env.DISCORD_CLIENT_ID;
 
   if (clientId && clientId.trim() !== '') {
@@ -43,24 +19,7 @@ export async function GET(request: Request) {
     return NextResponse.redirect(discordAuthUrl);
   }
 
-  // If DISCORD_CLIENT_ID is not configured, automatically authenticate as Demo Discord Clipper
-  const demoUser = DEMO_USERS.CLIPPER;
-  const token = generateToken({
-    userId: demoUser.id,
-    email: demoUser.email,
-    role: 'CLIPPER',
-    name: demoUser.name,
-  });
-
-  const response = NextResponse.redirect(`${baseUrl}/dashboard/clipper`);
-  response.cookies.set('clipmatrix_session', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 7 * 24 * 60 * 60,
-  });
-  return response;
+  return NextResponse.redirect(`${baseUrl}/auth/register-clipper?error=missing_credentials`);
 }
 
 export async function POST(request: Request) {
