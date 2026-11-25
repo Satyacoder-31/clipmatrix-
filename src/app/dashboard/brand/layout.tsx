@@ -17,7 +17,7 @@ export default function BrandLayout({ children }: { children: React.ReactNode })
       .then((res) => res.json())
       .then((data) => {
         if (!data.authenticated) {
-          router.push('/auth/login');
+          router.push('/auth/brand');
         } else {
           setUser(data.user);
         }

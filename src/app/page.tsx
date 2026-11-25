@@ -176,21 +176,21 @@ export default function HomePage() {
 
         {/* Central High-Impact Headline - Exactly 3 Attractive Lines with Thick Bold Typography */}
         <h1
-          className="text-4xl sm:text-6xl md:text-7xl lg:text-[74px] xl:text-[80px] font-black text-white tracking-[-0.03em] text-center leading-[1.06] max-w-6xl mx-auto uppercase"
+          className="text-3xl sm:text-5xl md:text-6xl lg:text-[70px] xl:text-[78px] font-black text-white tracking-[-0.03em] text-center leading-[1.08] max-w-6xl mx-auto uppercase"
           style={{ fontFamily: "'Plus Jakarta Sans', 'Syne', sans-serif", fontWeight: 900 }}
         >
           {/* Line 1: Pure White Thick Statement */}
-          <span className="block text-white drop-shadow-[0_4px_25px_rgba(255,255,255,0.22)] whitespace-nowrap">
+          <span className="block text-white drop-shadow-[0_4px_25px_rgba(255,255,255,0.22)] sm:whitespace-nowrap">
             VIRAL CLIPPING AGENCY
           </span>
 
           {/* Line 2: Glowing Sunset Rose to Electric Cyan Gradient */}
-          <span className="block bg-gradient-to-r from-[#fed7aa] via-[#f472b6] to-[#38bdf8] bg-clip-text text-transparent drop-shadow-[0_4px_35px_rgba(244,114,182,0.4)] py-1 whitespace-nowrap">
+          <span className="block bg-gradient-to-r from-[#fed7aa] via-[#f472b6] to-[#38bdf8] bg-clip-text text-transparent drop-shadow-[0_4px_35px_rgba(244,114,182,0.4)] py-1 sm:whitespace-nowrap">
             INFLUENCER MARKETING PLATFORM
           </span>
 
           {/* Line 3: Signature Brand Finish with Cyber Cyan & Purple Accent */}
-          <span className="flex items-center justify-center gap-x-3.5 tracking-[-0.02em] pt-1 whitespace-nowrap">
+          <span className="flex flex-wrap sm:flex-nowrap items-center justify-center gap-x-3.5 tracking-[-0.02em] pt-1 sm:whitespace-nowrap">
             <span className="text-white drop-shadow-[0_4px_20px_rgba(255,255,255,0.18)]">SCALE VIEWS WITH</span>
             <span
               className="bg-gradient-to-r from-[#c084fc] via-[#e879f9] to-[#00d4ff] bg-clip-text text-transparent inline-block tracking-normal drop-shadow-[0_4px_35px_rgba(192,132,252,0.6)] font-black"

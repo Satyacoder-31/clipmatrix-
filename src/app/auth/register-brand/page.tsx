@@ -160,8 +160,8 @@ export default function RegisterBrandPage() {
         </form>
 
         <div className="text-center text-xs text-purple-300/70">
-          Already have an account?{' '}
-          <a href="/auth/login" className="text-purple-400 font-semibold hover:text-white underline">
+          Already have a Brand account?{' '}
+          <a href="/auth/brand" className="text-purple-400 font-semibold hover:text-white underline">
             Sign In
           </a>
         </div>

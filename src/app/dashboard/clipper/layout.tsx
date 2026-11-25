@@ -18,7 +18,7 @@ export default function ClipperLayout({ children }: { children: React.ReactNode 
         const res = await fetch('/api/auth/me');
         const data = await res.json();
         if (!data.authenticated) {
-          router.push('/auth/login');
+          router.push('/auth/register-clipper');
           return;
         }
 

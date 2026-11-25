@@ -4,7 +4,7 @@ import { verifyPassword, generateToken, DEMO_USERS } from '@/lib/auth';
 
 export async function POST(request: Request) {
   try {
-    const { email, password, demoRole } = await request.json();
+    const { email, password, demoRole, expectedRole } = await request.json();
 
     let user: any;
 
@@ -102,6 +102,18 @@ export async function POST(request: Request) {
     if (user.role === 'CLIPPER') {
       return NextResponse.json(
         { error: 'Clipper accounts must log in with Discord. Please use the Discord Clipper Gateway.' },
+        { status: 403 }
+      );
+    }
+
+    if (expectedRole && user.role !== expectedRole) {
+      return NextResponse.json(
+        {
+          error:
+            expectedRole === 'ADMIN'
+              ? 'This login page is restricted to Admin accounts. Please use the Brand/Creator or Clipper login page.'
+              : 'This login page is restricted to Brand/Creator accounts. Please use the Admin or Clipper login page.',
+        },
         { status: 403 }
       );
     }

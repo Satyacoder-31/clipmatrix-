@@ -38,13 +38,19 @@ function DiscordClipperContent() {
     <div className="w-full max-w-md space-y-4 relative z-10">
       {/* Top Navigation & Logout Bar */}
       <div className="flex items-center justify-between px-2 text-xs">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-slate-400 hover:text-white transition-colors group font-semibold"
-        >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform text-cyan-400" />
-          <span>Main Website</span>
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/auth/login"
+            className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white transition-colors group font-semibold"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform text-cyan-400" />
+            <span>All Login Portals</span>
+          </Link>
+          <span className="text-white/20">•</span>
+          <Link href="/" className="text-slate-400 hover:text-white transition-colors font-medium">
+            Home
+          </Link>
+        </div>
 
         <button
           onClick={handleLogout}
@@ -136,11 +142,15 @@ function DiscordClipperContent() {
         </div>
       </div>
 
-      {/* Brand Sign In Footer Link */}
-      <div className="text-center text-xs text-purple-300/70 pt-2 border-t border-white/[0.05]">
-        Are you a Brand or Agency?{' '}
-        <Link href="/auth/login" className="text-cyan-400 font-semibold hover:text-white underline">
-          Sign In Here
+      {/* Other Login Portals Footer Link */}
+      <div className="text-center text-xs text-purple-300/70 pt-2 border-t border-white/[0.05] space-x-2">
+        <span>Not a Clipper?</span>
+        <Link href="/auth/brand" className="text-cyan-400 font-semibold hover:text-white underline">
+          Brand Login
+        </Link>
+        <span className="text-white/20">•</span>
+        <Link href="/auth/admin" className="text-purple-300 font-semibold hover:text-white underline">
+          Admin Login
         </Link>
       </div>
     </div>
