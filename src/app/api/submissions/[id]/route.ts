@@ -56,17 +56,29 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    // Calculate reward to credit to the clipper user if approved ($0.50 CPM standard)
+    // Calculate reward and verified views to sync when approved/verified
     let creditedReward = 0;
+    let resolvedVerifiedViews = submission.verifiedViews || 0;
     if (status === 'APPROVED' || status === 'VIEWS_VERIFIED') {
+      resolvedVerifiedViews =
+        typeof verifiedViews === 'number'
+          ? verifiedViews
+          : submission.verifiedViews > 0
+          ? submission.verifiedViews
+          : submission.reportedViews || 0;
+
       if (typeof rewardAmount === 'number' && rewardAmount > 0) {
         creditedReward = Number(rewardAmount.toFixed(2));
       } else {
-        const vCount = typeof verifiedViews === 'number' ? verifiedViews : (submission.verifiedViews || submission.reportedViews || 0);
         const rate = submission.campaign.cpmRate > 0 ? submission.campaign.cpmRate : 0.5;
-        creditedReward = Number(((vCount / 1000) * rate).toFixed(2));
+        creditedReward = Number(((resolvedVerifiedViews / 1000) * rate).toFixed(2));
       }
     }
+
+    const viewDelta =
+      status === 'APPROVED' || status === 'VIEWS_VERIFIED'
+        ? Math.max(0, resolvedVerifiedViews - (submission.verifiedViews || 0))
+        : 0;
 
     const updated = await prisma.$transaction(async (tx) => {
       // 1. Update submission
@@ -76,11 +88,23 @@ export async function PATCH(
           ...(status ? { status } : {}),
           ...(reviewNotes !== undefined ? { reviewNotes } : {}),
           ...(rejectionReason !== undefined ? { rejectionReason } : {}),
-          ...(typeof verifiedViews === 'number' ? { verifiedViews } : {}),
+          ...(status === 'APPROVED' || status === 'VIEWS_VERIFIED'
+            ? { verifiedViews: resolvedVerifiedViews, verifiedAt: new Date() }
+            : typeof verifiedViews === 'number'
+            ? { verifiedViews }
+            : {}),
           ...(creditedReward > 0 ? { rewardEarned: creditedReward, isPaid: true } : {}),
           reviewedAt: new Date(),
         },
       });
+
+      // Sync campaign verifiedViews whenever newly approved/verified views are added
+      if (viewDelta > 0) {
+        await tx.campaign.update({
+          where: { id: submission.campaignId },
+          data: { verifiedViews: { increment: viewDelta } },
+        });
+      }
 
       // 2. Credit to user's central wallet (all accounts merge to this one user)
       if (creditedReward > 0 && submission.rewardEarned === 0) {

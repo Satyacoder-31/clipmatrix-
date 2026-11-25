@@ -62,6 +62,8 @@ export default function AdminSubmissionsReviewPage() {
   const [rejectModalSub, setRejectModalSub] = useState<any>(null);
   const [rejectionReason, setRejectionReason] = useState('Missing required brand hashtag or handle tag in video caption.');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [refreshingSubId, setRefreshingSubId] = useState<string | null>(null);
+  const [bulkRefreshing, setBulkRefreshing] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
 
   // In-Place Audit State
@@ -151,14 +153,85 @@ export default function AdminSubmissionsReviewPage() {
     }
   };
 
-  // In-place Audit Logic
+  // In-place Audit Logic: show previously scraped metrics immediately; never auto-call paid scraper on open
   const handleOpenAudit = (sub: any) => {
     setAuditSub(sub);
-    setAuditScrapedData(null);
-    setAuditMsg('');
-    const initialCount = sub.verifiedViews || sub.reportedViews || 0;
-    setAuditVerifiedViews(initialCount.toString());
-    triggerLiveScrape(sub.videoUrl, sub.id);
+    const cachedViews = sub.verifiedViews || sub.reportedViews || 0;
+    setAuditScrapedData({
+      viewCount: cachedViews,
+      likeCount: sub.likesCount || 0,
+      commentCount: sub.commentsCount || 0,
+      shareCount: sub.sharesCount || 0,
+      verificationMethod:
+        sub.viewSnapshots?.[0]?.verifiedBy ||
+        (sub.platform === 'INSTAGRAM' ? 'CACHED_SNAPSHOT' : 'YOUTUBE_API'),
+    });
+    setAuditMsg(
+      sub.platform === 'INSTAGRAM'
+        ? cachedViews > 0
+          ? 'Showing previously scraped Instagram analytics. Click "Refresh Live Analytics" to run a fresh paid scan.'
+          : 'No Instagram scrape run yet. Click "Refresh Live Analytics" to scrape fresh metrics for this clip.'
+        : 'Showing stored metrics. Click "Refresh Live Analytics" to scan live URL.'
+    );
+    setAuditVerifiedViews(cachedViews.toString());
+  };
+
+  const handleQuickRefresh = async (sub: any) => {
+    if (!sub?.videoUrl || !sub?.id) return;
+    setRefreshingSubId(sub.id);
+    try {
+      const res = await fetch('/api/verification/scrape', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: sub.videoUrl, submissionId: sub.id }),
+      });
+      const data = await res.json();
+      if (res.ok && data.stats) {
+        const freshCount = data.stats.viewCount || data.submission?.verifiedViews || data.submission?.reportedViews || 0;
+        setToastMsg(
+          `✅ Refreshed ${sub.submissionNumber}: ${Number(freshCount).toLocaleString()} live views saved & synced!`
+        );
+        await fetchSubmissions();
+      } else {
+        setToastMsg(`⚠️ Refresh warning for ${sub.submissionNumber}: ${data.error || 'Could not scrape right now'}`);
+      }
+    } catch {
+      setToastMsg(`❌ Failed to refresh analytics for ${sub.submissionNumber}`);
+    } finally {
+      setRefreshingSubId(null);
+    }
+  };
+
+  const handleRefreshAllInstagram = async () => {
+    const igClips = filtered.filter((s) => s.platform === 'INSTAGRAM');
+    if (igClips.length === 0) {
+      setToastMsg('No Instagram clips in the current view to refresh.');
+      return;
+    }
+    if (
+      typeof window !== 'undefined' &&
+      !window.confirm(
+        `Run paid Instagram scraper on ${igClips.length} clip${igClips.length > 1 ? 's' : ''}? Only refreshed analytics will update for Brand & Clippers.`
+      )
+    ) {
+      return;
+    }
+
+    setBulkRefreshing(true);
+    let updated = 0;
+    for (const clip of igClips) {
+      try {
+        const res = await fetch('/api/verification/scrape', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: clip.videoUrl, submissionId: clip.id }),
+        });
+        if (res.ok) updated++;
+      } catch {}
+    }
+    setBulkRefreshing(false);
+    setToastMsg(`✅ Refreshed live Instagram analytics for ${updated}/${igClips.length} clip(s)!`);
+    fetchSubmissions();
   };
 
   const handleCloseAudit = () => {
@@ -192,12 +265,16 @@ export default function AdminSubmissionsReviewPage() {
         } else if (auditSub?.reportedViews > 0) {
           setAuditVerifiedViews(auditSub.reportedViews.toString());
         }
-        setAuditMsg('⚡ Live video metrics loaded successfully!');
+        if (data.submission) {
+          setAuditSub((prev: any) => (prev ? { ...prev, ...data.submission } : prev));
+        }
+        await fetchSubmissions();
+        setAuditMsg('⚡ Live analytics refreshed & published to stored snapshot!');
       } else {
-        setAuditMsg(`Notice: Real-time scraper status: ${data.error || 'using cached metrics'}`);
+        setAuditMsg(`Notice: Real-time scraper status: ${data.error || 'using previously scraped metrics'}`);
       }
     } catch {
-      setAuditMsg('Notice: Auditing with system verification profile.');
+      setAuditMsg('Notice: Auditing with previously scraped metrics.');
     } finally {
       setAuditScraping(false);
     }
@@ -589,6 +666,17 @@ export default function AdminSubmissionsReviewPage() {
               )}
             </button>
           ))}
+
+          <button
+            type="button"
+            onClick={handleRefreshAllInstagram}
+            disabled={bulkRefreshing}
+            className="px-3.5 py-2 rounded-xl font-bold whitespace-nowrap bg-pink-500/15 hover:bg-pink-500/25 text-pink-300 border border-pink-500/35 flex items-center gap-1.5 cursor-pointer disabled:opacity-50 transition-all"
+            title="Run paid Instagram scraper for visible Instagram clips"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${bulkRefreshing ? 'animate-spin' : ''}`} />
+            <span>{bulkRefreshing ? 'Refreshing IG...' : 'Refresh Instagram'}</span>
+          </button>
         </div>
       </div>
 
@@ -813,6 +901,18 @@ export default function AdminSubmissionsReviewPage() {
                       </>
                     )}
 
+                    {/* In-Place Refresh Analytics Button (Paid scraper only runs when Admin clicks Refresh) */}
+                    <button
+                      type="button"
+                      onClick={() => handleQuickRefresh(sub)}
+                      disabled={refreshingSubId === sub.id}
+                      className="px-3.5 py-2 rounded-xl bg-pink-500/15 hover:bg-pink-500/25 disabled:opacity-50 border border-pink-500/35 text-xs font-bold text-pink-300 hover:text-white flex items-center gap-1.5 transition-all cursor-pointer"
+                      title="Scrape fresh analytics now & update visible views"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${refreshingSubId === sub.id ? 'animate-spin' : ''}`} />
+                      <span>{refreshingSubId === sub.id ? 'Refreshing...' : 'Refresh Views'}</span>
+                    </button>
+
                     {/* In-Place Video Metrics & Settlement Button */}
                     <button
                       onClick={() => handleOpenAudit(sub)}
@@ -999,7 +1099,7 @@ export default function AdminSubmissionsReviewPage() {
                 className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 disabled:opacity-50 text-white font-bold flex items-center justify-center gap-2 shrink-0 cursor-pointer shadow-lg shadow-purple-500/25"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${auditScraping ? 'animate-spin' : ''}`} />
-                <span>{auditScraping ? 'Scanning Live URL...' : 'Re-Run Live Metrics Scan'}</span>
+                <span>{auditScraping ? 'Refreshing Live Analytics...' : 'Refresh Live Analytics'}</span>
               </button>
             </div>
 

@@ -214,12 +214,15 @@ export async function POST(request: Request) {
       );
     }
 
-    // Attempt real-time metadata & statistics enrichment via scraper
+    // Instagram scraper is paid: skip auto-scraping on clipper submission.
+    // Fresh Instagram analytics are only scraped when Admin explicitly clicks Refresh.
     let scrapedStats: any = null;
-    try {
-      scrapedStats = await scrapeVideoMetrics(cleanUrl);
-    } catch {
-      // Scraper fallback if video link is restricted or offline
+    if (platform.toUpperCase() !== 'INSTAGRAM') {
+      try {
+        scrapedStats = await scrapeVideoMetrics(cleanUrl);
+      } catch {
+        // Scraper fallback if video link is restricted or offline
+      }
     }
 
     // Auto-fill title, thumbnail, and author handle if not explicitly provided
@@ -301,6 +304,8 @@ export async function POST(request: Request) {
         status: 'PENDING_REVIEW',
         reviewNotes: scrapedStats
           ? `Auto-audited on submission via ${scrapedStats.verificationMethod}. Live views: ${reported.toLocaleString()}.`
+          : platform.toUpperCase() === 'INSTAGRAM'
+          ? 'Awaiting Admin Instagram analytics refresh (paid scraper gated to Admin refresh).'
           : undefined,
       },
     });
