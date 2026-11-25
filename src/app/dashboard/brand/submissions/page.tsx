@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ExternalLink, Eye, Share2, Sparkles, Filter } from 'lucide-react';
+import Link from 'next/link';
+import { ExternalLink, Share2, Filter, KeyRound } from 'lucide-react';
 import { getStatusBadge } from '@/lib/utils';
 import { useSearchParams } from 'next/navigation';
 
@@ -26,7 +27,9 @@ export default function BrandReviewSubmissionsPage() {
     ])
       .then(([subData, campData]) => {
         if (subData.submissions) setSubmissions(subData.submissions);
-        if (campData.campaigns) setCampaigns(campData.campaigns);
+        if (campData.campaigns) {
+          setCampaigns(campData.campaigns.filter((c: any) => c.isUnlocked));
+        }
       })
       .finally(() => setLoading(false));
   };
@@ -96,10 +99,25 @@ export default function BrandReviewSubmissionsPage() {
                   <td colSpan={6} className="py-16 text-center">
                     <div className="space-y-3">
                       <Share2 className="w-8 h-8 text-purple-400 mx-auto opacity-50" />
-                      <div className="text-sm font-bold text-white font-display">No Clips Found</div>
+                      <div className="text-sm font-bold text-white font-display">
+                        {campaigns.length === 0 ? 'No Unlocked Campaigns Yet' : 'No Clips Found'}
+                      </div>
                       <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
-                        No video clips have been submitted for this campaign brief yet. Once clippers publish content, their social handles and view delivery will display here.
+                        {campaigns.length === 0
+                          ? 'Unlock a registered campaign using its access code first to inspect its creator social accounts and verified views.'
+                          : 'No video clips have been submitted for this unlocked campaign brief yet. Once clippers publish content, their social handles and view delivery will display here.'}
                       </p>
+                      {campaigns.length === 0 && (
+                        <div className="pt-2">
+                          <Link
+                            href="/dashboard/brand/campaigns"
+                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 text-white text-xs font-bold"
+                          >
+                            <KeyRound className="w-3.5 h-3.5" />
+                            <span>Unlock Campaign with Code</span>
+                          </Link>
+                        </div>
+                      )}
                     </div>
                   </td>
                 </tr>

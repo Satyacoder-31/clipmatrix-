@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
+import { generateCampaignAccessCode, normalizeAccessCode } from '@/lib/campaign-code';
 
 export async function GET(request: Request) {
   try {
@@ -16,19 +17,23 @@ export async function GET(request: Request) {
 
     const user = await getCurrentUser();
     const brandId = searchParams.get('brandId');
-    if (brandId) {
+
+    // Note: For BRAND users, list ALL registered campaigns so they can see the registry
+    // and unlock campaigns belonging to them via access code.
+    if (brandId && user?.role !== 'BRAND') {
       where.brandId = brandId;
-    } else if (user?.role === 'BRAND') {
-      where.brandId = user.id;
     }
 
     if (status && status !== 'ALL') {
       where.status = status;
     } else if (!status) {
-      // By default public marketplace shows active campaigns
-      where.status = 'ACTIVE';
+      if (user?.role === 'BRAND') {
+        where.status = { in: ['ACTIVE', 'PAUSED', 'COMPLETED'] };
+      } else {
+        // By default public/clipper marketplace shows active campaigns
+        where.status = 'ACTIVE';
+      }
     }
-    // If status === 'ALL', no status filter is applied so all campaigns are returned
 
     if (platform && platform !== 'ALL') {
       where.allowedPlatforms = { contains: platform };
@@ -86,12 +91,43 @@ export async function GET(request: Request) {
       campaigns = [];
     }
 
-    // If Brand is requesting, strip all financial/budget fields - show ONLY views and completion
+    // For BRAND role: return all registered campaigns, gating analytics behind unlock access code
     if (user?.role === 'BRAND') {
+      const accesses = await prisma.brandCampaignAccess.findMany({
+        where: { brandId: user.id },
+        select: { campaignId: true },
+      });
+      const unlockedSet = new Set(accesses.map((a) => a.campaignId));
+
       const sanitizedCampaigns = campaigns.map((c) => {
+        const isUnlocked = unlockedSet.has(c.id);
+        const brandLabel = c.brand?.brandProfile?.companyName || c.brand?.name || 'Verified Partner';
+
+        if (!isUnlocked) {
+          // Locked campaign: show listing info + lock state, hide analytics & metrics
+          return {
+            id: c.id,
+            title: c.title,
+            slug: c.slug,
+            industry: c.industry,
+            thumbnailUrl: c.thumbnailUrl,
+            allowedPlatforms: c.allowedPlatforms,
+            status: c.status,
+            createdAt: c.createdAt,
+            brandLabel,
+            isUnlocked: false,
+            targetViews: null,
+            verifiedViews: null,
+            completionPercent: null,
+            _count: null,
+          };
+        }
+
         const targetViews = c.targetViews || 0;
         const verifiedViews = c.verifiedViews || 0;
-        const completionPercent = targetViews > 0 ? Math.min(100, Math.round((verifiedViews / targetViews) * 100)) : 0;
+        const completionPercent =
+          targetViews > 0 ? Math.min(100, Math.round((verifiedViews / targetViews) * 100)) : 0;
+
         return {
           id: c.id,
           title: c.title,
@@ -109,10 +145,18 @@ export async function GET(request: Request) {
           sourceVideoUrl: c.sourceVideoUrl,
           driveAssetsUrl: c.driveAssetsUrl,
           guidelines: c.guidelines,
+          brandLabel,
+          isUnlocked: true,
           _count: c._count,
         };
       });
       return NextResponse.json({ campaigns: sanitizedCampaigns });
+    }
+
+    // Strip accessCode for non-admin users (clippers / public)
+    if (user?.role !== 'ADMIN') {
+      const publicCampaigns = campaigns.map(({ accessCode: _omit, ...rest }) => rest);
+      return NextResponse.json({ campaigns: publicCampaigns });
     }
 
     return NextResponse.json({ campaigns });
@@ -158,10 +202,36 @@ export async function POST(request: Request) {
       totalBudget,
       targetViews,
       deadline,
+      accessCode: requestedAccessCode,
     } = body;
 
     if (!title || !description) {
       return NextResponse.json({ error: 'Campaign title and description are required' }, { status: 400 });
+    }
+
+    // Determine or generate unique Brand Access Code
+    let normalizedCode = requestedAccessCode ? normalizeAccessCode(String(requestedAccessCode)) : '';
+    if (normalizedCode) {
+      const existingCode = await prisma.campaign.findUnique({ where: { accessCode: normalizedCode } });
+      if (existingCode) {
+        return NextResponse.json(
+          { error: 'That campaign access code is already assigned to another campaign.' },
+          { status: 400 }
+        );
+      }
+    } else {
+      // Generate guaranteed unique access code
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const candidate = generateCampaignAccessCode();
+        const collision = await prisma.campaign.findUnique({ where: { accessCode: candidate } });
+        if (!collision) {
+          normalizedCode = candidate;
+          break;
+        }
+      }
+      if (!normalizedCode) {
+        normalizedCode = `CLM-${Date.now().toString(36).toUpperCase()}`;
+      }
     }
 
     // Determine target brand sponsor
@@ -186,6 +256,7 @@ export async function POST(request: Request) {
         title,
         slug,
         brandId: assignedBrandId,
+        accessCode: normalizedCode,
         industry: industry || 'Tech & AI',
         description: description || title,
         objective: objective || 'Drive brand awareness & viral reach',

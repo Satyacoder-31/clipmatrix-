@@ -20,12 +20,29 @@ export async function GET(request: Request) {
     // Role-based visibility
     if (user.role === 'CLIPPER') {
       where.clipperId = user.id;
+      if (campaignId) where.campaignId = campaignId;
     } else if (user.role === 'BRAND') {
-      where.campaign = { brandId: user.id };
+      const accesses = await prisma.brandCampaignAccess.findMany({
+        where: { brandId: user.id },
+        select: { campaignId: true },
+      });
+      const unlockedIds = accesses.map((a) => a.campaignId);
+      if (unlockedIds.length === 0) {
+        return NextResponse.json({ submissions: [] });
+      }
+      if (campaignId) {
+        if (!unlockedIds.includes(campaignId)) {
+          return NextResponse.json({ submissions: [] });
+        }
+        where.campaignId = campaignId;
+      } else {
+        where.campaignId = { in: unlockedIds };
+      }
+    } else {
+      // Admin sees everything
+      if (campaignId) where.campaignId = campaignId;
     }
-    // Admin sees everything
 
-    if (campaignId) where.campaignId = campaignId;
     if (status && status !== 'ALL') where.status = status;
     if (platform && platform !== 'ALL') where.platform = platform;
 

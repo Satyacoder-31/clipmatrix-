@@ -28,6 +28,7 @@ model User {
   
   // Relations
   campaignsCreated      Campaign[]              @relation("BrandCampaigns")
+  brandCampaignAccesses BrandCampaignAccess[]   @relation("BrandCampaignAccessUser")
   campaignParticipations CampaignParticipation[]
   submissions           Submission[]            @relation("ClipperSubmissions")
   withdrawals           Withdrawal[]
@@ -113,7 +114,8 @@ model Campaign {
   targetViews         Int      @default(500000)
   verifiedViews       Int      @default(0)
   
-  // Status
+  // Status & Access
+  accessCode          String?  @unique
   status              String   @default("ACTIVE") // DRAFT, PENDING_APPROVAL, ACTIVE, PAUSED, COMPLETED, CANCELLED
   isFeatured          Boolean  @default(false)
   deadline            DateTime
@@ -122,6 +124,18 @@ model Campaign {
 
   participations      CampaignParticipation[]
   submissions         Submission[]
+  brandAccesses       BrandCampaignAccess[]
+}
+
+model BrandCampaignAccess {
+  id         String   @id @default(uuid())
+  brandId    String
+  brand      User     @relation("BrandCampaignAccessUser", fields: [brandId], references: [id], onDelete: Cascade)
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  unlockedAt DateTime @default(now())
+
+  @@unique([brandId, campaignId])
 }
 
 model CampaignParticipation {

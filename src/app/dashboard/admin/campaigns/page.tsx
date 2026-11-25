@@ -18,8 +18,12 @@ import {
   ShieldCheck,
   Edit3,
   X,
+  KeyRound,
+  Copy,
+  RefreshCw,
 } from 'lucide-react';
 import Link from 'next/link';
+import { generateCampaignAccessCode } from '@/lib/campaign-code';
 
 export default function AdminCampaignsPage() {
   const [campaigns, setCampaigns] = useState<any[]>([]);
@@ -29,6 +33,8 @@ export default function AdminCampaignsPage() {
   const [editingCamp, setEditingCamp] = useState<any>(null);
   const [newCpm, setNewCpm] = useState(0.50);
   const [newBudget, setNewBudget] = useState(1500);
+  const [editAccessCode, setEditAccessCode] = useState('');
+  const [copiedCodeId, setCopiedCodeId] = useState<string | null>(null);
   const [toastMsg, setToastMsg] = useState('');
 
   // Add Campaign Modal State
@@ -39,6 +45,7 @@ export default function AdminCampaignsPage() {
   // New Campaign Form Fields
   const [newTitle, setNewTitle] = useState('');
   const [newBrandId, setNewBrandId] = useState('');
+  const [newAccessCode, setNewAccessCode] = useState(() => generateCampaignAccessCode());
   const [newIndustry, setNewIndustry] = useState('Creator Economy');
   const [newDescription, setNewDescription] = useState('');
   const [newCampBudget, setNewCampBudget] = useState('1500');
@@ -132,6 +139,7 @@ export default function AdminCampaignsPage() {
           thumbnailUrl: newThumbnail,
           guidelines: newGuidelines,
           requiredHashtags: newHashtags,
+          accessCode: newAccessCode.trim() || undefined,
         }),
       });
 
@@ -141,11 +149,15 @@ export default function AdminCampaignsPage() {
         return;
       }
 
-      setToastMsg(`✅ Campaign "${newTitle}" created and published to marketplace!`);
+      const createdCode = data.campaign?.accessCode || newAccessCode;
+      setToastMsg(
+        `✅ Campaign "${newTitle}" published! Brand Access Code: ${createdCode}`
+      );
       setAddModalOpen(false);
       // Reset form
       setNewTitle('');
       setNewDescription('');
+      setNewAccessCode(generateCampaignAccessCode());
       fetchCampaigns();
     } catch {
       setToastMsg('❌ An error occurred during campaign creation.');
@@ -180,16 +192,28 @@ export default function AdminCampaignsPage() {
         body: JSON.stringify({
           cpmRate: Number(newCpm),
           totalBudget: Number(newBudget),
+          ...(editAccessCode.trim() ? { accessCode: editAccessCode.trim() } : {}),
         }),
       });
+      const data = await res.json();
       if (res.ok) {
         setToastMsg(`Updated ${editingCamp.title} settings successfully!`);
         setEditingCamp(null);
         fetchCampaigns();
+      } else {
+        setToastMsg(`❌ ${data.error || 'Failed to update campaign'}`);
       }
     } catch {
-      setToastMsg('Failed to update campaign budget');
+      setToastMsg('Failed to update campaign settings');
     }
+  };
+
+  const handleCopyCode = (id: string, code: string) => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(code).catch(() => {});
+    }
+    setCopiedCodeId(id);
+    setTimeout(() => setCopiedCodeId(null), 2000);
   };
 
   const filtered = campaigns.filter((camp) => {
@@ -358,6 +382,36 @@ export default function AdminCampaignsPage() {
                   {camp.description}
                 </p>
 
+                {/* Brand Analytics Access Code Pill */}
+                <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-purple-950/35 border border-purple-500/25 text-xs">
+                  <div className="flex items-center gap-2">
+                    <KeyRound className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                    <span className="text-[11px] text-slate-300">Brand Access Code:</span>
+                    <span className="font-mono font-bold text-cyan-300 tracking-wider">
+                      {camp.accessCode || 'NOT SET'}
+                    </span>
+                  </div>
+                  {camp.accessCode && (
+                    <button
+                      type="button"
+                      onClick={() => handleCopyCode(camp.id, camp.accessCode)}
+                      className="px-2.5 py-1 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/30 text-[10px] font-mono font-bold flex items-center gap-1 cursor-pointer transition-colors"
+                    >
+                      {copiedCodeId === camp.id ? (
+                        <>
+                          <Check className="w-3 h-3 text-emerald-400" />
+                          <span className="text-emerald-300">Copied</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3 h-3" />
+                          <span>Copy</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+
                 <div className="grid grid-cols-3 gap-2 p-3 rounded-2xl bg-white/[0.03] border border-white/[0.06] text-center text-xs">
                   <div>
                     <div className="text-[10px] text-slate-400 font-mono">Budget Pool</div>
@@ -398,11 +452,12 @@ export default function AdminCampaignsPage() {
                       setEditingCamp(camp);
                       setNewCpm(camp.cpmRate || 0.50);
                       setNewBudget(camp.totalBudget || 1500);
+                      setEditAccessCode(camp.accessCode || generateCampaignAccessCode());
                     }}
                     className="px-3 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/25 transition-colors flex items-center gap-1.5 cursor-pointer font-medium"
                   >
                     <Edit3 className="w-3.5 h-3.5" />
-                    <span>Edit Rates</span>
+                    <span>Edit Rates & Code</span>
                   </button>
                 </div>
 
@@ -455,6 +510,27 @@ export default function AdminCampaignsPage() {
                   className="w-full mt-1 p-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white font-mono text-sm outline-none focus:border-cyan-400"
                 />
               </div>
+
+              <div>
+                <label className="text-xs text-purple-300 font-mono flex items-center justify-between">
+                  <span>Brand Analytics Access Code</span>
+                  <button
+                    type="button"
+                    onClick={() => setEditAccessCode(generateCampaignAccessCode())}
+                    className="text-[10px] text-cyan-400 hover:text-cyan-300 flex items-center gap-1 cursor-pointer"
+                  >
+                    <RefreshCw className="w-3 h-3" />
+                    <span>Regenerate</span>
+                  </button>
+                </label>
+                <input
+                  type="text"
+                  value={editAccessCode}
+                  onChange={(e) => setEditAccessCode(e.target.value.toUpperCase())}
+                  placeholder="e.g. CLM-4829"
+                  className="w-full mt-1 p-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-cyan-300 font-mono uppercase text-sm outline-none focus:border-cyan-400"
+                />
+              </div>
             </div>
 
             <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-white/10">
@@ -503,24 +579,48 @@ export default function AdminCampaignsPage() {
             </div>
 
             <form onSubmit={handleCreateCampaign} className="space-y-4 text-xs">
-              {/* Brand Sponsor Selection */}
-              <div>
-                <label className="text-purple-300 font-semibold block mb-1">Brand Sponsor</label>
-                <select
-                  value={newBrandId}
-                  onChange={(e) => setNewBrandId(e.target.value)}
-                  className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white outline-none focus:border-cyan-400 cursor-pointer"
-                >
-                  {brands.length === 0 ? (
-                    <option value="">Default Brand Partner</option>
-                  ) : (
-                    brands.map((b) => (
-                      <option key={b.id} value={b.id}>
-                        {b.name} ({b.email})
-                      </option>
-                    ))
-                  )}
-                </select>
+              {/* Brand Sponsor & Access Code */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-purple-300 font-semibold block mb-1">Brand Sponsor</label>
+                  <select
+                    value={newBrandId}
+                    onChange={(e) => setNewBrandId(e.target.value)}
+                    className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white outline-none focus:border-cyan-400 cursor-pointer"
+                  >
+                    {brands.length === 0 ? (
+                      <option value="">Default Brand Partner</option>
+                    ) : (
+                      brands.map((b) => (
+                        <option key={b.id} value={b.id}>
+                          {b.name} ({b.email})
+                        </option>
+                      ))
+                    )}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-purple-300 font-semibold flex items-center justify-between mb-1">
+                    <span>Brand Access Code *</span>
+                    <button
+                      type="button"
+                      onClick={() => setNewAccessCode(generateCampaignAccessCode())}
+                      className="text-[10px] font-mono text-cyan-400 hover:text-cyan-300 flex items-center gap-1 cursor-pointer"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                      <span>Generate</span>
+                    </button>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={newAccessCode}
+                    onChange={(e) => setNewAccessCode(e.target.value.toUpperCase())}
+                    placeholder="e.g. CLM-839201"
+                    className="w-full p-3 rounded-xl bg-black/40 border border-cyan-500/30 text-cyan-300 font-mono uppercase placeholder-slate-500 outline-none focus:border-cyan-400"
+                  />
+                </div>
               </div>
 
               {/* Title & Industry */}

@@ -72,7 +72,6 @@ export default function DashboardSidebar({
     { label: 'Campaign Analytics', href: '/dashboard/brand', icon: LayoutDashboard },
     { label: 'My Campaigns & Views', href: '/dashboard/brand/campaigns', icon: FolderKanban },
     { label: 'Viral Social Clips', href: '/dashboard/brand/submissions', icon: CheckSquare },
-    { label: 'Notifications', href: '/dashboard/clipper/notifications', icon: Bell },
   ];
 
   const adminWorkspace: WorkspaceItem[] = [
@@ -229,91 +228,97 @@ export default function DashboardSidebar({
           </div>
         </div>
 
-        {/* Category 2: NETWORK & COMMUNITY */}
-        <div className="space-y-1 pt-1">
-          <div className="text-[10px] font-mono font-bold text-slate-400 tracking-widest uppercase px-3 py-1">
-            NETWORK & COMMUNITY
-          </div>
+        {/* Category 2: NETWORK & COMMUNITY (Hidden for Brand login) */}
+        {!isBrandWorkspace && (
+          <div className="space-y-1 pt-1">
+            <div className="text-[10px] font-mono font-bold text-slate-400 tracking-widest uppercase px-3 py-1">
+              NETWORK & COMMUNITY
+            </div>
 
-          <div className="space-y-1">
-            {networkItems.map((item) => {
-              const isActive = pathname === item.href;
-              const Icon = item.icon;
+            <div className="space-y-1">
+              {networkItems.map((item) => {
+                const isActive = pathname === item.href;
+                const Icon = item.icon;
 
-              return (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all group ${
-                    isActive
-                      ? 'bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 text-white shadow-[0_0_20px_rgba(124,58,237,0.4)] font-bold'
-                      : 'text-slate-300 hover:text-white hover:bg-white/[0.05]'
-                  }`}
-                >
-                  <Icon
-                    className={`w-4 h-4 shrink-0 transition-transform group-hover:scale-110 ${
-                      isActive ? 'text-white' : 'text-purple-400/70 group-hover:text-cyan-400'
+                return (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all group ${
+                      isActive
+                        ? 'bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 text-white shadow-[0_0_20px_rgba(124,58,237,0.4)] font-bold'
+                        : 'text-slate-300 hover:text-white hover:bg-white/[0.05]'
                     }`}
-                  />
-                  <span className="truncate">{item.label}</span>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Distinctive Clip Matrix Payout Pulse Card */}
-        <div className="rounded-2xl bg-gradient-to-br from-[#160b36]/90 via-[#0e0c26]/90 to-[#070a1a] border border-purple-500/30 p-4 space-y-2 relative overflow-hidden shadow-lg group">
-          <div className="absolute -top-6 -right-6 w-20 h-20 bg-cyan-500/15 rounded-full blur-xl pointer-events-none group-hover:bg-cyan-500/25 transition-all" />
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono text-cyan-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
-              <Sparkles className="w-3 h-3 text-cyan-300" />
-              <span>DIRECT PAYOUT POOL</span>
-            </span>
-            <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-mono font-semibold">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              Active
-            </span>
-          </div>
-
-          <div className="space-y-0.5">
-            <div className="text-lg font-black text-white font-display tracking-tight">
-              $250,000+
-            </div>
-            <div className="text-[11px] text-purple-200/70 leading-tight">
-              Verified payouts issued to top performance clippers.
+                  >
+                    <Icon
+                      className={`w-4 h-4 shrink-0 transition-transform group-hover:scale-110 ${
+                        isActive ? 'text-white' : 'text-purple-400/70 group-hover:text-cyan-400'
+                      }`}
+                    />
+                    <span className="truncate">{item.label}</span>
+                  </Link>
+                );
+              })}
             </div>
           </div>
-        </div>
+        )}
+
+        {/* Distinctive Clip Matrix Payout Pulse Card (Hidden for Brand login) */}
+        {!isBrandWorkspace && (
+          <div className="rounded-2xl bg-gradient-to-br from-[#160b36]/90 via-[#0e0c26]/90 to-[#070a1a] border border-purple-500/30 p-4 space-y-2 relative overflow-hidden shadow-lg group">
+            <div className="absolute -top-6 -right-6 w-20 h-20 bg-cyan-500/15 rounded-full blur-xl pointer-events-none group-hover:bg-cyan-500/25 transition-all" />
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-mono text-cyan-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                <Sparkles className="w-3 h-3 text-cyan-300" />
+                <span>DIRECT PAYOUT POOL</span>
+              </span>
+              <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-mono font-semibold">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Active
+              </span>
+            </div>
+
+            <div className="space-y-0.5">
+              <div className="text-lg font-black text-white font-display tracking-tight">
+                $250,000+
+              </div>
+              <div className="text-[11px] text-purple-200/70 leading-tight">
+                Verified payouts issued to top performance clippers.
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* 3. Docked Bottom User Profile & Navigation Controls */}
       <div className="p-4 border-t border-purple-500/20 bg-[#070a1a]/95 space-y-3 shrink-0">
-        {/* User Card */}
-        <div className="flex items-center gap-3 p-2 rounded-xl bg-white/[0.03] border border-white/[0.05]">
-          {user?.avatar ? (
-            <img
-              src={user.avatar}
-              alt={displayName}
-              className="w-9 h-9 rounded-xl object-cover shrink-0 shadow-md border border-purple-500/40"
-            />
-          ) : (
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 to-cyan-500 text-white font-bold flex items-center justify-center text-sm shrink-0 shadow-md">
-              {initial}
-            </div>
-          )}
-          <div className="min-w-0 flex-1">
-            <div className="font-bold text-xs text-white truncate">{displayName}</div>
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                {displayRole}
-              </span>
-              <span className="text-[10px] text-emerald-400 font-mono font-semibold">
-                ${balance.toLocaleString('en-US')}
-              </span>
+        {/* User Card (Hidden for Brand login per minimal view-only telemetry layout) */}
+        {!isBrandWorkspace && (
+          <div className="flex items-center gap-3 p-2 rounded-xl bg-white/[0.03] border border-white/[0.05]">
+            {user?.avatar ? (
+              <img
+                src={user.avatar}
+                alt={displayName}
+                className="w-9 h-9 rounded-xl object-cover shrink-0 shadow-md border border-purple-500/40"
+              />
+            ) : (
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 to-cyan-500 text-white font-bold flex items-center justify-center text-sm shrink-0 shadow-md">
+                {initial}
+              </div>
+            )}
+            <div className="min-w-0 flex-1">
+              <div className="font-bold text-xs text-white truncate">{displayName}</div>
+              <div className="flex items-center gap-2 mt-0.5">
+                <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                  {displayRole}
+                </span>
+                <span className="text-[10px] text-emerald-400 font-mono font-semibold">
+                  ${balance.toLocaleString('en-US')}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* 1-Click Role Switcher */}
         {role === 'CLIPPER' ? (
