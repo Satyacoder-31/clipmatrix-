@@ -60,6 +60,7 @@ export default function HomePage() {
 
   // Clipper Simulator state
   const [viewsSim, setViewsSim] = useState(150000);
+  const [cpmSim, setCpmSim] = useState(0.5);
 
   // Contact form state
   const [contactName, setContactName] = useState('');
@@ -89,7 +90,7 @@ export default function HomePage() {
   const estimatedRoas = (estimatedRevenue / calcBudget).toFixed(1);
 
   // Clipper earnings
-  const potentialClipperEarnings = Number(((viewsSim / 1000) * 0.5).toFixed(2));
+  const potentialClipperEarnings = Number(((viewsSim / 1000) * cpmSim).toFixed(2));
 
   const displayedCampaigns = campaigns.filter((c) => {
     if (filteredPlatform === 'ALL') return true;
@@ -659,36 +660,66 @@ export default function HomePage() {
               How Much Can You Earn Per Viral Clip?
             </h3>
             <p className="text-purple-200/70 text-xs sm:text-sm">
-              Drag the slider to calculate your estimated payout based on verified views.
+              Drag the sliders to calculate your estimated payout based on verified views and campaign CPM rate.
             </p>
           </div>
 
           <div className="max-w-3xl mx-auto space-y-8">
-            <div className="space-y-3">
-              <div className="flex justify-between text-sm">
-                <span className="text-purple-200">Verified Views on Your Clip</span>
-                <span className="text-white font-bold font-mono text-base">{viewsSim.toLocaleString()} Views</span>
+            <div className="space-y-6">
+              {/* Slider 1: Views */}
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span className="text-purple-200">Verified Views on Your Clip</span>
+                  <span className="text-white font-bold font-mono text-base">{viewsSim.toLocaleString()} Views</span>
+                </div>
+                <input
+                  type="range"
+                  min="10000"
+                  max="1000000"
+                  step="10000"
+                  value={viewsSim}
+                  onChange={(e) => setViewsSim(Number(e.target.value))}
+                  className="w-full accent-purple-500 h-2 bg-[#201438] rounded-lg cursor-pointer"
+                />
+                <div className="flex justify-between text-[11px] text-purple-300/60 font-mono">
+                  <span>10K Views</span>
+                  <span>500K Views</span>
+                  <span>1,000,000 Views</span>
+                </div>
               </div>
-              <input
-                type="range"
-                min="10000"
-                max="1000000"
-                step="10000"
-                value={viewsSim}
-                onChange={(e) => setViewsSim(Number(e.target.value))}
-                className="w-full accent-purple-500 h-2 bg-[#201438] rounded-lg cursor-pointer"
-              />
+
+              {/* Slider 2: CPM Rate */}
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span className="text-purple-200">Campaign CPM Rate</span>
+                  <span className="text-cyan-300 font-bold font-mono text-base">${cpmSim.toFixed(2)} / 1k views</span>
+                </div>
+                <input
+                  type="range"
+                  min="0.10"
+                  max="3.00"
+                  step="0.05"
+                  value={cpmSim}
+                  onChange={(e) => setCpmSim(Number(e.target.value))}
+                  className="w-full accent-cyan-400 h-2 bg-[#201438] rounded-lg cursor-pointer"
+                />
+                <div className="flex justify-between text-[11px] text-purple-300/60 font-mono">
+                  <span>$0.10 (Entry)</span>
+                  <span>$1.50 (High Impact)</span>
+                  <span>$3.00 (Elite / Brand Sponsor)</span>
+                </div>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
               <div className="p-4 rounded-xl bg-[#140b26] border border-purple-900/40">
                 <div className="text-xs text-purple-300">Campaign CPM Rate</div>
-                <div className="text-xl font-bold text-purple-400 mt-1">$0.50 / 1k views</div>
+                <div className="text-xl font-bold text-cyan-400 mt-1">${cpmSim.toFixed(2)} / 1k views</div>
               </div>
               <div className="p-4 rounded-xl bg-[#140b26] border border-purple-900/40">
                 <div className="text-xs text-purple-300">Calculated Payout</div>
                 <div className="text-2xl font-extrabold text-emerald-400 mt-1 font-display">
-                  ${potentialClipperEarnings.toLocaleString('en-US')}
+                  ${potentialClipperEarnings.toLocaleString('en-US', { minimumFractionDigits: potentialClipperEarnings % 1 !== 0 ? 2 : 0, maximumFractionDigits: 2 })}
                 </div>
               </div>
               <div className="p-4 rounded-xl bg-[#140b26] border border-purple-900/40">
