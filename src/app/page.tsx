@@ -61,12 +61,6 @@ export default function HomePage() {
   // Clipper Simulator state
   const [viewsSim, setViewsSim] = useState(150000);
 
-  // Brand Simulator state
-  const [prevTitle, setPrevTitle] = useState('Aether AI 2.0 Global Launch');
-  const [prevIndustry, setPrevIndustry] = useState('Tech & AI');
-  const [prevBudget, setPrevBudget] = useState(2500);
-  const [prevCpm, setPrevCpm] = useState(0.5);
-
   // Contact form state
   const [contactName, setContactName] = useState('');
   const [contactEmail, setContactEmail] = useState('');
@@ -96,9 +90,6 @@ export default function HomePage() {
 
   // Clipper earnings
   const potentialClipperEarnings = Number(((viewsSim / 1000) * 0.5).toFixed(2));
-
-  // Brand estimated views
-  const brandEstimatedViews = Math.floor((prevBudget / prevCpm) * 1000);
 
   const displayedCampaigns = campaigns.filter((c) => {
     if (filteredPlatform === 'ALL') return true;
@@ -629,141 +620,6 @@ export default function HomePage() {
             );
           })}
         </div>
-
-        {/* Comparison Table */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="rounded-3xl bg-[#110822] border border-purple-900/50 p-6 sm:p-10 space-y-6"
-        >
-          <div className="text-center max-w-2xl mx-auto space-y-2">
-            <h3 className="text-2xl sm:text-3xl font-bold text-white font-display">
-              Clip Matrix vs Traditional Influencer Agencies
-            </h3>
-            <p className="text-purple-200/70 text-sm">See how performance clipping radically improves marketing ROI.</p>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-purple-200">
-              <thead>
-                <tr className="border-b border-purple-900/50 text-xs uppercase font-mono text-purple-400">
-                  <th className="py-4 px-4">Feature / Metric</th>
-                  <th className="py-4 px-4 text-purple-300 font-bold bg-purple-950/40 rounded-t-xl">Clip Matrix Network</th>
-                  <th className="py-4 px-4 text-slate-400">Traditional Agency</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-purple-900/30">
-                <tr>
-                  <td className="py-4 px-4 font-medium text-white">Pricing Model</td>
-                  <td className="py-4 px-4 font-semibold text-emerald-400 bg-purple-950/20">Guaranteed $0.50 CPM ($0.50/1k views)</td>
-                  <td className="py-4 px-4 text-slate-400">Fixed $2,000 - $10,000 Upfront Retainer</td>
-                </tr>
-                <tr>
-                  <td className="py-4 px-4 font-medium text-white">Financial Security</td>
-                  <td className="py-4 px-4 font-semibold text-emerald-400 bg-purple-950/20">100% Escrow Protection</td>
-                  <td className="py-4 px-4 text-slate-400">Paid in advance with zero guarantee</td>
-                </tr>
-                <tr>
-                  <td className="py-4 px-4 font-medium text-white">Creative Variations</td>
-                  <td className="py-4 px-4 font-semibold text-emerald-400 bg-purple-950/20">30 to 100+ unique clips</td>
-                  <td className="py-4 px-4 text-slate-400">Only 2 to 4 sponsored posts</td>
-                </tr>
-                <tr>
-                  <td className="py-4 px-4 font-medium text-white">Turnaround Speed</td>
-                  <td className="py-4 px-4 font-semibold text-emerald-400 bg-purple-950/20">24 - 48 Hours to Launch</td>
-                  <td className="py-4 px-4 text-slate-400">3 to 6 weeks of contracts & delays</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </motion.div>
-
-        {/* Interactive Campaign Creation Preview */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="rounded-3xl bg-gradient-to-br from-[#180e2f] to-[#100720] border border-purple-500/30 p-6 sm:p-10 space-y-8"
-        >
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-purple-900/40">
-            <div>
-              <span className="text-xs font-mono uppercase tracking-widest text-purple-400">Live Campaign Configurator</span>
-              <h3 className="text-2xl sm:text-3xl font-bold text-white mt-1 font-display">
-                Preview Your Next Campaign Brief
-              </h3>
-            </div>
-            <div className="text-right">
-              <span className="text-xs text-purple-300">Projected Reach</span>
-              <div className="text-xl sm:text-2xl font-bold text-emerald-400 font-display">
-                {brandEstimatedViews.toLocaleString()} Verified Views
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-4">
-              <div>
-                <label className="text-xs text-purple-300 font-medium">Campaign Title</label>
-                <input
-                  type="text"
-                  value={prevTitle}
-                  onChange={(e) => setPrevTitle(e.target.value)}
-                  className="w-full mt-1 px-4 py-2.5 rounded-xl bg-[#120824] border border-purple-800/50 text-white text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs text-purple-300 font-medium">Industry Category</label>
-                <select
-                  value={prevIndustry}
-                  onChange={(e) => setPrevIndustry(e.target.value)}
-                  className="w-full mt-1 px-4 py-2.5 rounded-xl bg-[#120824] border border-purple-800/50 text-white text-sm"
-                >
-                  <option>Tech & AI</option>
-                  <option>Fashion & Sneakers</option>
-                  <option>Podcasts & Media</option>
-                  <option>Fitness & Health</option>
-                  <option>Fintech & SaaS</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-xs text-purple-300 font-medium">Campaign Budget ($ USD)</label>
-                <input
-                  type="number"
-                  value={prevBudget}
-                  onChange={(e) => setPrevBudget(Number(e.target.value))}
-                  className="w-full mt-1 px-4 py-2.5 rounded-xl bg-[#120824] border border-purple-800/50 text-white text-sm"
-                />
-              </div>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-[#120822] border border-purple-800/40 flex flex-col justify-between space-y-6">
-              <div className="space-y-3">
-                <div className="text-xs font-mono text-purple-400 uppercase">Live Clipper Card Preview</div>
-                <div className="text-lg font-bold text-white font-display">{prevTitle}</div>
-                <div className="text-xs text-purple-300">
-                  Industry: <span className="text-white font-semibold">{prevIndustry}</span> • Model:{' '}
-                  <span className="text-emerald-400 font-bold">CPM ($0.50/1k views)</span>
-                </div>
-                <div className="text-xs text-purple-300/80 leading-relaxed">
-                  Clippers will cut 9:16 vertical clips from your video links and receive $0.50 per 1,000 verified
-                  views directly via escrow.
-                </div>
-              </div>
-
-              <a
-                href="/auth/register-brand"
-                className="w-full py-3.5 rounded-xl font-bold text-center text-white bg-purple-600 hover:bg-purple-500 transition-colors shadow-glow-purple block text-xs"
-              >
-                Launch This Campaign as Brand
-              </a>
-            </div>
-          </div>
-        </motion.div>
       </section>
 
       {/* =========================================================================
@@ -851,48 +707,6 @@ export default function HomePage() {
             </div>
           </div>
         </motion.div>
-
-        {/* 3 Clipper Benefits */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            {
-              icon: CheckCircle2,
-              title: 'No Need to Hunt for Clients',
-              desc: 'Stop sending cold DMs. High-budget brands are already live on Clip Matrix with ready-to-clip source footage and locked escrow funds.',
-              color: 'text-purple-400',
-            },
-            {
-              icon: Zap,
-              title: 'Instant UPI Settlements',
-              desc: 'No waiting 60 days for brand invoice clearance. Once your clip performance is verified, cash out straight to your PhonePe, GPay, or Paytm.',
-              color: 'text-emerald-400',
-            },
-            {
-              icon: Award,
-              title: 'Leaderboards & Elite Bonuses',
-              desc: 'Top editors unlock higher CPM rates, exclusive private campaigns, and monthly performance rewards.',
-              color: 'text-pink-400',
-            },
-          ].map((item, idx) => {
-            const Icon = item.icon;
-            return (
-              <motion.div
-                key={item.title}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: idx * 0.1 }}
-                className="p-8 rounded-3xl bg-[#130a24] border border-purple-900/50 space-y-4"
-              >
-                <div className="w-12 h-12 rounded-2xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-purple-400">
-                  <Icon className={`w-6 h-6 ${item.color}`} />
-                </div>
-                <h3 className="text-xl font-bold text-white font-display">{item.title}</h3>
-                <p className="text-sm text-purple-200/70 leading-relaxed">{item.desc}</p>
-              </motion.div>
-            );
-          })}
-        </div>
       </section>
 
       {/* =========================================================================
@@ -1337,135 +1151,6 @@ export default function HomePage() {
                     Peak: 2.14M views / day
                   </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Live Campaigns Table matching video reference */}
-            <div className="rounded-2xl bg-[#160c2b] border border-purple-900/50 overflow-hidden text-left">
-              <div className="p-4 sm:p-5 border-b border-purple-900/40 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block animate-pulse" />
-                  <span className="text-xs font-mono uppercase tracking-wider text-white font-bold">
-                    Active Verified Campaigns
-                  </span>
-                </div>
-                <span className="text-xs text-purple-300/70">7 Live Now</span>
-              </div>
-
-              <div className="divide-y divide-purple-900/30 overflow-x-auto">
-                {[
-                  {
-                    name: 'Joe Rogan [CLIPPING]',
-                    avatar: 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=100&auto=format&fit=crop&q=80',
-                    platforms: ['🎵'],
-                    date: '22 Sep 2026',
-                    views: '310K',
-                    budget: '$2,500',
-                    progress: 17,
-                  },
-                  {
-                    name: 'Assassins Creed [TIKTOK/INSTAGRAM]',
-                    avatar: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=100&auto=format&fit=crop&q=80',
-                    platforms: ['🎵', '📷'],
-                    date: '20 Sep 2026',
-                    views: '1.2M',
-                    budget: '$5,000',
-                    progress: 32,
-                  },
-                  {
-                    name: 'Yeat - Back Home [EDITS V6]',
-                    avatar: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100&auto=format&fit=crop&q=80',
-                    platforms: ['🎵'],
-                    date: '18 Sep 2026',
-                    views: '980K',
-                    budget: '$4,000',
-                    progress: 33,
-                  },
-                  {
-                    name: 'Michael Jackson [CLIPPING] TIKTOK',
-                    avatar: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=100&auto=format&fit=crop&q=80',
-                    platforms: ['🎵', '▶'],
-                    date: '16 Sep 2026',
-                    views: '760K',
-                    budget: '$3,000',
-                    progress: 38,
-                  },
-                  {
-                    name: 'OhnePixel [CLIPPING]',
-                    avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=100&auto=format&fit=crop&q=80',
-                    platforms: ['🎵', '𝕏'],
-                    date: '14 Sep 2026',
-                    views: '2.1M',
-                    budget: '$6,500',
-                    progress: 42,
-                  },
-                  {
-                    name: 'Taylor Swift [CLIPPING]',
-                    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
-                    platforms: ['🎵', '📷'],
-                    date: '12 Sep 2026',
-                    views: '810K',
-                    budget: '$4,000',
-                    progress: 56,
-                  },
-                  {
-                    name: 'Clipster.gg [UGC]',
-                    avatar: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop&q=80',
-                    platforms: ['🎵', '📷'],
-                    date: '10 Sep 2026',
-                    views: '1.6M',
-                    budget: '$5,000',
-                    progress: 62,
-                  },
-                ].map((item) => (
-                  <div
-                    key={item.name}
-                    className="p-4 flex items-center justify-between gap-4 hover:bg-white/[0.02] transition-colors"
-                  >
-                    <div className="flex items-center gap-3 min-w-[200px]">
-                      <img
-                        src={item.avatar}
-                        alt={item.name}
-                        loading="lazy"
-                        decoding="async"
-                        className="w-10 h-10 rounded-xl object-cover border border-purple-800/50"
-                      />
-                      <div>
-                        <div className="text-xs font-bold text-white font-mono">{item.name}</div>
-                        <div className="flex items-center gap-1.5 mt-0.5 text-[11px] text-emerald-400">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" /> Live
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-1.5 text-xs text-purple-300">
-                      {item.platforms.map((p, i) => (
-                        <span key={i} className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-[10px]">
-                          {p}
-                        </span>
-                      ))}
-                    </div>
-
-                    <div className="text-xs text-purple-300/70 hidden md:block">{item.date}</div>
-
-                    <div className="text-xs font-bold text-white flex items-center gap-1">
-                      <Eye className="w-3.5 h-3.5 text-purple-400" />
-                      <span>{item.views}</span>
-                    </div>
-
-                    <div className="text-xs font-bold font-mono text-emerald-400">{item.budget}</div>
-
-                    <div className="flex items-center gap-2 min-w-[80px]">
-                      <div className="w-12 h-1.5 rounded-full bg-purple-950 overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-cyan-400 to-emerald-400 rounded-full"
-                          style={{ width: `${item.progress}%` }}
-                        />
-                      </div>
-                      <span className="text-[11px] font-mono text-purple-300">{item.progress}%</span>
-                    </div>
-                  </div>
-                ))}
               </div>
             </div>
           </div>
