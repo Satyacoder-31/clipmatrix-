@@ -77,7 +77,19 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized: Only Admins can update campaign controls.' }, { status: 403 });
     }
 
-    const { status, isFeatured, cpmRate, rewardPerClip, totalBudget, accessCode } = await request.json();
+    const {
+      title,
+      thumbnailUrl,
+      description,
+      guidelines,
+      industry,
+      status,
+      isFeatured,
+      cpmRate,
+      rewardPerClip,
+      totalBudget,
+      accessCode,
+    } = await request.json();
 
     const campaign = await prisma.campaign.findUnique({
       where: { id: params.id },
@@ -100,10 +112,15 @@ export async function PATCH(
     }
 
     const updateData: any = {
+      ...(typeof title === 'string' && title.trim() ? { title: title.trim() } : {}),
+      ...(typeof thumbnailUrl === 'string' && thumbnailUrl.trim() ? { thumbnailUrl: thumbnailUrl.trim() } : {}),
+      ...(typeof description === 'string' && description.trim() ? { description: description.trim() } : {}),
+      ...(typeof guidelines === 'string' && guidelines.trim() ? { guidelines: guidelines.trim() } : {}),
+      ...(typeof industry === 'string' && industry.trim() ? { industry: industry.trim() } : {}),
       ...(status ? { status } : {}),
       ...(typeof isFeatured === 'boolean' ? { isFeatured } : {}),
-      ...(cpmRate ? { cpmRate: parseFloat(cpmRate) } : {}),
-      ...(rewardPerClip ? { rewardPerClip: parseFloat(rewardPerClip) } : {}),
+      ...(cpmRate !== undefined && !isNaN(parseFloat(cpmRate)) ? { cpmRate: parseFloat(cpmRate) } : {}),
+      ...(rewardPerClip !== undefined && !isNaN(parseFloat(rewardPerClip)) ? { rewardPerClip: parseFloat(rewardPerClip) } : {}),
       ...(updatedCode ? { accessCode: updatedCode } : {}),
     };
 
