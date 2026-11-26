@@ -13,10 +13,26 @@ export default function ClipperLayout({ children }: { children: React.ReactNode 
   const router = useRouter();
 
   useEffect(() => {
+    let isMounted = true;
+
+    const fetchSessionWithRetry = async (retries = 1): Promise<any> => {
+      try {
+        const res = await fetch('/api/auth/me', { cache: 'no-store' });
+        return await res.json();
+      } catch (err) {
+        if (retries > 0) {
+          await new Promise((r) => setTimeout(r, 600));
+          return fetchSessionWithRetry(retries - 1);
+        }
+        throw err;
+      }
+    };
+
     const syncClipperSession = async () => {
       try {
-        const res = await fetch('/api/auth/me');
-        const data = await res.json();
+        const data = await fetchSessionWithRetry(1);
+        if (!isMounted) return;
+
         if (!data.authenticated || data.user?.role !== 'CLIPPER') {
           router.push('/auth/register-clipper');
           return;
@@ -32,11 +48,16 @@ export default function ClipperLayout({ children }: { children: React.ReactNode 
         setUser(data.user);
         setLoading(false);
       } catch {
-        router.push('/auth/register-clipper');
+        if (isMounted) {
+          router.push('/auth/register-clipper');
+        }
       }
     };
 
     syncClipperSession();
+    return () => {
+      isMounted = false;
+    };
   }, [router]);
 
   if (loading) {

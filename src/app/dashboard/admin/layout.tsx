@@ -13,10 +13,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
 
   useEffect(() => {
+    let isMounted = true;
+
+    const fetchSessionWithRetry = async (retries = 1): Promise<any> => {
+      try {
+        const res = await fetch('/api/auth/me', { cache: 'no-store' });
+        return await res.json();
+      } catch (err) {
+        if (retries > 0) {
+          await new Promise((r) => setTimeout(r, 600));
+          return fetchSessionWithRetry(retries - 1);
+        }
+        throw err;
+      }
+    };
+
     const syncAdminSession = async () => {
       try {
-        const res = await fetch('/api/auth/me');
-        const data = await res.json();
+        const data = await fetchSessionWithRetry(1);
+        if (!isMounted) return;
+
         if (!data.authenticated || data.user?.role !== 'ADMIN') {
           router.push('/auth/admin');
           return;
@@ -25,11 +41,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         setUser(data.user);
         setLoading(false);
       } catch {
-        router.push('/auth/admin');
+        if (isMounted) {
+          router.push('/auth/admin');
+        }
       }
     };
 
     syncAdminSession();
+    return () => {
+      isMounted = false;
+    };
   }, [router]);
 
   if (loading) {

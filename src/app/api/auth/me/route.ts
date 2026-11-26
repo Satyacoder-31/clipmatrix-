@@ -36,7 +36,7 @@ export async function GET() {
       }
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       authenticated: true,
       user: {
         id: user.id,
@@ -59,6 +59,26 @@ export async function GET() {
         wallet: user.wallet,
       },
     });
+
+    // Sliding 7-day session renewal: keep the user logged in for 7 days from their latest activity
+    try {
+      const freshToken = generateToken({
+        userId: user.id,
+        email: user.email,
+        role: user.role as any,
+        name: user.name,
+      });
+
+      response.cookies.set('clipmatrix_session', freshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 7 * 24 * 60 * 60, // 7 days from now
+      });
+    } catch {}
+
+    return response;
   } catch (error) {
     return NextResponse.json({ authenticated: false, user: null });
   }

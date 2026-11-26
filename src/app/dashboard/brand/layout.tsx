@@ -13,25 +13,45 @@ export default function BrandLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
 
   useEffect(() => {
-    const loadBrandUser = () => {
-      fetch('/api/auth/me', { cache: 'no-store' })
-        .then((res) => res.json())
-        .then((data) => {
-          if (!data.authenticated || (data.user?.role !== 'BRAND' && data.user?.role !== 'ADMIN')) {
-            router.push('/auth/brand');
-            return;
-          }
-          setUser(data.user);
-          setLoading(false);
-        })
-        .catch(() => {
+    let isMounted = true;
+
+    const fetchSessionWithRetry = async (retries = 1): Promise<any> => {
+      try {
+        const res = await fetch('/api/auth/me', { cache: 'no-store' });
+        return await res.json();
+      } catch (err) {
+        if (retries > 0) {
+          await new Promise((r) => setTimeout(r, 600));
+          return fetchSessionWithRetry(retries - 1);
+        }
+        throw err;
+      }
+    };
+
+    const loadBrandUser = async () => {
+      try {
+        const data = await fetchSessionWithRetry(1);
+        if (!isMounted) return;
+
+        if (!data.authenticated || (data.user?.role !== 'BRAND' && data.user?.role !== 'ADMIN')) {
           router.push('/auth/brand');
-        });
+          return;
+        }
+        setUser(data.user);
+        setLoading(false);
+      } catch {
+        if (isMounted) {
+          router.push('/auth/brand');
+        }
+      }
     };
 
     loadBrandUser();
     window.addEventListener('clipmatrix-profile-updated', loadBrandUser);
-    return () => window.removeEventListener('clipmatrix-profile-updated', loadBrandUser);
+    return () => {
+      isMounted = false;
+      window.removeEventListener('clipmatrix-profile-updated', loadBrandUser);
+    };
   }, [router]);
 
   if (loading) {
