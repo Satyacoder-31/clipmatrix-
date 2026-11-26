@@ -287,6 +287,23 @@ export async function POST(request: Request) {
       },
     });
 
+    // Auto-grant brand access to assigned brand
+    if (assignedBrandId) {
+      await prisma.brandCampaignAccess.upsert({
+        where: {
+          brandId_campaignId: {
+            brandId: assignedBrandId,
+            campaignId: newCampaign.id,
+          },
+        },
+        update: {},
+        create: {
+          brandId: assignedBrandId,
+          campaignId: newCampaign.id,
+        },
+      }).catch((e) => console.warn('Could not auto-grant brand access:', e));
+    }
+
     return NextResponse.json({ success: true, campaign: newCampaign });
   } catch (error) {
     console.error('Error creating campaign:', error);

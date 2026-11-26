@@ -492,8 +492,8 @@ export default function AdminCampaignsPage() {
                 <label className="text-xs text-purple-300 font-mono">CPM Rate ($ per 1,000 views)</label>
                 <input
                   type="number"
-                  step="0.01"
-                  min="0.1"
+                  step="any"
+                  min="0.01"
                   value={newCpm}
                   onChange={(e) => setNewCpm(Number(e.target.value))}
                   className="w-full mt-1 p-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white font-mono text-sm outline-none focus:border-cyan-400"
@@ -504,7 +504,8 @@ export default function AdminCampaignsPage() {
                 <label className="text-xs text-purple-300 font-mono">Total Campaign Budget ($)</label>
                 <input
                   type="number"
-                  min="50"
+                  min="1"
+                  step="any"
                   value={newBudget}
                   onChange={(e) => setNewBudget(Number(e.target.value))}
                   className="w-full mt-1 p-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white font-mono text-sm outline-none focus:border-cyan-400"
@@ -673,8 +674,8 @@ export default function AdminCampaignsPage() {
                   <label className="text-purple-300 font-semibold block mb-1">Total Budget ($)</label>
                   <input
                     type="number"
-                    min="100"
-                    step="50"
+                    min="1"
+                    step="any"
                     value={newCampBudget}
                     onChange={(e) => handleBudgetChange(e.target.value)}
                     className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white font-mono outline-none focus:border-cyan-400"
@@ -685,8 +686,8 @@ export default function AdminCampaignsPage() {
                   <label className="text-purple-300 font-semibold block mb-1">CPM Rate ($ / 1k views)</label>
                   <input
                     type="number"
-                    min="0.10"
-                    step="0.05"
+                    min="0.01"
+                    step="any"
                     value={newCampCpm}
                     onChange={(e) => handleCpmChange(e.target.value)}
                     className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white font-mono outline-none focus:border-cyan-400"
