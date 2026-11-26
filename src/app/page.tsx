@@ -53,8 +53,6 @@ export default function HomePage() {
   // ROI Calculator state
   const [calcBudget, setCalcBudget] = useState(2500);
   const [calcCpm, setCalcCpm] = useState(0.5);
-  const [calcAov, setCalcAov] = useState(45);
-  const [calcConversion, setCalcConversion] = useState(1.2);
 
   // Clipper Simulator state
   const [viewsSim, setViewsSim] = useState(150000);
@@ -75,10 +73,6 @@ export default function HomePage() {
   // ROI computations
   const estimatedViews = Math.floor((calcBudget / calcCpm) * 1000);
   const estimatedCostPerView = (calcBudget / estimatedViews).toFixed(2);
-  const estimatedClicks = Math.floor(estimatedViews * 0.022);
-  const estimatedConversions = Math.floor(estimatedClicks * (calcConversion / 100));
-  const estimatedRevenue = estimatedConversions * calcAov;
-  const estimatedRoas = (estimatedRevenue / calcBudget).toFixed(1);
 
   // Clipper earnings
   const potentialClipperEarnings = Number(((viewsSim / 1000) * cpmSim).toFixed(2));
@@ -824,82 +818,56 @@ export default function HomePage() {
             </p>
           </motion.div>
 
-          <div className="space-y-8">
-            {[
-              {
-                brand: 'Aether AI Technologies',
-                industry: 'Tech & Multimodal AI',
-                title: 'How Aether AI Scaled From 0 to 1.8M Verified Views in 18 Days',
-                metric1: '1,850,000+',
-                label1: 'Verified Views',
-                metric2: '$0.50 CPM',
-                label2: 'Average CPV',
-                metric3: '14,200',
-                label3: 'Freemium Signups',
-                thumbnail: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80',
-                summary: '24 Clip Matrix clippers cut 48 retention-optimized vertical hooks highlighting prompt comparison versus traditional 3D software.',
-                quote: 'Clip Matrix delivered 10x more organic reach than traditional agency retainers at half the cost.',
-                author: 'Devika Nair, VP Growth',
-              },
-              {
-                brand: 'KicksDrop India',
-                industry: 'D2C Fashion & Sneakers',
-                title: 'Generating $350,000 in Sneaker GMV via Travis Scott ASMR Unboxings',
-                metric1: '920,000+',
-                label1: 'Verified Views',
-                metric2: '4.8x',
-                label2: 'Verified ROAS',
-                metric3: '1,420',
-                label3: 'Sneaker Orders',
-                thumbnail: 'https://images.unsplash.com/photo-1552346154-21d32810aba3?w=800&auto=format&fit=crop&q=80',
-                summary: 'By distributing ASMR sound-design edits and price comparison clips across Reels and TikTok, KicksDrop dominated limited drop hype.',
-                quote: 'The escrow protection and CPM model gave us total transparency. We paid strictly for verified reach.',
-                author: 'Rohan Singhania, Founder',
-              },
-            ].map((cs, idx) => (
-              <motion.div
-                key={cs.brand}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: idx * 0.1 }}
-                className="rounded-3xl bg-[#130a24] border border-purple-900/50 overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-8 p-6 sm:p-10 items-center hover:border-purple-500/40 transition-all shadow-xl"
-              >
-                <div className="lg:col-span-5 relative aspect-video sm:aspect-square lg:aspect-auto h-full min-h-[240px] rounded-2xl overflow-hidden bg-black">
-                  <img src={cs.thumbnail} alt={cs.title} loading="lazy" decoding="async" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
-                  <div className="absolute bottom-4 left-4 right-4 text-xs text-white/90 font-medium italic">
-                    "{cs.quote}" — <span className="font-bold text-white">{cs.author}</span>
-                  </div>
-                </div>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="rounded-3xl bg-[#130a24] border border-purple-900/50 overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-8 p-6 sm:p-10 items-center hover:border-purple-500/40 transition-all shadow-xl"
+          >
+            <div className="lg:col-span-5 relative aspect-video sm:aspect-square lg:aspect-auto h-full min-h-[240px] rounded-2xl overflow-hidden bg-black flex items-center justify-center">
+              <img
+                src="https://yt3.googleusercontent.com/ytc/AIdro_m5kGCbZq6Kd5kNkvVxqmD-6jFm0QZ-5xZHE5qHlVqZ1Q=s900-c-k-c0x00ffffff-no-rj"
+                alt="Yash Gupta – Trader & Media Creator"
+                loading="lazy"
+                decoding="async"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
+              <div className="absolute bottom-4 left-4 right-4 text-xs text-white/90 font-medium italic">
+                &quot;Clip Matrix gave me 10x more organic reach on my trading content than any agency could deliver — and I only paid for verified views.&quot; — <span className="font-bold text-white">Yash Gupta, Founder</span>
+              </div>
+            </div>
 
-                <div className="lg:col-span-7 space-y-6">
-                  <div className="space-y-2">
-                    <div className="text-xs font-mono uppercase tracking-widest text-purple-400">
-                      {cs.brand} • {cs.industry}
-                    </div>
-                    <h3 className="text-2xl font-bold text-white font-display leading-tight">{cs.title}</h3>
-                    <p className="text-sm text-purple-200/70 leading-relaxed">{cs.summary}</p>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-4 pt-2 border-t border-purple-900/40">
-                    <div className="p-3.5 rounded-xl bg-[#1b1033] border border-purple-800/40 text-center">
-                      <div className="text-xl sm:text-2xl font-extrabold text-white font-display">{cs.metric1}</div>
-                      <div className="text-[11px] text-purple-300/70 mt-0.5">{cs.label1}</div>
-                    </div>
-                    <div className="p-3.5 rounded-xl bg-[#1b1033] border border-purple-800/40 text-center">
-                      <div className="text-xl sm:text-2xl font-extrabold text-cyan-400 font-display">{cs.metric2}</div>
-                      <div className="text-[11px] text-cyan-300/70 mt-0.5">{cs.label2}</div>
-                    </div>
-                    <div className="p-3.5 rounded-xl bg-[#1b1033] border border-purple-800/40 text-center">
-                      <div className="text-xl sm:text-2xl font-extrabold text-emerald-400 font-display">{cs.metric3}</div>
-                      <div className="text-[11px] text-emerald-300/70 mt-0.5">{cs.label3}</div>
-                    </div>
-                  </div>
+            <div className="lg:col-span-7 space-y-6">
+              <div className="space-y-2">
+                <div className="text-xs font-mono uppercase tracking-widest text-purple-400">
+                  Yash Gupta • Podcasts &amp; Media
                 </div>
-              </motion.div>
-            ))}
-          </div>
+                <h3 className="text-2xl font-bold text-white font-display leading-tight">
+                  How Yash Gupta Scaled From 0 to 1.98M Verified Views With Clip Matrix Clippers
+                </h3>
+                <p className="text-sm text-purple-200/70 leading-relaxed">
+                  Clip Matrix clippers cut retention-optimized vertical hooks from Yash Gupta&apos;s long-form trading and podcast content, distributing them across Instagram Reels and YouTube Shorts for maximum organic reach.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4 pt-2 border-t border-purple-900/40">
+                <div className="p-3.5 rounded-xl bg-[#1b1033] border border-purple-800/40 text-center">
+                  <div className="text-xl sm:text-2xl font-extrabold text-white font-display">1,985,789+</div>
+                  <div className="text-[11px] text-purple-300/70 mt-0.5">Verified Views</div>
+                </div>
+                <div className="p-3.5 rounded-xl bg-[#1b1033] border border-purple-800/40 text-center">
+                  <div className="text-xl sm:text-2xl font-extrabold text-cyan-400 font-display">$0.50 CPM</div>
+                  <div className="text-[11px] text-cyan-300/70 mt-0.5">Average CPV</div>
+                </div>
+                <div className="p-3.5 rounded-xl bg-[#1b1033] border border-purple-800/40 text-center">
+                  <div className="text-xl sm:text-2xl font-extrabold text-emerald-400 font-display">$1,500</div>
+                  <div className="text-[11px] text-emerald-300/70 mt-0.5">Total Budget</div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
@@ -1076,115 +1044,72 @@ export default function HomePage() {
               Transparent Performance Pricing
             </span>
             <h2 className="text-3xl sm:text-5xl font-extrabold text-white font-display">
-              Calculate Your Viral Reach & <span className="text-gradient-neon">ROAS Return</span>
+              Calculate Your Viral Reach & <span className="text-gradient-neon">Campaign ROI</span>
             </h2>
             <p className="text-purple-200/70 text-base">
               100% escrow-backed. No agency markup, no retainer lock-in. Your money stays protected until clips deliver.
             </p>
           </motion.div>
 
-          {/* Calculator Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            <div className="lg:col-span-6 space-y-8">
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-purple-200">Campaign Budget</span>
-                  <span className="text-white font-bold font-mono">${calcBudget.toLocaleString('en-US')}</span>
-                </div>
-                <input
-                  type="range"
-                  min="20000"
-                  max="1000000"
-                  step="10000"
-                  value={calcBudget}
-                  onChange={(e) => setCalcBudget(Number(e.target.value))}
-                  className="w-full accent-purple-500 h-2 bg-[#1f1035] rounded-lg cursor-pointer"
-                />
+          {/* Calculator – budget & CPM sliders with projected views */}
+          <div className="max-w-3xl mx-auto space-y-8">
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-purple-200">Campaign Budget</span>
+                <span className="text-white font-bold font-mono">${calcBudget.toLocaleString('en-US')}</span>
               </div>
+              <input
+                type="range"
+                min="20000"
+                max="1000000"
+                step="10000"
+                value={calcBudget}
+                onChange={(e) => setCalcBudget(Number(e.target.value))}
+                className="w-full accent-purple-500 h-2 bg-[#1f1035] rounded-lg cursor-pointer"
+              />
+            </div>
 
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-purple-200">Target CPM Rate (Cost per 1k Views)</span>
-                  <span className="text-white font-bold font-mono">${calcCpm}</span>
-                </div>
-                <input
-                  type="range"
-                  min="80"
-                  max="200"
-                  step="10"
-                  value={calcCpm}
-                  onChange={(e) => setCalcCpm(Number(e.target.value))}
-                  className="w-full accent-purple-500 h-2 bg-[#1f1035] rounded-lg cursor-pointer"
-                />
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-purple-200">Target CPM Rate (Cost per 1k Views)</span>
+                <span className="text-white font-bold font-mono">${calcCpm}</span>
               </div>
+              <input
+                type="range"
+                min="80"
+                max="200"
+                step="10"
+                value={calcCpm}
+                onChange={(e) => setCalcCpm(Number(e.target.value))}
+                className="w-full accent-purple-500 h-2 bg-[#1f1035] rounded-lg cursor-pointer"
+              />
+            </div>
 
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-purple-200">Average Product Price / Subscription</span>
-                  <span className="text-white font-bold font-mono">${calcAov.toLocaleString('en-US')}</span>
+            {/* Projected Views + CPV in a simple row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+              <div className="p-5 rounded-2xl bg-gradient-to-br from-[#180e2f] to-[#0e061c] border border-purple-500/30 text-center">
+                <div className="text-xs text-purple-300 uppercase font-mono tracking-wider">Projected Views</div>
+                <div className="text-3xl sm:text-4xl font-extrabold text-white mt-2 font-display">
+                  {formatNumber(estimatedViews)}
                 </div>
-                <input
-                  type="range"
-                  min="500"
-                  max="10000"
-                  step="100"
-                  value={calcAov}
-                  onChange={(e) => setCalcAov(Number(e.target.value))}
-                  className="w-full accent-purple-500 h-2 bg-[#1f1035] rounded-lg cursor-pointer"
-                />
+                <div className="text-[10px] text-purple-400 mt-1">Across 15-40 clips</div>
+              </div>
+              <div className="p-5 rounded-2xl bg-gradient-to-br from-[#180e2f] to-[#0e061c] border border-purple-500/30 text-center">
+                <div className="text-xs text-purple-300 uppercase font-mono tracking-wider">Cost Per View (CPV)</div>
+                <div className="text-3xl sm:text-4xl font-extrabold text-cyan-400 mt-2 font-display">
+                  ${estimatedCostPerView}
+                </div>
+                <div className="text-[10px] text-cyan-300/70 mt-1">vs $1.80 Meta Ads</div>
               </div>
             </div>
 
-            <div className="lg:col-span-6 p-8 rounded-3xl bg-gradient-to-br from-[#180e2f] to-[#0e061c] border border-purple-500/30 shadow-2xl shadow-purple-950/80 space-y-6">
-              <div className="flex items-center justify-between pb-4 border-b border-purple-900/40">
-                <span className="text-xs uppercase font-mono tracking-wider text-purple-300">Projected Performance</span>
-                <span className="text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/30">
-                  Escrow Guaranteed
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 rounded-xl bg-[#110722] border border-purple-900/40">
-                  <div className="text-xs text-purple-300">Projected Views</div>
-                  <div className="text-2xl sm:text-3xl font-extrabold text-white mt-1 font-display">
-                    {formatNumber(estimatedViews)}
-                  </div>
-                  <div className="text-[10px] text-purple-400 mt-1">Across 15-40 clips</div>
-                </div>
-
-                <div className="p-4 rounded-xl bg-[#110722] border border-purple-900/40">
-                  <div className="text-xs text-purple-300">Cost Per View (CPV)</div>
-                  <div className="text-2xl sm:text-3xl font-extrabold text-cyan-400 mt-1 font-display">
-                    ${estimatedCostPerView}
-                  </div>
-                  <div className="text-[10px] text-cyan-300/70 mt-1">vs $1.80 Meta Ads</div>
-                </div>
-
-                <div className="p-4 rounded-xl bg-[#110722] border border-purple-900/40">
-                  <div className="text-xs text-purple-300">Projected Revenue</div>
-                  <div className="text-2xl sm:text-3xl font-extrabold text-emerald-400 mt-1 font-display">
-                    ${estimatedRevenue.toLocaleString('en-US')}
-                  </div>
-                  <div className="text-[10px] text-emerald-300/70 mt-1">Based on {estimatedConversions} sales</div>
-                </div>
-
-                <div className="p-4 rounded-xl bg-[#110722] border border-purple-900/40">
-                  <div className="text-xs text-purple-300">Estimated ROAS</div>
-                  <div className="text-2xl sm:text-3xl font-extrabold text-amber-400 mt-1 font-display">
-                    {estimatedRoas}x
-                  </div>
-                  <div className="text-[10px] text-amber-300/70 mt-1">Return on Ad Spend</div>
-                </div>
-              </div>
-
-              <div className="pt-2">
-                <button
-                  onClick={() => smoothScroll('#contact')}
-                  className="w-full py-4 rounded-xl text-center font-bold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 transition-all shadow-glow-purple block text-sm cursor-pointer"
-                >
-                  Book Campaign Strategy Call
-                </button>
-              </div>
+            <div className="pt-2 text-center">
+              <button
+                onClick={() => smoothScroll('#contact')}
+                className="px-10 py-4 rounded-xl font-bold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 transition-all shadow-glow-purple text-sm cursor-pointer"
+              >
+                Book Campaign Strategy Call
+              </button>
             </div>
           </div>
 
@@ -1436,10 +1361,10 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               {
-                quote: 'We scaled Aether AI from zero to 1.8M verified views in less than 3 weeks. Our budget only paid for verified views delivered by genuine clippers.',
-                name: 'Devika Nair',
-                role: 'VP Marketing, Aether AI',
-                avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
+                quote: 'Clip Matrix clippers turned my long-form trading content into viral Reels and Shorts. I hit nearly 2M verified views in weeks — paying only for real, verified reach.',
+                name: 'Yash Gupta',
+                role: 'Founder, Yash Gupta Trading',
+                avatar: 'https://yt3.googleusercontent.com/ytc/AIdro_m5kGCbZq6Kd5kNkvVxqmD-6jFm0QZ-5xZHE5qHlVqZ1Q=s900-c-k-c0x00ffffff-no-rj',
               },
               {
                 quote: 'As an editor, finding clients was a nightmare. On Clip Matrix, I just pick high-potential founder clips, edit hooks in CapCut, post them, and withdraw straight to UPI.',

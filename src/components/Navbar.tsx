@@ -265,7 +265,7 @@ export default function Navbar() {
             />
           </div>
           <span className="font-black text-white text-base sm:text-lg font-display tracking-tight whitespace-nowrap">
-            CLIP<span className="text-[#00D4FF] drop-shadow-[0_0_12px_rgba(0,212,255,0.7)]">MATRIX</span>
+            CLIP <span className="text-[#00D4FF] drop-shadow-[0_0_12px_rgba(0,212,255,0.7)]">MATRIX</span>
           </span>
         </a>
 
