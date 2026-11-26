@@ -1,13 +1,19 @@
 export interface RewardCalculationResult {
   rewardAmount: number;
+  grossReward: number;
+  platformFee: number;
   calculationDetails: string;
   breakdown: {
     baseReward: number;
     cpmReward: number;
     milestoneBonus: number;
+    platformFee: number;
     capApplied: boolean;
   };
 }
+
+export const PLATFORM_FEE_PERCENT = 3;
+export const PLATFORM_FEE_RATE = 0.03;
 
 export interface CampaignRewardConfig {
   rewardModel: 'CPM' | 'FIXED' | 'MILESTONE' | 'HYBRID' | string;
@@ -21,6 +27,7 @@ export interface CampaignRewardConfig {
 /**
  * Calculates earnings for a submission based on verified views and campaign reward rules.
  * Default platform rate: $0.50 CPM ($0.50 per 1,000 verified views).
+ * Deducts 3% platform fee to determine net creator payout.
  */
 export function calculateSubmissionReward(
   config: CampaignRewardConfig,
@@ -101,13 +108,22 @@ export function calculateSubmissionReward(
     calculationDetails += ` (Restricted by remaining campaign budget of $${reward.toFixed(2)})`;
   }
 
+  const grossReward = Math.max(0, Number(reward.toFixed(2)));
+  const platformFee = Number((grossReward * PLATFORM_FEE_RATE).toFixed(2));
+  const netReward = Math.max(0, Number((grossReward - platformFee).toFixed(2)));
+
+  calculationDetails += ` | Platform Fee (3%): -$${platformFee.toFixed(2)} | Net Creator Payout: $${netReward.toFixed(2)}`;
+
   return {
-    rewardAmount: Math.max(0, Number(reward.toFixed(2))),
+    rewardAmount: netReward,
+    grossReward,
+    platformFee,
     calculationDetails,
     breakdown: {
       baseReward,
       cpmReward,
       milestoneBonus,
+      platformFee,
       capApplied,
     },
   };

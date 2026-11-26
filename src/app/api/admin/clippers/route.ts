@@ -52,12 +52,16 @@ export async function GET() {
         0
       );
 
-      // Total earnings generated at $0.50 CPM standard: (views / 1000) * 0.5
-      const totalEarnings = Number(
+      // Total gross earnings generated at $0.50 CPM standard: (views / 1000) * 0.5
+      const grossEarnings = Number(
         approvedSubs
           .reduce((acc, s) => acc + (s.rewardEarned || ((s.verifiedViews || s.reportedViews || 0) / 1000) * 0.5), 0)
           .toFixed(2)
       );
+
+      // Deduct 3% platform fee for net clipper earnings
+      const platformFee = Number((grossEarnings * 0.03).toFixed(2));
+      const totalEarnings = Number((grossEarnings - platformFee).toFixed(2));
 
       // Total paid out through processed payouts
       const processedWithdrawals = clipper.withdrawals.filter(
@@ -94,7 +98,8 @@ export async function GET() {
         const handle = s.postAccountHandle?.trim() || `${s.platform.toLowerCase()}_account`;
         const platform = s.platform || 'INSTAGRAM';
         const views = s.verifiedViews || s.reportedViews || 0;
-        const reward = Number((s.rewardEarned || (views / 1000) * 0.5).toFixed(2));
+        const grossSubReward = Number((s.rewardEarned || (views / 1000) * 0.5).toFixed(2));
+        const reward = Number((grossSubReward * 0.97).toFixed(2));
 
         if (!accountMap[handle]) {
           accountMap[handle] = {

@@ -21,7 +21,9 @@ export default function ForClippersPage() {
   const [viewsSim, setViewsSim] = useState(150000);
   const cpmRate = 140; // ₹140 per 1k views
 
-  const potentialEarnings = Math.floor((viewsSim / 1000) * cpmRate);
+  const grossEarnings = (viewsSim / 1000) * cpmRate;
+  const platformFee = grossEarnings * 0.03;
+  const potentialEarnings = Math.floor(grossEarnings - platformFee);
 
   const clipperFaqs = [
     {
@@ -118,6 +120,9 @@ export default function ForClippersPage() {
               <div className="text-xs text-purple-300">Calculated Payout</div>
               <div className="text-2xl font-extrabold text-emerald-400 mt-1 font-display">
                 ₹{potentialEarnings.toLocaleString('en-IN')}
+              </div>
+              <div className="text-[11px] text-purple-300/70 font-mono mt-0.5">
+                Net earnings (3% platform fee: -₹{Math.floor(platformFee).toLocaleString('en-IN')})
               </div>
             </div>
             <div className="p-4 rounded-xl bg-[#140b26] border border-purple-900/40">

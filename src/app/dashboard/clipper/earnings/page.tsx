@@ -132,10 +132,13 @@ export default function ClipperEarningsPage() {
     [processedPayouts]
   );
 
-  // Remaining unpaid earnings to be disbursed
+  const platformFee = Number((totalGrossEarnings * 0.03).toFixed(2)); // 3% platform fee
+  const netEarnings = Number((totalGrossEarnings - platformFee).toFixed(2));
+
+  // Remaining unpaid earnings to be disbursed (based on net earnings after 3% platform fee)
   const remainingPayout = useMemo(
-    () => Math.max(0, Number((totalGrossEarnings - paidOutAmount).toFixed(2))),
-    [totalGrossEarnings, paidOutAmount]
+    () => Math.max(0, Number((netEarnings - paidOutAmount).toFixed(2))),
+    [netEarnings, paidOutAmount]
   );
 
   // Estimated pending earnings from clips awaiting admin approval (at $0.50 CPM)
@@ -154,9 +157,6 @@ export default function ClipperEarningsPage() {
     [totalGrossEarnings, pendingApprovalAmount]
   );
 
-  const platformFee = 0; // 0% platform fee launch promo
-  const netEarnings = totalGrossEarnings - platformFee;
-
   const totalSubmissions = submissions.length;
   const approvalRate =
     totalSubmissions > 0 ? Math.round((approvedSubmissions.length / totalSubmissions) * 100) : 100;
@@ -174,7 +174,8 @@ export default function ClipperEarningsPage() {
       const handle = s.postAccountHandle?.trim() || `${s.platform.toLowerCase()}_account`;
       const platform = s.platform || 'INSTAGRAM';
       const views = s.verifiedViews || s.reportedViews || 0;
-      const reward = Number((s.rewardEarned || (views / 1000) * 0.5).toFixed(2));
+      const grossSubReward = Number((s.rewardEarned || (views / 1000) * 0.5).toFixed(2));
+      const reward = Number((grossSubReward * 0.97).toFixed(2));
 
       if (!map[handle]) {
         map[handle] = {
@@ -369,9 +370,11 @@ export default function ClipperEarningsPage() {
           </div>
 
           <div className="p-3 rounded-xl bg-purple-950/30 border border-purple-900/30">
-            <div className="text-[11px] font-mono text-purple-400 uppercase">Platform Fee (0%)</div>
-            <div className="text-lg sm:text-xl font-bold font-mono text-emerald-400 mt-1">$0.00</div>
-            <div className="text-[10px] text-emerald-400/80 font-mono mt-0.5">Zero creator deduction</div>
+            <div className="text-[11px] font-mono text-purple-400 uppercase">Platform Fee (3%)</div>
+            <div className="text-lg sm:text-xl font-bold font-mono text-purple-300 mt-1">
+              {formatCurrency(platformFee)}
+            </div>
+            <div className="text-[10px] text-purple-400/80 font-mono mt-0.5">3% platform service fee</div>
           </div>
 
           <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-950/30 to-purple-950/30 border border-emerald-500/30">

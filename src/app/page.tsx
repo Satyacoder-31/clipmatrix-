@@ -68,8 +68,10 @@ export default function HomePage() {
 
 
 
-  // Clipper earnings
-  const potentialClipperEarnings = Number(((viewsSim / 1000) * cpmSim).toFixed(2));
+  // Clipper earnings (including 3% platform fee deduction)
+  const grossClipperEarnings = Number(((viewsSim / 1000) * cpmSim).toFixed(2));
+  const platformFeeSim = Number((grossClipperEarnings * 0.03).toFixed(2));
+  const potentialClipperEarnings = Number((grossClipperEarnings - platformFeeSim).toFixed(2));
 
 
 
@@ -702,6 +704,9 @@ export default function HomePage() {
                 <div className="text-xs text-purple-300">Calculated Payout</div>
                 <div className="text-2xl font-extrabold text-emerald-400 mt-1 font-display">
                   ${potentialClipperEarnings.toLocaleString('en-US', { minimumFractionDigits: potentialClipperEarnings % 1 !== 0 ? 2 : 0, maximumFractionDigits: 2 })}
+                </div>
+                <div className="text-[11px] text-purple-300/70 font-mono mt-0.5">
+                  Net earnings (3% platform fee: -${platformFeeSim.toFixed(2)})
                 </div>
               </div>
               <div className="p-4 rounded-xl bg-[#140b26] border border-purple-900/40">
