@@ -12,6 +12,7 @@ import {
   X,
 } from 'lucide-react';
 import Link from 'next/link';
+import { formatCompactCurrency, formatCompactViews } from '@/lib/utils';
 
 function InstagramIcon({ className = 'w-3.5 h-3.5' }: { className?: string }) {
   return (
@@ -265,7 +266,7 @@ export default function MarketplacePage() {
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between text-[11px] font-mono">
                         <span className="text-slate-400">
-                          BUDGET: <strong className="text-white">₹{(usedBudget / 1000).toFixed(1)}K</strong> / ₹{(totalBudget / 1000).toFixed(1)}K
+                          BUDGET: <strong className="text-white">{formatCompactCurrency(usedBudget)}</strong> / {formatCompactCurrency(totalBudget)}
                         </span>
                         <span className="text-amber-400 font-bold">{budgetPercent}%</span>
                       </div>
@@ -281,7 +282,7 @@ export default function MarketplacePage() {
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between text-[11px] font-mono">
                         <span className="text-slate-400">
-                          VIEWS: <strong className="text-white">{(verifiedViews / 1000000).toFixed(1)}M</strong> / {(targetViews / 1000000).toFixed(1)}M
+                          VIEWS: <strong className="text-white">{formatCompactViews(verifiedViews)}</strong> / {formatCompactViews(targetViews)}
                         </span>
                         <span className="text-cyan-400 font-bold">{viewsPercent}%</span>
                       </div>

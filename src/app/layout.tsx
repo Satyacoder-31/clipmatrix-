@@ -1,10 +1,17 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import DynamicBackground from '@/components/DynamicBackground';
 import ScrollProgressBar from '@/components/ScrollProgressBar';
 import SmoothScroll from '@/components/SmoothScroll';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: '#070a1a',
+};
 
 export const metadata: Metadata = {
   title: 'Clip Matrix | Viral Clipping Platform & Creator Economy Ecosystem',
@@ -40,7 +47,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-screen bg-[#070a1a] text-white antialiased selection:bg-purple-600 selection:text-white relative">
+      <body className="min-h-screen bg-[#070a1a] text-white antialiased selection:bg-purple-600 selection:text-white relative overflow-x-hidden w-full max-w-full">
         <SmoothScroll>
           <ScrollProgressBar />
           <DynamicBackground />

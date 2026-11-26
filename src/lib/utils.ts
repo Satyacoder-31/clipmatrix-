@@ -28,6 +28,34 @@ export function formatNumber(num: number): string {
   return num.toLocaleString('en-US');
 }
 
+export function formatCompactCurrency(amount: number, currency: string = '$'): string {
+  const safeAmount = isNaN(amount) ? 0 : amount;
+  if (safeAmount <= 0) return `${currency}0`;
+  if (safeAmount >= 1000000) {
+    const m = (safeAmount / 1000000).toFixed(1).replace(/\.0$/, '');
+    return `${currency}${m}M`;
+  }
+  if (safeAmount >= 1000) {
+    const k = (safeAmount / 1000).toFixed(1).replace(/\.0$/, '');
+    return `${currency}${k}K`;
+  }
+  return `${currency}${Math.round(safeAmount)}`;
+}
+
+export function formatCompactViews(views: number): string {
+  const safeViews = isNaN(views) ? 0 : views;
+  if (safeViews <= 0) return '0';
+  if (safeViews >= 1000000) {
+    const m = (safeViews / 1000000).toFixed(1).replace(/\.0$/, '');
+    return `${m}M`;
+  }
+  if (safeViews >= 1000) {
+    const k = (safeViews / 1000).toFixed(1).replace(/\.0$/, '');
+    return `${k}K`;
+  }
+  return Math.round(safeViews).toLocaleString('en-US');
+}
+
 export function getPlatformBadge(platform: string) {
   const p = platform.toUpperCase();
   switch (p) {

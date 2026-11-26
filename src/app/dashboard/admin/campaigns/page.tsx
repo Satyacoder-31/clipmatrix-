@@ -530,7 +530,7 @@ export default function AdminCampaignsPage() {
       {/* Edit Campaign Modal */}
       {editingCamp && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-          <div className="w-full max-w-xl rounded-3xl bg-[#0e0c26] border border-cyan-500/40 p-6 sm:p-7 space-y-4 shadow-2xl my-8 relative">
+          <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[#0e0c26] border border-cyan-500/40 p-5 sm:p-7 space-y-4 shadow-2xl my-auto relative">
             <button
               onClick={() => setEditingCamp(null)}
               className="absolute top-5 right-5 text-slate-400 hover:text-white font-bold cursor-pointer"
@@ -719,7 +719,7 @@ export default function AdminCampaignsPage() {
       {/* Add Campaign Modal (Admin Only) */}
       {addModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-          <div className="w-full max-w-2xl rounded-3xl bg-[#0d091e] border border-purple-500/40 p-6 sm:p-8 space-y-6 shadow-2xl my-8 relative">
+          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[#0d091e] border border-purple-500/40 p-5 sm:p-8 space-y-6 shadow-2xl my-auto relative">
             <button
               onClick={() => setAddModalOpen(false)}
               className="absolute top-6 right-6 text-slate-400 hover:text-white font-bold cursor-pointer"

@@ -69,7 +69,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 md:hidden"
           onClick={() => setMobileMenuOpen(false)}
         >
-          <div className="w-72 h-full" onClick={(e) => e.stopPropagation()}>
+          <div className="w-72 max-w-[85vw] h-full" onClick={(e) => e.stopPropagation()}>
             <DashboardSidebar
               user={user}
               role="ADMIN"
@@ -86,7 +86,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 p-4 sm:p-8 lg:p-10 overflow-y-auto max-w-7xl mx-auto w-full min-h-screen">
+      <main className="flex-1 min-w-0 p-3.5 sm:p-6 lg:p-10 overflow-y-auto max-w-7xl mx-auto w-full min-h-screen">
         {children}
       </main>
     </div>
