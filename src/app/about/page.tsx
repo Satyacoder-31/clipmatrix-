@@ -32,15 +32,15 @@ export default function AboutPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
         <div className="p-6 rounded-2xl bg-[#120a22] border border-purple-900/40 space-y-2">
-          <div className="text-3xl font-extrabold text-white font-display">84.5M+</div>
+          <div className="text-3xl font-extrabold text-white font-display">100M+</div>
           <div className="text-xs text-purple-300">Verified Organic Views</div>
         </div>
         <div className="p-6 rounded-2xl bg-[#120a22] border border-purple-900/40 space-y-2">
-          <div className="text-3xl font-extrabold text-purple-400 font-display">₹1.8Cr+</div>
+          <div className="text-3xl font-extrabold text-emerald-400 font-display">$10,000+</div>
           <div className="text-xs text-purple-300">Paid to Independent Clippers</div>
         </div>
         <div className="p-6 rounded-2xl bg-[#120a22] border border-purple-900/40 space-y-2">
-          <div className="text-3xl font-extrabold text-cyan-400 font-display">1,200+</div>
+          <div className="text-3xl font-extrabold text-cyan-400 font-display">500+</div>
           <div className="text-xs text-purple-300">Vetted Editors in Network</div>
         </div>
       </div>

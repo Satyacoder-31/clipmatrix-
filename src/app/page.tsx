@@ -237,7 +237,7 @@ export default function HomePage() {
             ))}
           </div>
           <span>
-            Joined by <strong className="text-white">3,420+ clippers</strong> across India
+            Joined by <strong className="text-white">500+ clippers</strong> across India
           </span>
           <span className="text-purple-500">•</span>
           <div className="flex items-center gap-1 text-amber-400 font-semibold">
@@ -381,7 +381,7 @@ export default function HomePage() {
                   <Scissors className="w-5 h-5 -rotate-45" />
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-white">2. 1,200+ Clippers Cut Hooks</div>
+                  <div className="text-xs font-bold text-white">2. 500+ Clippers Cut Hooks</div>
                   <div className="text-[11px] text-purple-300/70">30 to 100+ high-retention variations</div>
                 </div>
               </div>
@@ -515,11 +515,11 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 text-center">
             {[
-              { label: 'Verified Views', value: '84.5M+', color: 'text-white' },
-              { label: 'Active Clippers', value: '3,420+', color: 'text-purple-400' },
-              { label: 'Campaigns Ran', value: '240+', color: 'text-white' },
-              { label: 'Brands Onboarded', value: '120+', color: 'text-cyan-400' },
-              { label: 'Clipper Payouts', value: '$250,000+', color: 'text-emerald-400' },
+              { label: 'Verified Views', value: '100M+', color: 'text-white' },
+              { label: 'Active Clippers', value: '500+', color: 'text-purple-400' },
+              { label: 'Campaigns Ran', value: '10+', color: 'text-white' },
+              { label: 'Brands Onboarded', value: '10+', color: 'text-cyan-400' },
+              { label: 'Clipper Payouts', value: '$10,000+', color: 'text-emerald-400' },
               { label: 'Approved Clips', value: '18,500+', color: 'text-white' },
             ].map((stat, idx) => (
               <motion.div
@@ -894,7 +894,7 @@ export default function HomePage() {
                   YASH GUPTA • TRADER &amp; PODCASTS
                 </div>
                 <h3 className="text-2xl font-bold text-white font-display leading-tight">
-                  How Yash Gupta Scaled From 0 to 1.8M Verified Views in 18 Days
+                  How Yash Gupta Scaled From 0 to 5M+ Verified Views in 18 Days
                 </h3>
                 <p className="text-sm text-purple-200/70 leading-relaxed">
                   24 Clip Matrix clippers cut 48 retention-optimized vertical hooks highlighting trade setups, market psychology, and podcast breakdowns across Reels and Shorts.
@@ -914,12 +914,12 @@ export default function HomePage() {
 
               <div className="grid grid-cols-3 gap-4 pt-2 border-t border-purple-900/40">
                 <div className="p-3.5 rounded-xl bg-[#1b1033] border border-purple-800/40 text-center">
-                  <div className="text-xl sm:text-2xl font-extrabold text-white font-display">1,850,000+</div>
+                  <div className="text-xl sm:text-2xl font-extrabold text-white font-display">5M+</div>
                   <div className="text-[11px] text-purple-300/70 mt-0.5">Verified Views</div>
                 </div>
                 <div className="p-3.5 rounded-xl bg-[#1b1033] border border-purple-800/40 text-center">
-                  <div className="text-xl sm:text-2xl font-extrabold text-cyan-400 font-display">$0.50 CPM</div>
-                  <div className="text-[11px] text-cyan-300/70 mt-0.5">Average CPV</div>
+                  <div className="text-xl sm:text-2xl font-extrabold text-cyan-400 font-display">$2,400+</div>
+                  <div className="text-[11px] text-cyan-300/70 mt-0.5">Campaign Budget</div>
                 </div>
                 <div className="p-3.5 rounded-xl bg-[#1b1033] border border-purple-800/40 text-center">
                   <div className="text-xl sm:text-2xl font-extrabold text-emerald-400 font-display">14,200</div>
@@ -1338,7 +1338,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               {
-                quote: 'Clip Matrix clippers turned my long-form trading content into viral Reels and Shorts. I hit nearly 2M verified views in weeks — paying only for real, verified reach.',
+                quote: 'Clip Matrix clippers turned my long-form trading content into viral Reels and Shorts. I hit 5M+ verified views in weeks — paying only for real, verified reach.',
                 name: 'Yash Gupta',
                 role: 'Founder, Yash Gupta Trading',
                 avatar: 'https://yt3.googleusercontent.com/ytc/AIdro_m5kGCbZq6Kd5kNkvVxqmD-6jFm0QZ-5xZHE5qHlVqZ1Q=s900-c-k-c0x00ffffff-no-rj',

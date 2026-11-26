@@ -206,11 +206,11 @@ function LoginPortalHubContent() {
           <div className="flex items-center gap-2">
             <Scissors className="w-4 h-4 text-purple-400 -rotate-45" />
             <span>
-              <strong className="text-white">$250,000+</strong> distributed via escrow-protected CPM payouts
+              <strong className="text-white">$10,000+</strong> distributed via escrow-protected CPM payouts
             </span>
           </div>
           <div className="text-[11px] text-slate-400 font-mono">
-            3,420+ Verified Clippers • Real-Time Apify & YouTube Audits
+            500+ Verified Clippers • Real-Time Apify & YouTube Audits
           </div>
         </div>
       </div>

@@ -264,7 +264,7 @@ export default function DashboardSidebar({
 
             <div className="space-y-0.5">
               <div className="text-lg font-black text-white font-display tracking-tight">
-                $250,000+
+                $10,000+
               </div>
               <div className="text-[11px] text-purple-200/70 leading-tight">
                 Verified payouts issued to top performance clippers.

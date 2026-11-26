@@ -6,20 +6,21 @@ import { TrendingUp, Eye, ArrowUpRight, Award, Play, CheckCircle } from 'lucide-
 export default function CaseStudiesPage() {
   const caseStudies = [
     {
-      brand: 'Aether AI Technologies',
-      industry: 'Tech & Multimodal AI',
-      title: 'How Aether AI Scaled From 0 to 1.8M Verified Views in 18 Days',
-      metric1: '1,850,000+',
+      brand: 'Yash Gupta Trading',
+      industry: 'Trading & Creator Economy',
+      title: 'How Yash Gupta Scaled From 0 to 5M+ Verified Views in 18 Days',
+      metric1: '5M+',
       label1: 'Verified Views',
-      metric2: '₹0.11',
-      label2: 'Average CPV',
+      metric2: '$2,400+',
+      label2: 'Campaign Budget',
       metric3: '14,200',
-      label3: 'Freemium Signups',
-      thumbnail: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80',
+      label3: 'Community Signups',
+      thumbnail: '/showcase-yash-reel.jpg',
       summary:
-        'Aether AI provided a 45-minute technical keynote demo. 24 Clip Matrix clippers cut 48 retention-optimized vertical hooks highlighting prompt comparison versus traditional 3D software.',
-      quote: 'Clip Matrix delivered 10x more organic reach than traditional agency retainers at half the cost.',
-      author: 'Devika Nair, VP Growth',
+        '24 Clip Matrix clippers cut 48 retention-optimized vertical hooks highlighting trade setups, market psychology, and podcast breakdowns across Reels and Shorts.',
+      quote:
+        'Clip Matrix clippers turned my long-form trading content into viral Reels and Shorts. I hit 5M+ verified views in weeks — paying only for real, verified reach.',
+      author: 'Yash Gupta, Founder',
     },
     {
       brand: 'KicksDrop India',
