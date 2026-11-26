@@ -146,7 +146,7 @@ export default function Navbar() {
       href: '#pricing',
       id: 'pricing',
       dropdown: [
-        { label: 'ROI & CPM Simulator', href: '#pricing', desc: 'Calculate views & return on ad spend', icon: BarChart3 },
+        { label: 'Real-Time Anti-Fraud', href: '#pricing', desc: 'Verified view tracking & security', icon: ShieldCheck },
         { label: 'Client Reviews (890+)', href: '#reviews', desc: 'Founder & editor testimonials', icon: Star },
         { label: 'About Clip Matrix', href: '#about', desc: 'Our decentralized mission & ethos', icon: Sparkles },
       ],
@@ -255,17 +255,15 @@ export default function Navbar() {
         <a
           href="#hero"
           onClick={(e) => handleNavClick(e, '#hero')}
-          className="flex items-center gap-2.5 group shrink-0"
+          className="flex items-center gap-3 group shrink-0"
         >
-          <div className="p-1.5 rounded-xl bg-[#160B3E]/90 border border-purple-500/40 shadow-[0_0_15px_rgba(124,58,237,0.4)] flex items-center justify-center">
-            <img
-              src="/clipmatrix-logo.png"
-              alt="Clip Matrix Logo"
-              className="w-7 h-7 sm:w-8 sm:h-8 object-contain group-hover:scale-105 transition-transform drop-shadow-[0_0_10px_rgba(0,212,255,0.7)]"
-            />
-          </div>
-          <span className="font-black text-white text-base sm:text-lg font-display tracking-tight whitespace-nowrap">
-            CLIP <span className="text-[#00D4FF] drop-shadow-[0_0_12px_rgba(0,212,255,0.7)]">MATRIX</span>
+          <img
+            src="/clipmatrix-logo.png"
+            alt="Clip Matrix Logo"
+            className="w-9 h-9 sm:w-10 sm:h-10 object-contain group-hover:scale-105 transition-transform drop-shadow-[0_0_15px_rgba(124,58,237,0.55)]"
+          />
+          <span className="text-lg sm:text-xl font-extrabold text-white font-display tracking-tight whitespace-nowrap">
+            CLIP <span className="text-[#00D4FF]">MATRIX</span>
           </span>
         </a>
 

@@ -50,10 +50,6 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState<'brand' | 'clipper'>('brand');
   const [playingShowcase, setPlayingShowcase] = useState<'ig' | 'yt' | null>(null);
 
-  // ROI Calculator state
-  const [calcBudget, setCalcBudget] = useState(2500);
-  const [calcCpm, setCalcCpm] = useState(0.5);
-
   // Clipper Simulator state
   const [viewsSim, setViewsSim] = useState(150000);
   const [cpmSim, setCpmSim] = useState(0.5);
@@ -69,10 +65,6 @@ export default function HomePage() {
   const [contactLoading, setContactLoading] = useState(false);
 
 
-
-  // ROI computations
-  const estimatedViews = Math.floor((calcBudget / calcCpm) * 1000);
-  const estimatedCostPerView = (calcBudget / estimatedViews).toFixed(2);
 
   // Clipper earnings
   const potentialClipperEarnings = Number(((viewsSim / 1000) * cpmSim).toFixed(2));
@@ -828,33 +820,33 @@ export default function HomePage() {
             <div className="lg:col-span-5 relative aspect-video sm:aspect-square lg:aspect-auto h-full min-h-[240px] rounded-2xl overflow-hidden bg-black flex items-center justify-center">
               <img
                 src="https://yt3.googleusercontent.com/ytc/AIdro_m5kGCbZq6Kd5kNkvVxqmD-6jFm0QZ-5xZHE5qHlVqZ1Q=s900-c-k-c0x00ffffff-no-rj"
-                alt="Yash Gupta – Trader & Media Creator"
+                alt="Yash Gupta – Trader & Creator"
                 loading="lazy"
                 decoding="async"
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
               <div className="absolute bottom-4 left-4 right-4 text-xs text-white/90 font-medium italic">
-                &quot;Clip Matrix gave me 10x more organic reach on my trading content than any agency could deliver — and I only paid for verified views.&quot; — <span className="font-bold text-white">Yash Gupta, Founder</span>
+                &quot;Clip Matrix delivered 10x more organic reach than traditional agency retainers at half the cost.&quot; — <span className="font-bold text-white">Yash Gupta, Trader</span>
               </div>
             </div>
 
             <div className="lg:col-span-7 space-y-6">
               <div className="space-y-2">
                 <div className="text-xs font-mono uppercase tracking-widest text-purple-400">
-                  Yash Gupta • Podcasts &amp; Media
+                  YASH GUPTA • TRADER &amp; PODCASTS
                 </div>
                 <h3 className="text-2xl font-bold text-white font-display leading-tight">
-                  How Yash Gupta Scaled From 0 to 1.98M Verified Views With Clip Matrix Clippers
+                  How Yash Gupta Scaled From 0 to 1.8M Verified Views in 18 Days
                 </h3>
                 <p className="text-sm text-purple-200/70 leading-relaxed">
-                  Clip Matrix clippers cut retention-optimized vertical hooks from Yash Gupta&apos;s long-form trading and podcast content, distributing them across Instagram Reels and YouTube Shorts for maximum organic reach.
+                  24 Clip Matrix clippers cut 48 retention-optimized vertical hooks highlighting trade setups, market psychology, and podcast breakdowns across Reels and Shorts.
                 </p>
               </div>
 
               <div className="grid grid-cols-3 gap-4 pt-2 border-t border-purple-900/40">
                 <div className="p-3.5 rounded-xl bg-[#1b1033] border border-purple-800/40 text-center">
-                  <div className="text-xl sm:text-2xl font-extrabold text-white font-display">1,985,789+</div>
+                  <div className="text-xl sm:text-2xl font-extrabold text-white font-display">1,850,000+</div>
                   <div className="text-[11px] text-purple-300/70 mt-0.5">Verified Views</div>
                 </div>
                 <div className="p-3.5 rounded-xl bg-[#1b1033] border border-purple-800/40 text-center">
@@ -862,8 +854,8 @@ export default function HomePage() {
                   <div className="text-[11px] text-cyan-300/70 mt-0.5">Average CPV</div>
                 </div>
                 <div className="p-3.5 rounded-xl bg-[#1b1033] border border-purple-800/40 text-center">
-                  <div className="text-xl sm:text-2xl font-extrabold text-emerald-400 font-display">$1,500</div>
-                  <div className="text-[11px] text-emerald-300/70 mt-0.5">Total Budget</div>
+                  <div className="text-xl sm:text-2xl font-extrabold text-emerald-400 font-display">14,200</div>
+                  <div className="text-[11px] text-emerald-300/70 mt-0.5">Community Signups</div>
                 </div>
               </div>
             </div>
@@ -1029,95 +1021,12 @@ export default function HomePage() {
       </section>
 
       {/* =========================================================================
-          SECTION 9: PRICING & ROI SIMULATOR (#pricing)
+          SECTION 9: VERIFICATION & ANTI-FRAUD ENGINE (#security / #pricing)
           ========================================================================= */}
       <section id="pricing" className="py-24 bg-[#0a0415]/90 border-y border-purple-900/40 px-4 sm:px-6 lg:px-8 scroll-mt-24">
         <div className="max-w-7xl mx-auto space-y-16">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center max-w-3xl mx-auto space-y-4"
-          >
-            <span className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-purple-950/80 text-purple-300 border border-purple-800/60 uppercase tracking-widest font-mono">
-              Transparent Performance Pricing
-            </span>
-            <h2 className="text-3xl sm:text-5xl font-extrabold text-white font-display">
-              Calculate Your Viral Reach & <span className="text-gradient-neon">Campaign ROI</span>
-            </h2>
-            <p className="text-purple-200/70 text-base">
-              100% escrow-backed. No agency markup, no retainer lock-in. Your money stays protected until clips deliver.
-            </p>
-          </motion.div>
-
-          {/* Calculator – budget & CPM sliders with projected views */}
-          <div className="max-w-3xl mx-auto space-y-8">
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-purple-200">Campaign Budget</span>
-                <span className="text-white font-bold font-mono">${calcBudget.toLocaleString('en-US')}</span>
-              </div>
-              <input
-                type="range"
-                min="20000"
-                max="1000000"
-                step="10000"
-                value={calcBudget}
-                onChange={(e) => setCalcBudget(Number(e.target.value))}
-                className="w-full accent-purple-500 h-2 bg-[#1f1035] rounded-lg cursor-pointer"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-purple-200">Target CPM Rate (Cost per 1k Views)</span>
-                <span className="text-white font-bold font-mono">${calcCpm}</span>
-              </div>
-              <input
-                type="range"
-                min="80"
-                max="200"
-                step="10"
-                value={calcCpm}
-                onChange={(e) => setCalcCpm(Number(e.target.value))}
-                className="w-full accent-purple-500 h-2 bg-[#1f1035] rounded-lg cursor-pointer"
-              />
-            </div>
-
-            {/* Projected Views + CPV in a simple row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
-              <div className="p-5 rounded-2xl bg-gradient-to-br from-[#180e2f] to-[#0e061c] border border-purple-500/30 text-center">
-                <div className="text-xs text-purple-300 uppercase font-mono tracking-wider">Projected Views</div>
-                <div className="text-3xl sm:text-4xl font-extrabold text-white mt-2 font-display">
-                  {formatNumber(estimatedViews)}
-                </div>
-                <div className="text-[10px] text-purple-400 mt-1">Across 15-40 clips</div>
-              </div>
-              <div className="p-5 rounded-2xl bg-gradient-to-br from-[#180e2f] to-[#0e061c] border border-purple-500/30 text-center">
-                <div className="text-xs text-purple-300 uppercase font-mono tracking-wider">Cost Per View (CPV)</div>
-                <div className="text-3xl sm:text-4xl font-extrabold text-cyan-400 mt-2 font-display">
-                  ${estimatedCostPerView}
-                </div>
-                <div className="text-[10px] text-cyan-300/70 mt-1">vs $1.80 Meta Ads</div>
-              </div>
-            </div>
-
-            <div className="pt-2 text-center">
-              <button
-                onClick={() => smoothScroll('#contact')}
-                className="px-10 py-4 rounded-xl font-bold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 transition-all shadow-glow-purple text-sm cursor-pointer"
-              >
-                Book Campaign Strategy Call
-              </button>
-            </div>
-          </div>
-
-          {/* =========================================================================
-              VIEW VERIFICATION & ANTI-FRAUD ENGINE (From Video Reference)
-              "Every view is checked. Only real ones get paid."
-              ========================================================================= */}
-          <div className="pt-8">
+          {/* VIEW VERIFICATION & ANTI-FRAUD ENGINE */}
+          <div>
             <div className="text-center max-w-3xl mx-auto mb-12 space-y-3">
               <span className="px-3.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 uppercase tracking-widest font-mono">
                 Real-Time Anti-Fraud Engine
@@ -1126,7 +1035,7 @@ export default function HomePage() {
                 Every view is checked. <span className="text-gradient-neon">Only real ones get paid.</span>
               </h3>
               <p className="text-purple-200/80 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
-                Every post is checked the moment it's submitted, then re-checked for as long as it's live. Anything suspicious is stopped before it reaches your budget.
+                Every post is checked the moment it&apos;s submitted, then re-checked for as long as it&apos;s live. Anything suspicious is stopped before it reaches your budget.
               </p>
             </div>
 
