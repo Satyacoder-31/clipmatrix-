@@ -42,13 +42,15 @@ import {
   Link2,
   Plus,
   X,
+  VolumeX,
   ExternalLink,
 } from 'lucide-react';
 import { formatCurrency, formatNumber } from '@/lib/utils';
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState<'brand' | 'clipper'>('brand');
-  const [playingShowcase, setPlayingShowcase] = useState<'ig' | 'yt' | null>(null);
+  const [hoveredShowcase, setHoveredShowcase] = useState<'yash' | 'ig' | 'yt' | 'case' | null>(null);
+  const [playingShowcase, setPlayingShowcase] = useState<'yash' | 'ig' | 'yt' | 'case' | null>(null);
 
   // Clipper Simulator state
   const [viewsSim, setViewsSim] = useState(150000);
@@ -243,18 +245,120 @@ export default function HomePage() {
         </motion.div>
 
         {/* =====================================================================
-            HERO VISUAL SHOWCASE: 3D DYNAMIC VIRAL CLIP CARDS & PIPELINE
+            HERO VISUAL SHOWCASE: 3 VIRAL VIDEO CARDS (HOVER TO PLAY WITHOUT SOUND)
             ===================================================================== */}
-        <div className="mt-14 w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-          {/* Left Vertical Clip Card (Real Instagram Reel: DcsnbnfvynC) */}
+        <div className="mt-14 w-full grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+          {/* Card 1: Yash Gupta (@yash.highlights - Real Secret of Trading) */}
           <motion.div
-            initial={{ opacity: 0, x: -30, rotateY: 10 }}
-            animate={{ opacity: 1, x: 0, rotateY: 0 }}
-            transition={{ duration: 0.7, delay: 0.3 }}
-            className="lg:col-span-4 rounded-3xl bg-gradient-to-b from-[#1c0e35] to-[#100720] border border-purple-500/30 p-4 shadow-2xl shadow-purple-950/70 text-left relative overflow-hidden group hover:border-purple-400/60 transition-all"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.2 }}
+            onMouseEnter={() => setHoveredShowcase('yash')}
+            onMouseLeave={() => setHoveredShowcase(null)}
+            className="rounded-3xl bg-gradient-to-b from-[#1c0e35] to-[#100720] border border-purple-500/30 p-4 shadow-2xl shadow-purple-950/70 text-left relative overflow-hidden group hover:border-purple-400/60 hover:shadow-purple-700/30 transition-all flex flex-col justify-between"
           >
             <div className="relative aspect-[9/14] sm:aspect-[9/13] rounded-2xl overflow-hidden bg-black/80">
-              {playingShowcase === 'ig' ? (
+              {hoveredShowcase === 'yash' || playingShowcase === 'yash' ? (
+                <>
+                  <iframe
+                    src="https://www.instagram.com/reel/DdXX3JMPLDV/embed/"
+                    title="Yash Gupta Reel showcase"
+                    className="w-full h-full border-0 bg-black"
+                    allow="autoplay; encrypted-media; picture-in-picture"
+                    allowFullScreen
+                  />
+                  <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-black/80 backdrop-blur-md text-emerald-400 border border-emerald-500/40 shadow-md pointer-events-none">
+                    <VolumeX className="w-3 h-3 text-emerald-400 animate-pulse" />
+                    <span>Playing (Muted)</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setPlayingShowcase(null); setHoveredShowcase(null); }}
+                    aria-label="Close Reel preview"
+                    className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full bg-black/80 hover:bg-black border border-white/25 flex items-center justify-center text-white cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </>
+              ) : (
+                <>
+                  <img
+                    src="/showcase-yash-reel.jpg"
+                    alt="Instagram Reel by @yash.highlights"
+                    loading="eager"
+                    decoding="async"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-black/55" />
+
+                  {/* Platform & Status Badge */}
+                  <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
+                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-pink-600 text-white shadow-md flex items-center gap-1">
+                      <Instagram className="w-3 h-3" /> Instagram Reels
+                    </span>
+                    <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+                      TOP TRADER VIRAL
+                    </span>
+                  </div>
+
+                  {/* Play Button & Hover Hint */}
+                  <button
+                    type="button"
+                    onClick={() => setPlayingShowcase('yash')}
+                    aria-label="Play Yash Gupta Reel"
+                    className="absolute inset-0 flex flex-col items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center text-white shadow-glow-purple group-hover:scale-110 transition-transform">
+                      <Play className="w-5 h-5 fill-white ml-0.5" />
+                    </div>
+                    <span className="text-[10px] font-semibold text-purple-200/90 bg-black/60 px-2 py-0.5 rounded-full backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                      Hover to play (without sound)
+                    </span>
+                  </button>
+
+                  {/* Hook Caption */}
+                  <div className="absolute bottom-14 left-3 right-3 pointer-events-none">
+                    <div className="p-2.5 rounded-xl bg-black/65 backdrop-blur-md border border-white/10 text-xs font-semibold text-white line-clamp-2">
+                      &quot;Real Secret of Trading 😲 • Market psychology and discipline are 90% of the game...&quot;
+                    </div>
+                  </div>
+
+                  {/* Bottom Metrics Bar */}
+                  <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-[11px] font-semibold text-white/90 pointer-events-none">
+                    <span className="flex items-center gap-1 text-purple-300">
+                      <Eye className="w-3.5 h-3.5 text-purple-400" /> 1.85M Views
+                    </span>
+                    <span className="text-emerald-400 font-mono font-bold">+$925 Earned</span>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="mt-3 flex items-center justify-between text-xs px-1 gap-2">
+              <a
+                href="https://www.instagram.com/reel/DdXX3JMPLDV/?evlk=MXY0YnhoYXNmb3hpcg=="
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-purple-300/80 hover:text-white inline-flex items-center gap-1 truncate transition-colors"
+              >
+                <span>Creator: <strong className="text-white">@yash.highlights</strong></span>
+                <ExternalLink className="w-3 h-3 text-purple-400 shrink-0" />
+              </a>
+              <span className="text-xs font-mono text-cyan-400 font-semibold shrink-0">CPM: $0.50</span>
+            </div>
+          </motion.div>
+
+          {/* Card 2: Left Vertical Clip Card (Real Instagram Reel: DcsnbnfvynC) */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.3 }}
+            onMouseEnter={() => setHoveredShowcase('ig')}
+            onMouseLeave={() => setHoveredShowcase(null)}
+            className="rounded-3xl bg-gradient-to-b from-[#1c0e35] to-[#100720] border border-purple-500/30 p-4 shadow-2xl shadow-purple-950/70 text-left relative overflow-hidden group hover:border-purple-400/60 hover:shadow-purple-700/30 transition-all flex flex-col justify-between"
+          >
+            <div className="relative aspect-[9/14] sm:aspect-[9/13] rounded-2xl overflow-hidden bg-black/80">
+              {hoveredShowcase === 'ig' || playingShowcase === 'ig' ? (
                 <>
                   <iframe
                     src="https://www.instagram.com/reel/DcsnbnfvynC/embed/"
@@ -263,9 +367,13 @@ export default function HomePage() {
                     allow="autoplay; encrypted-media; picture-in-picture"
                     allowFullScreen
                   />
+                  <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-black/80 backdrop-blur-md text-emerald-400 border border-emerald-500/40 shadow-md pointer-events-none">
+                    <VolumeX className="w-3 h-3 text-emerald-400 animate-pulse" />
+                    <span>Playing (Muted)</span>
+                  </div>
                   <button
                     type="button"
-                    onClick={() => setPlayingShowcase(null)}
+                    onClick={() => { setPlayingShowcase(null); setHoveredShowcase(null); }}
                     aria-label="Close Reel preview"
                     className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full bg-black/80 hover:bg-black border border-white/25 flex items-center justify-center text-white cursor-pointer"
                   >
@@ -284,12 +392,12 @@ export default function HomePage() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-black/55" />
 
                   {/* Platform & Status Badge */}
-                  <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
+                  <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
                     <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-pink-600 text-white shadow-md flex items-center gap-1">
                       <Instagram className="w-3 h-3" /> Instagram Reels
                     </span>
                     <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
-                      VERIFIED
+                      DOCU VIRAL
                     </span>
                   </div>
 
@@ -298,17 +406,20 @@ export default function HomePage() {
                     type="button"
                     onClick={() => setPlayingShowcase('ig')}
                     aria-label="Play Instagram Reel"
-                    className="absolute inset-0 flex items-center justify-center cursor-pointer"
+                    className="absolute inset-0 flex flex-col items-center justify-center gap-2 cursor-pointer"
                   >
                     <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center text-white shadow-glow-purple group-hover:scale-110 transition-transform">
                       <Play className="w-5 h-5 fill-white ml-0.5" />
                     </div>
+                    <span className="text-[10px] font-semibold text-purple-200/90 bg-black/60 px-2 py-0.5 rounded-full backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                      Hover to play (without sound)
+                    </span>
                   </button>
 
                   {/* Hook Caption */}
                   <div className="absolute bottom-14 left-3 right-3 pointer-events-none">
                     <div className="p-2.5 rounded-xl bg-black/65 backdrop-blur-md border border-white/10 text-xs font-semibold text-white line-clamp-2">
-                      "Sonam Wangchuk (born September 1, 1966, in Uleytokpo, near Alchi, Ladakh)..."
+                      &quot;Sonam Wangchuk (born September 1, 1966, in Uleytokpo, near Alchi, Ladakh)...&quot;
                     </div>
                   </div>
 
@@ -337,94 +448,32 @@ export default function HomePage() {
             </div>
           </motion.div>
 
-          {/* Center Pipeline Visualizer (1 Long Video ➔ 48 Viral Clips ➔ Mass Reach) */}
+          {/* Card 3: Right Vertical Clip Card (Real YouTube Short: UdSdSV0xytM) */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.4 }}
-            className="lg:col-span-4 rounded-3xl bg-[#120724]/90 backdrop-blur-xl border border-purple-500/30 p-6 shadow-2xl space-y-6 text-left"
-          >
-            <div className="flex items-center justify-between border-b border-purple-900/40 pb-4">
-              <span className="text-xs font-mono uppercase tracking-widest text-purple-400">The Virality Engine</span>
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-600/30 text-purple-300 border border-purple-500/40">
-                LIVE PIPELINE
-              </span>
-            </div>
-
-            <div className="space-y-4">
-              {/* Pipeline Step 1 */}
-              <div className="p-3.5 rounded-2xl bg-[#1a0e33] border border-purple-800/40 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center shrink-0">
-                  <Video className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-white">1. Ingest Raw Long Video</div>
-                  <div className="text-[11px] text-purple-300/70">YouTube Link, Podcast URL, or Raw MP4</div>
-                </div>
-              </div>
-
-              {/* Connecting Pulse Line */}
-              <div className="flex justify-center -my-2">
-                <div className="w-0.5 h-6 bg-gradient-to-b from-purple-500 to-cyan-400" />
-              </div>
-
-              {/* Pipeline Step 2 */}
-              <div className="p-3.5 rounded-2xl bg-[#1a0e33] border border-purple-800/40 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-cyan-600/20 text-cyan-400 flex items-center justify-center shrink-0">
-                  <Scissors className="w-5 h-5 -rotate-45" />
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-white">2. 1,200+ Clippers Cut Hooks</div>
-                  <div className="text-[11px] text-purple-300/70">30 to 100+ high-retention variations</div>
-                </div>
-              </div>
-
-              {/* Connecting Pulse Line */}
-              <div className="flex justify-center -my-2">
-                <div className="w-0.5 h-6 bg-gradient-to-b from-cyan-400 to-emerald-400" />
-              </div>
-
-              {/* Pipeline Step 3 */}
-              <div className="p-3.5 rounded-2xl bg-[#1a0e33] border border-purple-800/40 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-600/20 text-emerald-400 flex items-center justify-center shrink-0">
-                  <ShieldCheck className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-white">3. Verified Views & Escrow Release</div>
-                  <div className="text-[11px] text-purple-300/70">Audited API sync • Zero ad fatigue</div>
-                </div>
-              </div>
-            </div>
-
-            <button
-              onClick={() => smoothScroll('#how-it-works')}
-              className="w-full py-3 rounded-xl text-xs font-bold text-center text-purple-200 hover:text-white bg-purple-950/60 hover:bg-purple-900/60 border border-purple-700/50 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              <span>Explore Complete Engine Architecture</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </motion.div>
-
-          {/* Right Vertical Clip Card (Real YouTube Short: UdSdSV0xytM) */}
-          <motion.div
-            initial={{ opacity: 0, x: 30, rotateY: -10 }}
-            animate={{ opacity: 1, x: 0, rotateY: 0 }}
-            transition={{ duration: 0.7, delay: 0.3 }}
-            className="lg:col-span-4 rounded-3xl bg-gradient-to-b from-[#1c0e35] to-[#100720] border border-purple-500/30 p-4 shadow-2xl shadow-purple-950/70 text-left relative overflow-hidden group hover:border-purple-400/60 transition-all"
+            onMouseEnter={() => setHoveredShowcase('yt')}
+            onMouseLeave={() => setHoveredShowcase(null)}
+            className="rounded-3xl bg-gradient-to-b from-[#1c0e35] to-[#100720] border border-purple-500/30 p-4 shadow-2xl shadow-purple-950/70 text-left relative overflow-hidden group hover:border-purple-400/60 hover:shadow-purple-700/30 transition-all flex flex-col justify-between"
           >
             <div className="relative aspect-[9/14] sm:aspect-[9/13] rounded-2xl overflow-hidden bg-black/80">
-              {playingShowcase === 'yt' ? (
+              {hoveredShowcase === 'yt' || playingShowcase === 'yt' ? (
                 <>
                   <iframe
-                    src="https://www.youtube.com/embed/UdSdSV0xytM?autoplay=1&playsinline=1"
+                    src="https://www.youtube-nocookie.com/embed/UdSdSV0xytM?autoplay=1&mute=1&controls=0&loop=1&playlist=UdSdSV0xytM&playsinline=1&modestbranding=1&rel=0"
                     title="YouTube Short showcase"
                     className="w-full h-full border-0 bg-black"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
                   />
+                  <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-black/80 backdrop-blur-md text-emerald-400 border border-emerald-500/40 shadow-md pointer-events-none">
+                    <VolumeX className="w-3 h-3 text-emerald-400 animate-pulse" />
+                    <span>Playing (Muted)</span>
+                  </div>
                   <button
                     type="button"
-                    onClick={() => setPlayingShowcase(null)}
+                    onClick={() => { setPlayingShowcase(null); setHoveredShowcase(null); }}
                     aria-label="Close YouTube Short preview"
                     className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full bg-black/80 hover:bg-black border border-white/25 flex items-center justify-center text-white cursor-pointer"
                   >
@@ -443,7 +492,7 @@ export default function HomePage() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-black/55" />
 
                   {/* Platform & Status Badge */}
-                  <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
+                  <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
                     <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-600 text-white shadow-md flex items-center gap-1">
                       <Youtube className="w-3 h-3" /> YouTube Shorts
                     </span>
@@ -457,17 +506,20 @@ export default function HomePage() {
                     type="button"
                     onClick={() => setPlayingShowcase('yt')}
                     aria-label="Play YouTube Short"
-                    className="absolute inset-0 flex items-center justify-center cursor-pointer"
+                    className="absolute inset-0 flex flex-col items-center justify-center gap-2 cursor-pointer"
                   >
                     <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center text-white shadow-glow-purple group-hover:scale-110 transition-transform">
                       <Play className="w-5 h-5 fill-white ml-0.5" />
                     </div>
+                    <span className="text-[10px] font-semibold text-purple-200/90 bg-black/60 px-2 py-0.5 rounded-full backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                      Hover to play (without sound)
+                    </span>
                   </button>
 
                   {/* Hook Caption */}
                   <div className="absolute bottom-14 left-3 right-3 pointer-events-none">
                     <div className="p-2.5 rounded-xl bg-black/65 backdrop-blur-md border border-white/10 text-xs font-semibold text-white line-clamp-2">
-                      "Snoop & Em couldn't believe @Thatsdax said THIS... 🤐🔥"
+                      &quot;Snoop &amp; Em couldn&apos;t believe @Thatsdax said THIS... 🤐🔥&quot;
                     </div>
                   </div>
 
@@ -495,6 +547,41 @@ export default function HomePage() {
               <span className="text-xs font-mono text-emerald-400 font-semibold shrink-0">CPM: $0.50</span>
             </div>
           </motion.div>
+        </div>
+
+        {/* =====================================================================
+            VIRALITY ENGINE PIPELINE STRIP
+            ===================================================================== */}
+        <div className="mt-8 w-full rounded-2xl bg-[#120724]/90 backdrop-blur-xl border border-purple-500/30 p-5 sm:p-6 shadow-xl">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="text-xs font-mono uppercase tracking-widest text-purple-400">Virality Pipeline:</span>
+              <span className="text-xs text-white/90 font-semibold">How Every Video Dominates Reach</span>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-xs">
+              <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#1a0e33] border border-purple-800/40 text-purple-200">
+                <Video className="w-4 h-4 text-purple-400" />
+                <span>1. Ingest Raw Long Video</span>
+              </div>
+              <ChevronRight className="w-3.5 h-3.5 text-purple-500 hidden sm:block" />
+              <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#1a0e33] border border-purple-800/40 text-cyan-200">
+                <Scissors className="w-4 h-4 text-cyan-400 -rotate-45" />
+                <span>2. 1,200+ Clippers Cut Hooks</span>
+              </div>
+              <ChevronRight className="w-3.5 h-3.5 text-purple-500 hidden sm:block" />
+              <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#1a0e33] border border-purple-800/40 text-emerald-200">
+                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                <span>3. Verified Views &amp; Escrow</span>
+              </div>
+            </div>
+            <button
+              onClick={() => smoothScroll('#how-it-works')}
+              className="px-4 py-2 rounded-xl text-xs font-bold text-purple-200 hover:text-white bg-purple-950/60 hover:bg-purple-900/60 border border-purple-700/50 transition-colors flex items-center gap-1 cursor-pointer shrink-0"
+            >
+              <span>Explore Architecture</span>
+              <ChevronRight className="w-3 h-3" />
+            </button>
+          </div>
         </div>
       </section>
 
@@ -817,18 +904,64 @@ export default function HomePage() {
             transition={{ duration: 0.6 }}
             className="rounded-3xl bg-[#130a24] border border-purple-900/50 overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-8 p-6 sm:p-10 items-center hover:border-purple-500/40 transition-all shadow-xl"
           >
-            <div className="lg:col-span-5 relative aspect-video sm:aspect-square lg:aspect-auto h-full min-h-[240px] rounded-2xl overflow-hidden bg-black flex items-center justify-center">
-              <img
-                src="https://yt3.googleusercontent.com/ytc/AIdro_m5kGCbZq6Kd5kNkvVxqmD-6jFm0QZ-5xZHE5qHlVqZ1Q=s900-c-k-c0x00ffffff-no-rj"
-                alt="Yash Gupta – Trader & Creator"
-                loading="lazy"
-                decoding="async"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
-              <div className="absolute bottom-4 left-4 right-4 text-xs text-white/90 font-medium italic">
-                &quot;Clip Matrix delivered 10x more organic reach than traditional agency retainers at half the cost.&quot; — <span className="font-bold text-white">Yash Gupta, Trader</span>
-              </div>
+            <div
+              onMouseEnter={() => setHoveredShowcase('case')}
+              onMouseLeave={() => setHoveredShowcase(null)}
+              className="lg:col-span-5 relative aspect-video sm:aspect-square lg:aspect-auto h-full min-h-[260px] rounded-2xl overflow-hidden bg-black flex items-center justify-center group"
+            >
+              {hoveredShowcase === 'case' || playingShowcase === 'case' ? (
+                <>
+                  <iframe
+                    src="https://www.instagram.com/reel/DdXX3JMPLDV/embed/"
+                    title="Yash Gupta Case Study Reel"
+                    className="w-full h-full border-0 bg-black"
+                    allow="autoplay; encrypted-media; picture-in-picture"
+                    allowFullScreen
+                  />
+                  <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-black/80 backdrop-blur-md text-emerald-400 border border-emerald-500/40 pointer-events-none">
+                    <VolumeX className="w-3 h-3 text-emerald-400 animate-pulse" />
+                    <span>Playing (Muted)</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setPlayingShowcase(null); setHoveredShowcase(null); }}
+                    aria-label="Close Reel preview"
+                    className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full bg-black/80 hover:bg-black border border-white/25 flex items-center justify-center text-white cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </>
+              ) : (
+                <>
+                  <img
+                    src="/showcase-yash-reel.jpg"
+                    alt="Yash Gupta – Trader & Creator"
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
+
+                  {/* Play & Hover button */}
+                  <button
+                    type="button"
+                    onClick={() => setPlayingShowcase('case')}
+                    aria-label="Play Yash Gupta Case Study Reel"
+                    className="absolute inset-0 flex flex-col items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center text-white shadow-glow-purple group-hover:scale-110 transition-transform">
+                      <Play className="w-5 h-5 fill-white ml-0.5" />
+                    </div>
+                    <span className="text-[10px] font-semibold text-purple-200/90 bg-black/60 px-2 py-0.5 rounded-full backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                      Hover to play (without sound)
+                    </span>
+                  </button>
+
+                  <div className="absolute bottom-4 left-4 right-4 text-xs text-white/90 font-medium italic pointer-events-none">
+                    &quot;Clip Matrix delivered 10x more organic reach than traditional agency retainers at half the cost.&quot; — <span className="font-bold text-white">Yash Gupta, Trader</span>
+                  </div>
+                </>
+              )}
             </div>
 
             <div className="lg:col-span-7 space-y-6">
@@ -842,6 +975,17 @@ export default function HomePage() {
                 <p className="text-sm text-purple-200/70 leading-relaxed">
                   24 Clip Matrix clippers cut 48 retention-optimized vertical hooks highlighting trade setups, market psychology, and podcast breakdowns across Reels and Shorts.
                 </p>
+                <div className="pt-1">
+                  <a
+                    href="https://www.instagram.com/reel/DdXX3JMPLDV/?evlk=MXY0YnhoYXNmb3hpcg=="
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-1 font-semibold transition-colors"
+                  >
+                    <span>View verified Reel (@yash.highlights)</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
               </div>
 
               <div className="grid grid-cols-3 gap-4 pt-2 border-t border-purple-900/40">
