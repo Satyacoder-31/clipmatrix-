@@ -124,10 +124,10 @@ export default function Navbar() {
     { label: 'For Brands', href: '#brands', id: 'brands' },
     {
       label: 'Campaigns',
-      href: '#campaigns',
+      href: '/campaigns',
       id: 'campaigns',
       dropdown: [
-        { label: 'Live Brand Campaigns', href: '#campaigns', desc: 'Browse active clipping pools', icon: Flame },
+        { label: 'Live Brand Campaigns', href: '/campaigns', desc: 'Browse active clipping pools', icon: Flame },
         { label: 'How It Works', href: '#how-it-works', desc: 'Decentralized clipping workflow', icon: Layers },
         { label: 'Clipper Hub & Earnings', href: '#clippers', desc: 'Creator payout calculator', icon: Sparkles },
       ],

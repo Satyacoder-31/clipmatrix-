@@ -47,8 +47,6 @@ import {
 import { formatCurrency, formatNumber } from '@/lib/utils';
 
 export default function HomePage() {
-  const [campaigns, setCampaigns] = useState<any[]>([]);
-  const [filteredPlatform, setFilteredPlatform] = useState('ALL');
   const [activeTab, setActiveTab] = useState<'brand' | 'clipper'>('brand');
   const [playingShowcase, setPlayingShowcase] = useState<'ig' | 'yt' | null>(null);
 
@@ -72,14 +70,7 @@ export default function HomePage() {
   const [contactSubmitted, setContactSubmitted] = useState(false);
   const [contactLoading, setContactLoading] = useState(false);
 
-  useEffect(() => {
-    fetch('/api/campaigns')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.campaigns) setCampaigns(data.campaigns);
-      })
-      .catch(() => { });
-  }, []);
+
 
   // ROI computations
   const estimatedViews = Math.floor((calcBudget / calcCpm) * 1000);
@@ -92,10 +83,7 @@ export default function HomePage() {
   // Clipper earnings
   const potentialClipperEarnings = Number(((viewsSim / 1000) * cpmSim).toFixed(2));
 
-  const displayedCampaigns = campaigns.filter((c) => {
-    if (filteredPlatform === 'ALL') return true;
-    return c.allowedPlatforms?.includes(filteredPlatform);
-  });
+
 
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -224,14 +212,14 @@ export default function HomePage() {
             <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
           </button>
 
-          <button
-            onClick={() => smoothScroll('#campaigns')}
+          <a
+            href="/campaigns"
             className="w-full sm:w-auto px-6 py-3.5 rounded-full text-xs font-bold text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 flex items-center justify-center gap-2 transition-all cursor-pointer"
           >
             <Flame className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
             <span>Discover Campaigns</span>
             <ArrowUpRight className="w-3.5 h-3.5" />
-          </button>
+          </a>
         </div>
 
         {/* Live Social Proof Stack */}
@@ -740,123 +728,7 @@ export default function HomePage() {
         </motion.div>
       </section>
 
-      {/* =========================================================================
-          SECTION 5: CAMPAIGN MARKETPLACE (#campaigns)
-          ========================================================================= */}
-      <section id="campaigns" className="py-24 bg-[#0a0415]/90 border-y border-purple-900/40 px-4 sm:px-6 lg:px-8 scroll-mt-24">
-        <div className="max-w-7xl mx-auto space-y-12">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div>
-              <span className="text-xs font-mono uppercase tracking-widest text-purple-400">Live Marketplace</span>
-              <h2 className="text-3xl sm:text-5xl font-extrabold text-white mt-2 font-display">
-                Featured Brand Campaigns Active Now
-              </h2>
-              <p className="text-purple-200/70 text-sm mt-1">
-                Browse verified campaigns, download source footage, and submit your live video URLs.
-              </p>
-            </div>
 
-            {/* Platform filter tabs */}
-            <div className="flex items-center gap-2 p-1.5 rounded-xl bg-[#130826] border border-purple-900/50">
-              {['ALL', 'INSTAGRAM', 'YOUTUBE', 'TIKTOK'].map((p) => (
-                <button
-                  key={p}
-                  onClick={() => setFilteredPlatform(p)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${filteredPlatform === p
-                    ? 'bg-purple-600 text-white shadow-glow-purple'
-                    : 'text-purple-300 hover:text-white'
-                    }`}
-                >
-                  {p === 'ALL' ? 'All Platforms' : p === 'INSTAGRAM' ? 'Reels' : p === 'YOUTUBE' ? 'Shorts' : 'TikTok'}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {displayedCampaigns.map((camp, idx) => {
-              const budgetPercent = Math.min(
-                100,
-                Math.round(((camp.totalBudget - camp.remainingBudget) / camp.totalBudget) * 100)
-              );
-
-              return (
-                <motion.div
-                  key={camp.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: idx * 0.08 }}
-                  className="rounded-2xl bg-[#130b24] border border-purple-900/50 hover:border-purple-500/50 transition-all flex flex-col justify-between overflow-hidden group shadow-lg"
-                >
-                  <div>
-                    <div className="relative aspect-video w-full overflow-hidden bg-black/60">
-                      <img
-                        src={camp.thumbnailUrl || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=80'}
-                        alt={camp.title}
-                        loading="lazy"
-                        decoding="async"
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <div className="absolute top-3 left-3 px-2 py-0.5 rounded text-[10px] font-bold bg-black/70 backdrop-blur-md text-white border border-white/10 uppercase">
-                        {camp.industry}
-                      </div>
-                      <div className="absolute top-3 right-3 px-2 py-0.5 rounded text-[10px] font-bold bg-purple-600 text-white shadow-glow-purple">
-                        {camp.rewardModel}
-                      </div>
-                    </div>
-
-                    <div className="p-5 space-y-3">
-                      <div className="text-xs text-purple-300 font-medium">{camp.brand?.name || 'Verified Brand'}</div>
-                      <h3 className="text-base font-bold text-white line-clamp-2 font-display group-hover:text-purple-300 transition-colors">
-                        {camp.title}
-                      </h3>
-
-                      <div className="bg-[#1b1035] p-3 rounded-xl border border-purple-800/40 flex items-center justify-between">
-                        <div>
-                          <div className="text-[10px] text-purple-300/70 uppercase">Clipper Reward</div>
-                          <div className="text-sm font-bold text-emerald-400">
-                            {camp.rewardModel === 'CPM'
-                              ? `${camp.cpmRate || 0.5} / 1k views`
-                              : camp.rewardModel === 'FIXED'
-                                ? `${camp.rewardPerClip} / clip`
-                                : `${camp.rewardPerClip} + CPM`}
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-[10px] text-purple-300/70 uppercase">Total Budget</div>
-                          <div className="text-xs font-semibold text-white">${camp.totalBudget?.toLocaleString('en-US')}</div>
-                        </div>
-                      </div>
-
-                      {/* Progress */}
-                      <div className="space-y-1 pt-1">
-                        <div className="flex justify-between text-[11px] text-purple-300/80">
-                          <span>Claimed</span>
-                          <span>{budgetPercent}%</span>
-                        </div>
-                        <div className="w-full h-1.5 rounded-full bg-[#201438] overflow-hidden">
-                          <div className="h-full bg-gradient-to-r from-purple-500 to-cyan-400 rounded-full" style={{ width: `${budgetPercent}%` }} />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-5 pt-0">
-                    <a
-                      href={`/campaigns/${camp.slug || camp.id}`}
-                      className="w-full py-2.5 rounded-xl text-xs font-semibold text-center text-white bg-purple-600/80 hover:bg-purple-600 transition-colors flex items-center justify-center gap-1.5"
-                    >
-                      <span>View Guidelines & Assets</span>
-                      <ArrowUpRight className="w-3.5 h-3.5" />
-                    </a>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
 
       {/* =========================================================================
           SECTION 6: HOW IT WORKS (#how-it-works)
