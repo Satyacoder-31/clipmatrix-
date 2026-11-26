@@ -39,7 +39,7 @@ export const DEMO_USERS = {
       city: 'Mumbai',
       country: 'India',
       isVerified: true,
-      level: 'ELITE',
+      level: 'CLIPPER',
       rating: 4.95,
       createdAt: new Date(),
       updatedAt: new Date(),

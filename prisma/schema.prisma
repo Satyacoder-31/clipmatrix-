@@ -36,6 +36,7 @@ model User {
   notifications         Notification[]
   supportTickets        SupportTicket[]
   auditLogs             AuditLog[]              @relation("AdminAuditLogs")
+  connectedAccounts     ConnectedAccount[]      @relation("UserConnectedAccounts")
 }
 
 model BrandProfile {
@@ -71,7 +72,7 @@ model ClipperProfile {
   city            String?
   country         String   @default("India")
   isVerified      Boolean  @default(true)
-  level           String   @default("PRO_CLIPPER") // ROOKIE, PRO_CLIPPER, ELITE, MASTER
+  level           String   @default("CLIPPER") // CLIPPER, PRO_CLIPPER, ELITE_CLIPPER
   rating          Float    @default(4.9)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -290,4 +291,26 @@ model PlatformSetting {
   category    String   @default("GENERAL") // GENERAL, FINANCIAL, VERIFICATION
   description String?
   updatedAt   DateTime @updatedAt
+}
+
+model ConnectedAccount {
+  id                String   @id @default(uuid())
+  userId            String
+  user              User     @relation("UserConnectedAccounts", fields: [userId], references: [id], onDelete: Cascade)
+  platform          String   // Instagram, TikTok, YouTube, X, Facebook
+  handle            String
+  verified          Boolean  @default(true)
+  addedAt           DateTime @default(now())
+  studioViewAccess  Boolean  @default(true)
+  accessScope       String?
+  adminAccessStatus String   @default("ACTIVE")
+  subscriberCount   Int?
+  totalViews        Int?
+  avatarUrl         String?
+  demographicsJson  String?
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([userId])
 }

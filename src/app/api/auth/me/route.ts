@@ -1,12 +1,39 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser, DEMO_USERS, hashPassword, verifyPassword, generateToken } from '@/lib/auth';
+import { getClipperTier } from '@/lib/rewards';
 
 export async function GET() {
   try {
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ authenticated: false, user: null });
+    }
+
+    let approvedViews = 0;
+    let tierInfo = null;
+
+    if (user.role === 'CLIPPER') {
+      const approvedSubs = await prisma.submission.findMany({
+        where: {
+          clipperId: user.id,
+          status: { in: ['APPROVED', 'VIEWS_VERIFIED'] },
+        },
+        select: { verifiedViews: true, reportedViews: true },
+      });
+      approvedViews = approvedSubs.reduce(
+        (acc, s) => acc + (s.verifiedViews || s.reportedViews || 0),
+        0
+      );
+      tierInfo = getClipperTier(approvedViews);
+
+      // Sync level in database if changed
+      if (user.clipperProfile && user.clipperProfile.level !== tierInfo.code) {
+        await prisma.clipperProfile.update({
+          where: { id: user.clipperProfile.id },
+          data: { level: tierInfo.code },
+        }).catch(() => {});
+      }
     }
 
     return NextResponse.json({
@@ -20,7 +47,15 @@ export async function GET() {
         avatar: user.avatar,
         phone: (user as any).phone || null,
         brandProfile: user.brandProfile,
-        clipperProfile: user.clipperProfile,
+        clipperProfile: user.clipperProfile
+          ? {
+              ...user.clipperProfile,
+              level: tierInfo ? tierInfo.code : user.clipperProfile.level,
+              tierLabel: tierInfo ? tierInfo.label : 'Clipper',
+              approvedViews,
+              tierInfo,
+            }
+          : null,
         wallet: user.wallet,
       },
     });

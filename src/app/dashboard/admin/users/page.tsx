@@ -166,7 +166,7 @@ export default function AdminUsersPage() {
                       ) : cp ? (
                         <div className="space-y-1.5">
                           <div className="font-semibold text-white flex items-center gap-2">
-                            <span>{cp.instagramHandle || cp.youtubeHandle || '@daxraps30'}</span>
+                            <span>{cp.instagramHandle || cp.youtubeHandle || 'No social handle'}</span>
                             <span className="text-[10px] font-mono text-cyan-400 font-normal">({cp.level})</span>
                           </div>
 
@@ -367,11 +367,11 @@ export default function AdminUsersPage() {
               <div className="flex flex-wrap gap-2">
                 <span className="px-2.5 py-1 rounded-lg bg-red-500/10 border border-red-500/20 text-red-300 font-mono flex items-center gap-1">
                   <YouTubeIcon className="w-3.5 h-3.5" />
-                  <span>{payoutModalUser.clipperProfile?.youtubeHandle || '@daxraps30'}</span>
+                  <span>{payoutModalUser.clipperProfile?.youtubeHandle || 'Not linked'}</span>
                 </span>
                 <span className="px-2.5 py-1 rounded-lg bg-pink-500/10 border border-pink-500/20 text-pink-300 font-mono flex items-center gap-1">
                   <InstagramIcon className="w-3.5 h-3.5" />
-                  <span>{payoutModalUser.clipperProfile?.instagramHandle || '@satya.viralclips'}</span>
+                  <span>{payoutModalUser.clipperProfile?.instagramHandle || 'Not linked'}</span>
                 </span>
               </div>
             </div>

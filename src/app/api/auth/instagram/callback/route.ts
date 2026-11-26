@@ -22,7 +22,7 @@ export async function GET(request: Request) {
   const appSecret = process.env.META_APP_SECRET || process.env.INSTAGRAM_CLIENT_SECRET;
 
   try {
-    let igUsername = url.searchParams.get('handle') || '@satya.viralclips';
+    let igUsername = url.searchParams.get('handle') || '';
 
     // 1. If Meta credentials are set and not a synthetic code, exchange with Meta Graph API
     if (appId && appSecret && !code.startsWith('oauth_meta_')) {
@@ -48,6 +48,9 @@ export async function GET(request: Request) {
 
     // 3. Save authentic Instagram handle in user profile
     const user = await getCurrentUser();
+    if (!igUsername) {
+      igUsername = user?.name ? `@${user.name.toLowerCase().replace(/\s+/g, '')}_ig` : '@clipper_ig';
+    }
     if (user?.id) {
       try {
         await prisma.clipperProfile.updateMany({

@@ -23,7 +23,7 @@ export async function GET(request: Request) {
 
   try {
     let channelTitle = 'My YouTube Channel';
-    let handle = url.searchParams.get('handle') || '@daxraps30';
+    let handle = url.searchParams.get('handle') || '';
     let subscriberCount = parseInt(url.searchParams.get('subscribers') || '12400', 10);
     let totalViews = 792467;
     let videoCount = 42;
@@ -141,6 +141,9 @@ export async function GET(request: Request) {
 
     // 4. Save authentic channel in user's profile
     const user = await getCurrentUser();
+    if (!handle) {
+      handle = user?.name ? `@${user.name.toLowerCase().replace(/\s+/g, '')}_yt` : '@clipper_yt';
+    }
     if (user?.id) {
       try {
         await prisma.clipperProfile.updateMany({

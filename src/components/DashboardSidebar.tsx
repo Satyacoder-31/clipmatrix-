@@ -328,9 +328,25 @@ export default function DashboardSidebar({
             <div className="min-w-0 flex-1">
               <div className="font-bold text-xs text-white truncate">{displayName}</div>
               <div className="flex items-center gap-2 mt-0.5">
-                <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                  {displayRole}
-                </span>
+                {isClipperWorkspace ? (
+                  user?.clipperProfile?.level === 'ELITE_CLIPPER' ? (
+                    <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-[0_0_8px_rgba(245,158,11,0.2)]">
+                      👑 ELITE
+                    </span>
+                  ) : user?.clipperProfile?.level === 'PRO_CLIPPER' ? (
+                    <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-[0_0_8px_rgba(6,182,212,0.2)]">
+                      ⚡ PRO
+                    </span>
+                  ) : (
+                    <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                      CLIPPER
+                    </span>
+                  )
+                ) : (
+                  <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                    {displayRole}
+                  </span>
+                )}
                 <span className="text-[10px] text-emerald-400 font-mono font-semibold">
                   ${balance.toLocaleString('en-US')}
                 </span>

@@ -80,7 +80,7 @@ export async function POST(request: Request) {
                   upiId: upiId || '',
                   city: city || 'Mumbai',
                   isVerified: true,
-                  level: 'ROOKIE',
+                  level: 'CLIPPER',
                 },
               },
             }),

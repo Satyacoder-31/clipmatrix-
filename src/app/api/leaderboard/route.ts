@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getClipperTier } from '@/lib/rewards';
 
 export async function GET() {
   try {
@@ -52,7 +53,7 @@ export async function GET() {
           id: c.id,
           name: c.name,
           handle,
-          tier: c.clipperProfile?.level || 'PRO_CLIPPER',
+          tier: getClipperTier(totalViews).label,
           views: totalViews,
           earned: totalEarned,
           rating: c.clipperProfile?.rating || 4.9,

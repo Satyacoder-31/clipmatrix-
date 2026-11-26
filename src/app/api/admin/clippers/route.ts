@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser, DEMO_USERS } from '@/lib/auth';
+import { getClipperTier } from '@/lib/rewards';
 
 export async function GET() {
   try {
@@ -152,6 +153,8 @@ export async function GET() {
         avatar: clipper.avatar || null,
         status: clipper.status,
         joinedAt: clipper.createdAt,
+        tier: getClipperTier(totalApprovedViews).label,
+        level: getClipperTier(totalApprovedViews).code,
         paymentDetails: {
           upiId,
           bankName,

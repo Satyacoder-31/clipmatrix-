@@ -626,7 +626,7 @@ export default function AdminSubmissionsReviewPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search clips by title, creator name, handle (@daxraps30), submission ID..."
+            placeholder="Search clips by title, creator name, handle (@creatorhandle), submission ID..."
             className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white placeholder-slate-500 text-xs outline-none focus:border-cyan-400 transition-all"
           />
         </div>

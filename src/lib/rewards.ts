@@ -128,3 +128,50 @@ export function calculateSubmissionReward(
     },
   };
 }
+
+/**
+ * Clipper Tier Badges / Level rules:
+ * - Elite Clipper: >= 2,000,000 approved views (2M+)
+ * - Pro Clipper: >= 500,000 approved views (500k+)
+ * - Clipper: starting level (< 500k views)
+ */
+export interface ClipperTierInfo {
+  code: 'CLIPPER' | 'PRO_CLIPPER' | 'ELITE_CLIPPER';
+  label: 'Clipper' | 'Pro Clipper' | 'Elite Clipper';
+  minViews: number;
+  badgeColor: string;
+  nextTier: string | null;
+  viewsNeeded: number;
+}
+
+export function getClipperTier(approvedViews: number): ClipperTierInfo {
+  const views = Math.max(0, Number(approvedViews) || 0);
+  if (views >= 2000000) {
+    return {
+      code: 'ELITE_CLIPPER',
+      label: 'Elite Clipper',
+      minViews: 2000000,
+      badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+      nextTier: null,
+      viewsNeeded: 0,
+    };
+  }
+  if (views >= 500000) {
+    return {
+      code: 'PRO_CLIPPER',
+      label: 'Pro Clipper',
+      minViews: 500000,
+      badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40',
+      nextTier: 'Elite Clipper (2M+ views)',
+      viewsNeeded: 2000000 - views,
+    };
+  }
+  return {
+    code: 'CLIPPER',
+    label: 'Clipper',
+    minViews: 0,
+    badgeColor: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
+    nextTier: 'Pro Clipper (500K+ views)',
+    viewsNeeded: 500000 - views,
+  };
+}

@@ -85,7 +85,16 @@ function ClipperProfileInner() {
   const [avatar, setAvatar] = useState('');
   const [editingSoftware, setEditingSoftware] = useState('CapCut, Premiere Pro');
   const [experienceYears, setExperienceYears] = useState('1-3 years');
-  const [clipperLevel, setClipperLevel] = useState('PRO_CLIPPER');
+  const [clipperLevel, setClipperLevel] = useState('CLIPPER');
+  const [approvedViews, setApprovedViews] = useState(0);
+  const [tierInfo, setTierInfo] = useState<{
+    code: string;
+    label: string;
+    minViews: number;
+    badgeColor: string;
+    nextTier: string | null;
+    viewsNeeded: number;
+  } | null>(null);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
 
@@ -126,7 +135,9 @@ function ClipperProfileInner() {
         if (meData.user.clipperProfile) {
           setEditingSoftware(meData.user.clipperProfile.editingSoftware || 'CapCut, Premiere Pro');
           setExperienceYears(meData.user.clipperProfile.experienceYears || '1-3 years');
-          setClipperLevel(meData.user.clipperProfile.level || 'PRO_CLIPPER');
+          setClipperLevel(meData.user.clipperProfile.level || 'CLIPPER');
+          setApprovedViews(meData.user.clipperProfile.approvedViews || 0);
+          setTierInfo(meData.user.clipperProfile.tierInfo || null);
         }
       }
     } catch {
@@ -315,9 +326,19 @@ function ClipperProfileInner() {
                 <h2 className="text-lg sm:text-xl font-bold text-white font-display">
                   {name || 'Verified Clipper'}
                 </h2>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
-                  {clipperLevel.replace('_', ' ')}
-                </span>
+                {clipperLevel === 'ELITE_CLIPPER' ? (
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1 shadow-[0_0_10px_rgba(245,158,11,0.2)]">
+                    <span>👑 Elite Clipper</span>
+                  </span>
+                ) : clipperLevel === 'PRO_CLIPPER' ? (
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 flex items-center gap-1 shadow-[0_0_10px_rgba(6,182,212,0.2)]">
+                    <span>⚡ Pro Clipper</span>
+                  </span>
+                ) : (
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center gap-1">
+                    <span>Clipper</span>
+                  </span>
+                )}
               </div>
               <p className="text-xs text-slate-400 font-mono">{email}</p>
             </div>
@@ -331,6 +352,73 @@ function ClipperProfileInner() {
             <Edit3 className="w-3.5 h-3.5 text-cyan-400" />
             <span>{isEditingProfile ? 'Cancel Editing' : 'Edit Profile'}</span>
           </button>
+        </div>
+
+        {/* Tier Status & Progression Milestone Bar */}
+        <div className="mt-4 pt-4 border-t border-white/[0.08] grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-slate-400">Total Approved Views</span>
+              <span className="font-mono font-bold text-white text-sm">
+                {approvedViews.toLocaleString('en-US')}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono">
+              <span>Current Tier:</span>
+              <span
+                className={
+                  clipperLevel === 'ELITE_CLIPPER'
+                    ? 'text-amber-400 font-bold'
+                    : clipperLevel === 'PRO_CLIPPER'
+                    ? 'text-cyan-400 font-bold'
+                    : 'text-purple-400 font-bold'
+                }
+              >
+                {clipperLevel === 'ELITE_CLIPPER'
+                  ? 'Elite Clipper (2M+ views)'
+                  : clipperLevel === 'PRO_CLIPPER'
+                  ? 'Pro Clipper (500K+ views)'
+                  : 'Clipper (<500K views)'}
+              </span>
+            </div>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-slate-400">Next Milestone</span>
+              <span className="font-mono text-cyan-300 text-xs font-semibold">
+                {clipperLevel === 'ELITE_CLIPPER'
+                  ? '👑 Max Tier Achieved'
+                  : clipperLevel === 'PRO_CLIPPER'
+                  ? `${Math.max(0, 2000000 - approvedViews).toLocaleString()} views to Elite`
+                  : `${Math.max(0, 500000 - approvedViews).toLocaleString()} views to Pro`}
+              </span>
+            </div>
+            <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+              <div
+                className={`h-full transition-all duration-500 rounded-full ${
+                  clipperLevel === 'ELITE_CLIPPER'
+                    ? 'bg-gradient-to-r from-amber-400 to-amber-500'
+                    : clipperLevel === 'PRO_CLIPPER'
+                    ? 'bg-gradient-to-r from-cyan-400 to-blue-500'
+                    : 'bg-gradient-to-r from-purple-500 to-cyan-400'
+                }`}
+                style={{
+                  width:
+                    clipperLevel === 'ELITE_CLIPPER'
+                      ? '100%'
+                      : clipperLevel === 'PRO_CLIPPER'
+                      ? `${Math.min(100, Math.max(8, ((approvedViews - 500000) / 1500000) * 100))}%`
+                      : `${Math.min(100, Math.max(8, (approvedViews / 500000) * 100))}%`,
+                }}
+              />
+            </div>
+            <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono">
+              <span>0</span>
+              <span>500K (Pro Clipper)</span>
+              <span>2M+ (Elite Clipper)</span>
+            </div>
+          </div>
         </div>
 
         {/* Profile Info Edit Form (if toggled) */}
@@ -443,8 +531,16 @@ function ClipperProfileInner() {
 
         <div className="space-y-3">
           {connectedAccounts.length === 0 ? (
-            <div className="py-12 text-center text-slate-400 text-xs">
-              No accounts linked yet. Click YouTube or Instagram above to connect your first channel.
+            <div className="py-12 px-4 text-center rounded-2xl bg-white/[0.01] border border-dashed border-white/10 space-y-3">
+              <div className="w-12 h-12 mx-auto rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-300">
+                <Globe2 className="w-6 h-6" />
+              </div>
+              <div className="space-y-1">
+                <div className="text-sm font-bold text-white font-display">No connected accounts yet</div>
+                <p className="text-xs text-slate-400 max-w-md mx-auto">
+                  Link your YouTube or Instagram channels above to enable video moderation and clip submission tracking.
+                </p>
+              </div>
             </div>
           ) : (
             connectedAccounts.map((acc) => {

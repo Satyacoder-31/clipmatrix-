@@ -26,175 +26,76 @@ export interface ConnectedAccountItem {
   };
 }
 
-// In-memory persistent store fallback for clippers
-const defaultAccountsMap: Record<string, ConnectedAccountItem[]> = {
-  default: [
-    {
-      id: 'acc-yt-1',
-      platform: 'YouTube',
-      handle: '@daxraps30',
-      verified: true,
-      addedAt: '2026-11-15',
-      studioViewAccess: true,
-      accessScope: 'https://www.googleapis.com/auth/yt-analytics.readonly, youtube.readonly',
-      adminAccessStatus: 'ACTIVE',
-      demographics: {
-        tier1Percent: 84,
-        topCountries: [
-          { country: 'United States', percent: 48, isTier1: true, code: 'US' },
-          { country: 'United Kingdom', percent: 18, isTier1: true, code: 'GB' },
-          { country: 'India', percent: 16, isTier1: false, code: 'IN' },
-          { country: 'Canada', percent: 10, isTier1: true, code: 'CA' },
-          { country: 'Australia', percent: 8, isTier1: true, code: 'AU' },
-        ],
-        gender: { male: 61, female: 39 },
-        ageGroups: [
-          { group: '18-24', percent: 54 },
-          { group: '25-34', percent: 32 },
-          { group: '13-17', percent: 9 },
-          { group: '35-44', percent: 5 },
-        ],
-        retentionRate: 82.4,
-        avgWatchDuration: '0:48 / 0:58',
-        sharesCount: 9509,
-        reachCount: 792467,
-      },
-    },
-    {
-      id: 'acc-yt-2',
-      platform: 'YouTube',
-      handle: '@DaxEditz30',
-      verified: true,
-      addedAt: '2026-11-18',
-      studioViewAccess: true,
-      accessScope: 'https://www.googleapis.com/auth/yt-analytics.readonly, youtube.readonly',
-      adminAccessStatus: 'ACTIVE',
-      demographics: {
-        tier1Percent: 86,
-        topCountries: [
-          { country: 'United States', percent: 52, isTier1: true, code: 'US' },
-          { country: 'United Kingdom', percent: 16, isTier1: true, code: 'GB' },
-          { country: 'Canada', percent: 11, isTier1: true, code: 'CA' },
-          { country: 'India', percent: 14, isTier1: false, code: 'IN' },
-          { country: 'Australia', percent: 7, isTier1: true, code: 'AU' },
-        ],
-        gender: { male: 59, female: 41 },
-        ageGroups: [
-          { group: '18-24', percent: 56 },
-          { group: '25-34', percent: 30 },
-          { group: '13-17', percent: 10 },
-          { group: '35-44', percent: 4 },
-        ],
-        retentionRate: 85.1,
-        avgWatchDuration: '0:51 / 0:59',
-        sharesCount: 6420,
-        reachCount: 480000,
-      },
-    },
-    {
-      id: 'acc-ig-1',
-      platform: 'Instagram',
-      handle: '@satya.viralclips',
-      verified: true,
-      addedAt: '2026-11-21',
-      studioViewAccess: true,
-      accessScope: 'instagram_manage_insights, instagram_basic, pages_read_engagement',
-      adminAccessStatus: 'ACTIVE',
-      demographics: {
-        tier1Percent: 81,
-        topCountries: [
-          { country: 'United States', percent: 45, isTier1: true, code: 'US' },
-          { country: 'India', percent: 19, isTier1: false, code: 'IN' },
-          { country: 'United Kingdom', percent: 16, isTier1: true, code: 'GB' },
-          { country: 'Canada', percent: 11, isTier1: true, code: 'CA' },
-          { country: 'Germany', percent: 9, isTier1: true, code: 'DE' },
-        ],
-        gender: { male: 54, female: 46 },
-        ageGroups: [
-          { group: '18-24', percent: 58 },
-          { group: '25-34', percent: 28 },
-          { group: '13-17', percent: 9 },
-          { group: '35-44', percent: 5 },
-        ],
-        retentionRate: 81.5,
-        avgWatchDuration: '0:26 / 0:30',
-        sharesCount: 8420,
-        reachCount: 1420000,
-      },
-    },
-    {
-      id: 'acc-yt-3',
-      platform: 'YouTube',
-      handle: '@DaxForever31',
-      verified: true,
-      addedAt: '2026-11-20',
-      studioViewAccess: true,
-      accessScope: 'https://www.googleapis.com/auth/yt-analytics.readonly',
-      adminAccessStatus: 'ACTIVE',
-      demographics: {
-        tier1Percent: 83,
-        topCountries: [
-          { country: 'United States', percent: 46, isTier1: true, code: 'US' },
-          { country: 'United Kingdom', percent: 19, isTier1: true, code: 'GB' },
-          { country: 'India', percent: 17, isTier1: false, code: 'IN' },
-          { country: 'Canada', percent: 10, isTier1: true, code: 'CA' },
-          { country: 'Australia', percent: 8, isTier1: true, code: 'AU' },
-        ],
-        gender: { male: 62, female: 38 },
-        ageGroups: [
-          { group: '18-24', percent: 53 },
-          { group: '25-34', percent: 31 },
-          { group: '13-17', percent: 11 },
-          { group: '35-44', percent: 5 },
-        ],
-        retentionRate: 83.0,
-        avgWatchDuration: '0:49 / 0:58',
-        sharesCount: 4210,
-        reachCount: 310000,
-      },
-    },
-    {
-      id: 'acc-yt-4',
-      platform: 'YouTube',
-      handle: '@DaxHits31',
-      verified: true,
-      addedAt: '2026-11-22',
-      studioViewAccess: true,
-      accessScope: 'https://www.googleapis.com/auth/yt-analytics.readonly',
-      adminAccessStatus: 'ACTIVE',
-      demographics: {
-        tier1Percent: 82,
-        topCountries: [
-          { country: 'United States', percent: 44, isTier1: true, code: 'US' },
-          { country: 'United Kingdom', percent: 20, isTier1: true, code: 'GB' },
-          { country: 'India', percent: 18, isTier1: false, code: 'IN' },
-          { country: 'Canada', percent: 10, isTier1: true, code: 'CA' },
-          { country: 'Australia', percent: 8, isTier1: true, code: 'AU' },
-        ],
-        gender: { male: 60, female: 40 },
-        ageGroups: [
-          { group: '18-24', percent: 55 },
-          { group: '25-34', percent: 29 },
-          { group: '13-17', percent: 11 },
-          { group: '35-44', percent: 5 },
-        ],
-        retentionRate: 80.5,
-        avgWatchDuration: '0:45 / 0:55',
-        sharesCount: 3890,
-        reachCount: 290000,
-      },
-    },
-  ],
-};
-
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const user = await getCurrentUser();
-    const userId = user?.id || 'default';
+    if (!user) {
+      return NextResponse.json({ accounts: [] });
+    }
 
-    const accounts = defaultAccountsMap[userId] || defaultAccountsMap.default;
+    // STRICT: Fetch ONLY this authenticated user's connected accounts from database
+    const dbAccounts = await prisma.connectedAccount.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const accounts: ConnectedAccountItem[] = dbAccounts.map((acc) => {
+      let demographics = null;
+      if (acc.demographicsJson) {
+        try {
+          demographics = JSON.parse(acc.demographicsJson);
+        } catch {}
+      }
+
+      const isYouTube = acc.platform.toLowerCase() === 'youtube';
+
+      return {
+        id: acc.id,
+        platform: acc.platform as any,
+        handle: acc.handle,
+        verified: acc.verified,
+        addedAt: acc.addedAt ? acc.addedAt.toISOString().split('T')[0] : acc.createdAt.toISOString().split('T')[0],
+        studioViewAccess: acc.studioViewAccess,
+        accessScope: acc.accessScope || (isYouTube ? 'https://www.googleapis.com/auth/yt-analytics.readonly' : 'public_profile'),
+        adminAccessStatus: (acc.adminAccessStatus as any) || 'ACTIVE',
+        subscriberCount: acc.subscriberCount || undefined,
+        totalViews: acc.totalViews || undefined,
+        avatarUrl: acc.avatarUrl || undefined,
+        demographics: demographics || {
+          tier1Percent: isYouTube ? 84 : 81,
+          topCountries: isYouTube
+            ? [
+                { country: 'United States', percent: 48, isTier1: true, code: 'US' },
+                { country: 'United Kingdom', percent: 18, isTier1: true, code: 'GB' },
+                { country: 'India', percent: 16, isTier1: false, code: 'IN' },
+                { country: 'Canada', percent: 10, isTier1: true, code: 'CA' },
+                { country: 'Australia', percent: 8, isTier1: true, code: 'AU' },
+              ]
+            : [
+                { country: 'United States', percent: 45, isTier1: true, code: 'US' },
+                { country: 'India', percent: 19, isTier1: false, code: 'IN' },
+                { country: 'United Kingdom', percent: 16, isTier1: true, code: 'GB' },
+                { country: 'Canada', percent: 11, isTier1: true, code: 'CA' },
+                { country: 'Germany', percent: 9, isTier1: true, code: 'DE' },
+              ],
+          gender: isYouTube ? { male: 61, female: 39 } : { male: 54, female: 46 },
+          ageGroups: [
+            { group: '18-24', percent: 55 },
+            { group: '25-34', percent: 30 },
+            { group: '13-17', percent: 10 },
+            { group: '35-44', percent: 5 },
+          ],
+          retentionRate: isYouTube ? 83.5 : 81.5,
+          avgWatchDuration: isYouTube ? '0:49 / 0:58' : '0:27 / 0:30',
+          sharesCount: isYouTube ? 8100 : 7200,
+          reachCount: isYouTube ? 650000 : 1200000,
+        },
+      };
+    });
+
     return NextResponse.json({ accounts });
   } catch (error) {
+    console.error('Failed to fetch accounts:', error);
     return NextResponse.json({ error: 'Failed to fetch connected accounts' }, { status: 500 });
   }
 }
@@ -202,7 +103,9 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const user = await getCurrentUser();
-    const userId = user?.id || 'default';
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized. Please login.' }, { status: 401 });
+    }
 
     const body = await request.json();
     const { platform, handle, grantStudioViewAccess } = body;
@@ -212,7 +115,6 @@ export async function POST(request: Request) {
     }
 
     const cleanHandle = handle.trim().startsWith('@') ? handle.trim() : `@${handle.trim()}`;
-
     const isYouTube = platform.toLowerCase() === 'youtube';
     const isInstagram = platform.toLowerCase() === 'instagram';
 
@@ -222,83 +124,92 @@ export async function POST(request: Request) {
       ? 'instagram_manage_insights, instagram_basic, pages_read_engagement'
       : 'public_profile';
 
-    const newAccount: ConnectedAccountItem = {
-      id: `acc-${Date.now()}`,
-      platform,
-      handle: cleanHandle,
-      verified: true,
-      addedAt: new Date().toISOString().split('T')[0],
-      studioViewAccess: grantStudioViewAccess !== false,
-      accessScope,
-      adminAccessStatus: grantStudioViewAccess !== false ? 'ACTIVE' : 'PENDING',
-      subscriberCount: typeof body.subscriberCount === 'number' ? body.subscriberCount : undefined,
-      totalViews: typeof body.totalViews === 'number' ? body.totalViews : undefined,
-      avatarUrl: body.avatarUrl || undefined,
-      demographics: body.demographics && Array.isArray(body.demographics.topCountries) && body.demographics.topCountries.length > 0
-        ? body.demographics
-        : {
-        tier1Percent: isYouTube ? 84 : 81,
-        topCountries: isYouTube
-          ? [
-              { country: 'United States', percent: 48, isTier1: true, code: 'US' },
-              { country: 'United Kingdom', percent: 18, isTier1: true, code: 'GB' },
-              { country: 'India', percent: 16, isTier1: false, code: 'IN' },
-              { country: 'Canada', percent: 10, isTier1: true, code: 'CA' },
-              { country: 'Australia', percent: 8, isTier1: true, code: 'AU' },
-            ]
-          : [
-              { country: 'United States', percent: 45, isTier1: true, code: 'US' },
-              { country: 'India', percent: 19, isTier1: false, code: 'IN' },
-              { country: 'United Kingdom', percent: 16, isTier1: true, code: 'GB' },
-              { country: 'Canada', percent: 11, isTier1: true, code: 'CA' },
-              { country: 'Germany', percent: 9, isTier1: true, code: 'DE' },
-            ],
-        gender: isYouTube ? { male: 61, female: 39 } : { male: 54, female: 46 },
-        ageGroups: [
-          { group: '18-24', percent: 55 },
-          { group: '25-34', percent: 30 },
-          { group: '13-17', percent: 10 },
-          { group: '35-44', percent: 5 },
-        ],
-        retentionRate: isYouTube ? 83.5 : 81.5,
-        avgWatchDuration: isYouTube ? '0:49 / 0:58' : '0:27 / 0:30',
-        sharesCount: isYouTube ? 8100 : 7200,
-        reachCount: isYouTube ? 650000 : 1200000,
+    const demographics = body.demographics && Array.isArray(body.demographics.topCountries) && body.demographics.topCountries.length > 0
+      ? body.demographics
+      : {
+          tier1Percent: isYouTube ? 84 : 81,
+          topCountries: isYouTube
+            ? [
+                { country: 'United States', percent: 48, isTier1: true, code: 'US' },
+                { country: 'United Kingdom', percent: 18, isTier1: true, code: 'GB' },
+                { country: 'India', percent: 16, isTier1: false, code: 'IN' },
+                { country: 'Canada', percent: 10, isTier1: true, code: 'CA' },
+                { country: 'Australia', percent: 8, isTier1: true, code: 'AU' },
+              ]
+            : [
+                { country: 'United States', percent: 45, isTier1: true, code: 'US' },
+                { country: 'India', percent: 19, isTier1: false, code: 'IN' },
+                { country: 'United Kingdom', percent: 16, isTier1: true, code: 'GB' },
+                { country: 'Canada', percent: 11, isTier1: true, code: 'CA' },
+                { country: 'Germany', percent: 9, isTier1: true, code: 'DE' },
+              ],
+          gender: isYouTube ? { male: 61, female: 39 } : { male: 54, female: 46 },
+          ageGroups: [
+            { group: '18-24', percent: 55 },
+            { group: '25-34', percent: 30 },
+            { group: '13-17', percent: 10 },
+            { group: '35-44', percent: 5 },
+          ],
+          retentionRate: isYouTube ? 83.5 : 81.5,
+          avgWatchDuration: isYouTube ? '0:49 / 0:58' : '0:27 / 0:30',
+          sharesCount: isYouTube ? 8100 : 7200,
+          reachCount: isYouTube ? 650000 : 1200000,
+        };
+
+    // Save strictly under user's own userId in Postgres
+    const created = await prisma.connectedAccount.create({
+      data: {
+        userId: user.id,
+        platform,
+        handle: cleanHandle,
+        verified: true,
+        studioViewAccess: grantStudioViewAccess !== false,
+        accessScope,
+        adminAccessStatus: grantStudioViewAccess !== false ? 'ACTIVE' : 'PENDING',
+        subscriberCount: typeof body.subscriberCount === 'number' ? body.subscriberCount : null,
+        totalViews: typeof body.totalViews === 'number' ? body.totalViews : null,
+        avatarUrl: body.avatarUrl || null,
+        demographicsJson: JSON.stringify(demographics),
       },
-    };
+    });
 
-    if (!defaultAccountsMap[userId]) {
-      defaultAccountsMap[userId] = [...defaultAccountsMap.default];
-    }
-    defaultAccountsMap[userId].unshift(newAccount);
-
-    // Also update ClipperProfile in Prisma if available
+    // Also update ClipperProfile in Prisma
     try {
-      if (user?.id) {
-        if (isYouTube) {
-          await prisma.clipperProfile.updateMany({
-            where: { userId: user.id },
-            data: { youtubeHandle: cleanHandle },
-          });
-        } else if (isInstagram) {
-          await prisma.clipperProfile.updateMany({
-            where: { userId: user.id },
-            data: { instagramHandle: cleanHandle },
-          });
-        }
+      if (isYouTube) {
+        await prisma.clipperProfile.updateMany({
+          where: { userId: user.id },
+          data: { youtubeHandle: cleanHandle },
+        });
+      } else if (isInstagram) {
+        await prisma.clipperProfile.updateMany({
+          where: { userId: user.id },
+          data: { instagramHandle: cleanHandle },
+        });
       }
-    } catch {
-      // Prisma update fallback
-    }
+    } catch {}
+
+    const newAccount: ConnectedAccountItem = {
+      id: created.id,
+      platform: created.platform as any,
+      handle: created.handle,
+      verified: created.verified,
+      addedAt: created.addedAt.toISOString().split('T')[0],
+      studioViewAccess: created.studioViewAccess,
+      accessScope: created.accessScope || accessScope,
+      adminAccessStatus: created.adminAccessStatus as any,
+      subscriberCount: created.subscriberCount || undefined,
+      totalViews: created.totalViews || undefined,
+      avatarUrl: created.avatarUrl || undefined,
+      demographics,
+    };
 
     return NextResponse.json({
       success: true,
       account: newAccount,
-      message: `Successfully linked ${platform} (${cleanHandle}) with ${
-        isYouTube ? 'YouTube Studio Analytics' : isInstagram ? 'Instagram Professional Insights' : 'Social'
-      } View Access granted to Admin!`,
+      message: `Successfully linked ${platform} (${cleanHandle})!`,
     });
   } catch (error) {
+    console.error('Failed to link account:', error);
     return NextResponse.json({ error: 'Failed to link account' }, { status: 500 });
   }
 }
@@ -306,7 +217,9 @@ export async function POST(request: Request) {
 export async function DELETE(request: Request) {
   try {
     const user = await getCurrentUser();
-    const userId = user?.id || 'default';
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
@@ -315,13 +228,18 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Account ID is required' }, { status: 400 });
     }
 
-    if (!defaultAccountsMap[userId]) {
-      defaultAccountsMap[userId] = [...defaultAccountsMap.default];
+    // STRICT: Delete ONLY if account belongs to this authenticated user
+    const deleted = await prisma.connectedAccount.deleteMany({
+      where: { id, userId: user.id },
+    });
+
+    if (deleted.count === 0) {
+      return NextResponse.json({ error: 'Account not found or access denied' }, { status: 404 });
     }
-    defaultAccountsMap[userId] = defaultAccountsMap[userId].filter((acc) => acc.id !== id);
 
     return NextResponse.json({ success: true, message: 'Account unlinked successfully' });
   } catch (error) {
+    console.error('Failed to unlink account:', error);
     return NextResponse.json({ error: 'Failed to unlink account' }, { status: 500 });
   }
 }
