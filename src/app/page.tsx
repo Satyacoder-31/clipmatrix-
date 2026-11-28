@@ -44,6 +44,7 @@ import {
   X,
   VolumeX,
   ExternalLink,
+  MessageSquare,
 } from 'lucide-react';
 import { formatCurrency, formatNumber } from '@/lib/utils';
 
@@ -59,21 +60,19 @@ export default function HomePage() {
   // Contact form state
   const [contactName, setContactName] = useState('');
   const [contactEmail, setContactEmail] = useState('');
+  const [contactPhone, setContactPhone] = useState('');
   const [contactCompany, setContactCompany] = useState('');
   const [contactMessage, setContactMessage] = useState('');
   const [contactDate, setContactDate] = useState('');
   const [contactTime, setContactTime] = useState('14:00');
   const [contactSubmitted, setContactSubmitted] = useState(false);
   const [contactLoading, setContactLoading] = useState(false);
-
-
+  const [contactWhatsappUrl, setContactWhatsappUrl] = useState('');
 
   // Clipper earnings (including 3% platform fee deduction)
   const grossClipperEarnings = Number(((viewsSim / 1000) * cpmSim).toFixed(2));
   const platformFeeSim = Number((grossClipperEarnings * 0.03).toFixed(2));
   const potentialClipperEarnings = Number((grossClipperEarnings - platformFeeSim).toFixed(2));
-
-
 
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,6 +84,7 @@ export default function HomePage() {
         body: JSON.stringify({
           name: contactName,
           email: contactEmail,
+          phone: contactPhone,
           company: contactCompany,
           message: contactMessage,
           date: contactDate,
@@ -94,6 +94,14 @@ export default function HomePage() {
       const data = await res.json();
       if (data.success) {
         setContactSubmitted(true);
+        if (data.whatsappUrl) {
+          setContactWhatsappUrl(data.whatsappUrl);
+          try {
+            window.open(data.whatsappUrl, '_blank');
+          } catch {
+            // Popup blocker fallback
+          }
+        }
       }
     } catch {
       alert('Failed to send consultation inquiry');
@@ -1420,7 +1428,9 @@ export default function HomePage() {
                   </div>
                   <div>
                     <div className="text-xs text-purple-400 font-medium">Email</div>
-                    <div className="text-white font-semibold">support@clipmatrix.in</div>
+                    <a href="mailto:byclipmatrix@gmail.com" className="text-white font-semibold hover:text-cyan-400 transition-colors">
+                      byclipmatrix@gmail.com
+                    </a>
                   </div>
                 </div>
 
@@ -1455,20 +1465,36 @@ export default function HomePage() {
           {/* Contact form */}
           <div className="lg:col-span-7 p-8 rounded-3xl bg-[#140c26] border border-purple-900/50">
             {contactSubmitted ? (
-              <div className="py-16 text-center space-y-4">
+              <div className="py-12 text-center space-y-4">
                 <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/40">
                   <CheckCircle2 className="w-8 h-8" />
                 </div>
                 <h3 className="text-2xl font-bold text-white font-display">Consultation Reserved!</h3>
                 <p className="text-purple-200/80 text-sm max-w-md mx-auto">
-                  Thank you, {contactName}! Our creator strategy team will contact you to review your campaign goals.
+                  Thank you, {contactName}! Your consultation brief has been recorded. Click below to forward directly to our campaign architect on WhatsApp.
                 </p>
-                <button
-                  onClick={() => setContactSubmitted(false)}
-                  className="text-xs text-purple-400 underline hover:text-purple-200"
-                >
-                  Send another inquiry
-                </button>
+                {contactWhatsappUrl && (
+                  <div className="pt-2">
+                    <a
+                      href={contactWhatsappUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-[0_0_20px_rgba(16,185,129,0.35)] transition-all hover:scale-105"
+                    >
+                      <MessageSquare className="w-4 h-4" />
+                      <span>Forward to WhatsApp (+91 98201 44520)</span>
+                      <ArrowUpRight className="w-4 h-4" />
+                    </a>
+                  </div>
+                )}
+                <div className="pt-3">
+                  <button
+                    onClick={() => setContactSubmitted(false)}
+                    className="text-xs text-purple-400 underline hover:text-purple-200"
+                  >
+                    Send another inquiry
+                  </button>
+                </div>
               </div>
             ) : (
               <form onSubmit={handleContactSubmit} className="space-y-4">
@@ -1500,15 +1526,29 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                <div>
-                  <label className="text-xs text-purple-300 font-medium">Company or Channel Name</label>
-                  <input
-                    type="text"
-                    value={contactCompany}
-                    onChange={(e) => setContactCompany(e.target.value)}
-                    placeholder="e.g. ZenPulse Nutrition"
-                    className="w-full mt-1 px-4 py-2.5 rounded-xl bg-[#0e061c] border border-purple-800/40 text-white text-sm focus:outline-none focus:border-purple-500"
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs text-purple-300 font-medium">Contact Phone / WhatsApp *</label>
+                    <input
+                      type="tel"
+                      required
+                      value={contactPhone}
+                      onChange={(e) => setContactPhone(e.target.value)}
+                      placeholder="+91 98765 43210"
+                      className="w-full mt-1 px-4 py-2.5 rounded-xl bg-[#0e071c] border border-purple-800/40 text-white text-sm focus:outline-none focus:border-purple-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs text-purple-300 font-medium">Company or Channel Name</label>
+                    <input
+                      type="text"
+                      value={contactCompany}
+                      onChange={(e) => setContactCompany(e.target.value)}
+                      placeholder="e.g. ZenPulse Nutrition"
+                      className="w-full mt-1 px-4 py-2.5 rounded-xl bg-[#0e061c] border border-purple-800/40 text-white text-sm focus:outline-none focus:border-purple-500"
+                    />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

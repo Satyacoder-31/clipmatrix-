@@ -601,7 +601,7 @@ async function main() {
       { key: 'MINIMUM_WITHDRAWAL_INR', value: '500', category: 'FINANCIAL', description: 'Minimum balance in INR required for withdrawal request' },
       { key: 'MINIMUM_CAMPAIGN_BUDGET_INR', value: '10000', category: 'FINANCIAL', description: 'Minimum budget required to launch a brand campaign' },
       { key: 'AUTO_VERIFY_INTERVAL_HOURS', value: '12', category: 'VERIFICATION', description: 'Frequency of automated social API syncs' },
-      { key: 'SUPPORT_EMAIL', value: 'support@clipmatrix.in', category: 'GENERAL', description: 'Primary platform support email' },
+      { key: 'SUPPORT_EMAIL', value: 'byclipmatrix@gmail.com', category: 'GENERAL', description: 'Primary platform support email' },
     ],
   });
 

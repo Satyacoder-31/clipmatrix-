@@ -1,17 +1,19 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Mail, Phone, MapPin, Calendar, Clock, Send, CheckCircle2 } from 'lucide-react';
+import { Mail, Phone, MapPin, Calendar, Clock, Send, CheckCircle2, MessageSquare, ArrowUpRight } from 'lucide-react';
 
 export default function ContactPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [company, setCompany] = useState('');
   const [message, setMessage] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('14:00');
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [whatsappForwardUrl, setWhatsappForwardUrl] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,11 +22,20 @@ export default function ContactPage() {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, company, message, date, time }),
+        body: JSON.stringify({ name, email, phone, company, message, date, time }),
       });
       const data = await res.json();
       if (data.success) {
         setSubmitted(true);
+        if (data.whatsappUrl) {
+          setWhatsappForwardUrl(data.whatsappUrl);
+          // Auto-forward consultation details directly to WhatsApp
+          try {
+            window.open(data.whatsappUrl, '_blank');
+          } catch {
+            // Popup blocker fallback
+          }
+        }
       }
     } catch {
       alert('Failed to send inquiry');
@@ -60,7 +71,9 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <div className="text-xs text-purple-400 font-medium">Email</div>
-                  <div className="text-white font-semibold">support@clipmatrix.in</div>
+                  <a href="mailto:byclipmatrix@gmail.com" className="text-white font-semibold hover:text-cyan-400 transition-colors">
+                    byclipmatrix@gmail.com
+                  </a>
                 </div>
               </div>
 
@@ -96,20 +109,36 @@ export default function ContactPage() {
         {/* Contact & Consultation Form */}
         <div className="lg:col-span-7 p-8 rounded-3xl bg-[#140c26] border border-purple-900/50">
           {submitted ? (
-            <div className="py-16 text-center space-y-4">
+            <div className="py-12 text-center space-y-4">
               <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/40">
                 <CheckCircle2 className="w-8 h-8" />
               </div>
               <h2 className="text-2xl font-bold text-white font-display">Inquiry & Consultation Received!</h2>
               <p className="text-purple-200/80 text-sm max-w-md mx-auto">
-                Thank you, {name}! A Clip Matrix Campaign Lead will contact you shortly to review your brief.
+                Thank you, {name}! Your consultation brief has been recorded. Click below to forward directly to our campaign architect on WhatsApp.
               </p>
-              <button
-                onClick={() => setSubmitted(false)}
-                className="text-xs text-purple-400 underline hover:text-purple-200"
-              >
-                Send another inquiry
-              </button>
+              {whatsappForwardUrl && (
+                <div className="pt-2">
+                  <a
+                    href={whatsappForwardUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-[0_0_20px_rgba(16,185,129,0.35)] transition-all hover:scale-105"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    <span>Forward to WhatsApp (+91 98201 44520)</span>
+                    <ArrowUpRight className="w-4 h-4" />
+                  </a>
+                </div>
+              )}
+              <div className="pt-3">
+                <button
+                  onClick={() => setSubmitted(false)}
+                  className="text-xs text-purple-400 underline hover:text-purple-200"
+                >
+                  Send another inquiry
+                </button>
+              </div>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -141,15 +170,29 @@ export default function ContactPage() {
                 </div>
               </div>
 
-              <div>
-                <label className="text-xs text-purple-300 font-medium">Company or Channel Name</label>
-                <input
-                  type="text"
-                  value={company}
-                  onChange={(e) => setCompany(e.target.value)}
-                  placeholder="e.g. ZenPulse Nutrition"
-                  className="w-full mt-1 px-4 py-2.5 rounded-xl bg-[#0e071c] border border-purple-800/40 text-white text-sm focus:outline-none focus:border-purple-500"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs text-purple-300 font-medium">Contact Phone / WhatsApp *</label>
+                  <input
+                    type="tel"
+                    required
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+91 98765 43210"
+                    className="w-full mt-1 px-4 py-2.5 rounded-xl bg-[#0e071c] border border-purple-800/40 text-white text-sm focus:outline-none focus:border-purple-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs text-purple-300 font-medium">Company or Channel Name</label>
+                  <input
+                    type="text"
+                    value={company}
+                    onChange={(e) => setCompany(e.target.value)}
+                    placeholder="e.g. ZenPulse Nutrition"
+                    className="w-full mt-1 px-4 py-2.5 rounded-xl bg-[#0e071c] border border-purple-800/40 text-white text-sm focus:outline-none focus:border-purple-500"
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

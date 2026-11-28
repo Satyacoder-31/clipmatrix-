@@ -63,7 +63,7 @@ export default function Footer() {
                 <Youtube className="w-4 h-4" />
               </a>
               <a
-                href="mailto:support@clipmatrix.in"
+                href="mailto:byclipmatrix@gmail.com"
                 className="w-9 h-9 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 flex items-center justify-center text-purple-300 hover:text-white transition-colors"
                 aria-label="Email"
               >
@@ -302,7 +302,7 @@ export default function Footer() {
             <a href="/payout-policy" className="hover:text-white transition-colors">
               Payout Policy
             </a>
-            <a href="mailto:support@clipmatrix.in" className="hover:text-white transition-colors">
+            <a href="mailto:byclipmatrix@gmail.com" className="hover:text-white transition-colors">
               Support
             </a>
           </div>
